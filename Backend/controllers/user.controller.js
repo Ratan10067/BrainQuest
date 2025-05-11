@@ -51,3 +51,8 @@ module.exports.logout = async (req, res, next) => {
   res.clearCookie("token");
   res.status(200).json({ message: "Logout Successfully" });
 };
+
+module.exports.getProfile = async (req, res, next) => {
+  console.log(req.user);
+  return res.json({ user: req.user });
+};

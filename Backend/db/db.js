@@ -1,4 +1,4 @@
-require("dotenv").config(); // ✅ Required to read .env in this file
+require("dotenv").config();
 const mongoose = require("mongoose");
 
 const url = process.env.MONGO_URL;
