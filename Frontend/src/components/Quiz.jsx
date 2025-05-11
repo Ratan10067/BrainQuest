@@ -1,8 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate, NavLink } from "react-router-dom";
 
 export default function QuizSection() {
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Check auth status on mount
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsAuthenticated(!!token);
+  }, []);
 
   const newQuizzes = [
     { id: 1, title: "Test Your C Language" },
@@ -41,13 +50,35 @@ export default function QuizSection() {
   };
   const closeModal = () => setIsModalOpen(false);
   const handleStart = () => {
-    console.log("Starting quiz:", selectedQuiz);
-    // TODO: navigate to quiz
+    navigate(`/quiz-started`);
     closeModal();
   };
 
+  // If user is not signed in
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#f3f4f6] p-8">
+        <div className="bg-white p-10 rounded-2xl shadow-lg text-center max-w-sm">
+          <div className="text-6xl mb-4">🔒</div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            Login Required
+          </h2>
+          <p className="text-gray-600 mb-6">
+            You need to sign in before creating or viewing quizzes.
+          </p>
+          <NavLink
+            to="/signin"
+            className="inline-block px-6 py-3 bg-[#2c3250] text-white font-semibold rounded-full hover:bg-opacity-90 transition"
+          >
+            Sign In Now
+          </NavLink>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-8">
+    <div className="p-8 bg-gray-50">
       {/* Create Quiz Button */}
       <button
         onClick={openModal}
@@ -61,25 +92,25 @@ export default function QuizSection() {
         <h4 className="text-2xl font-semibold text-[#2c3250] mb-4">
           Your Past Quizzes
         </h4>
-        <div className="space-y-4">
+        <div className="space-y-6">
           {pastQuizzes.map((quiz) => (
             <div
               key={quiz.id}
-              className="p-6 bg-white border border-gray-200 rounded-lg shadow-md flex justify-between items-center"
+              className="p-6 bg-white rounded-xl shadow hover:shadow-lg transition flex justify-between items-center"
             >
               <div>
                 <h5 className="text-lg font-medium text-gray-800">
                   {quiz.title}
                 </h5>
-                <p className="text-sm text-gray-600">Score: {quiz.score}</p>
-                <p className="text-sm text-gray-600">
-                  Time Taken: {quiz.timeTaken}
-                </p>
-                <p className="text-sm text-gray-500">Date: {quiz.date}</p>
+                <div className="flex space-x-4 text-sm text-gray-600 mt-1">
+                  <span>Score: {quiz.score}</span>
+                  <span>Time: {quiz.timeTaken}</span>
+                  <span>Date: {quiz.date}</span>
+                </div>
               </div>
               <button
-                className="px-4 py-2 bg-[#2c3250] text-white rounded-lg hover:bg-opacity-90 transition"
-                onClick={() => console.log("Review quiz:", quiz.id)}
+                onClick={() => navigate(`/quiz/review/${quiz.id}`)}
+                className="px-4 py-2 bg-[#2c3250] text-white rounded-full hover:bg-opacity-90 transition"
               >
                 Review
               </button>
@@ -91,7 +122,7 @@ export default function QuizSection() {
       {/* Modal for Selecting New Quiz */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl shadow-xl w-11/12 md:w-3/4 lg:w-2/3 xl:w-1/2 max-h-[80vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-2xl w-11/12 md:w-3/4 lg:w-2/3 xl:w-1/2 max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between p-4 bg-[#2c3250] rounded-t-2xl">
               <h3 className="text-xl font-bold text-white">Select a Quiz</h3>
               <button
@@ -102,23 +133,27 @@ export default function QuizSection() {
               </button>
             </div>
             <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {newQuizzes.map((quiz) => {
-                  const isSelected = selectedQuiz === quiz.id;
+                  const selected = selectedQuiz === quiz.id;
                   return (
                     <div
                       key={quiz.id}
                       onClick={() => setSelectedQuiz(quiz.id)}
                       className={
-                        `cursor-pointer p-6 bg-white border-2 rounded-lg shadow hover:shadow-lg transform hover:scale-[1.02] transition ` +
-                        (isSelected ? "border-[#2c3250]" : "border-gray-200")
+                        `cursor-pointer p-6 rounded-lg transition transform hover:scale-105 border-2 ` +
+                        (selected
+                          ? "border-[#2c3250] bg-gray-50 shadow-lg"
+                          : "border-gray-200 bg-white")
                       }
                     >
-                      <h5 className="text-gray-800 font-medium mb-2">
+                      <h5 className="text-gray-800 font-semibold mb-2">
                         {quiz.title}
                       </h5>
-                      {isSelected && (
-                        <span className="text-sm text-[#2c3250]">Selected</span>
+                      {selected && (
+                        <span className="text-xs text-[#2c3250]">
+                          Selected ✅
+                        </span>
                       )}
                     </div>
                   );
@@ -130,7 +165,7 @@ export default function QuizSection() {
                 onClick={handleStart}
                 disabled={!selectedQuiz}
                 className={
-                  `px-6 py-3 rounded-lg font-semibold transition ` +
+                  `px-6 py-3 rounded-full font-semibold transition cursor-pointer ` +
                   (selectedQuiz
                     ? "bg-[#2c3250] text-white hover:bg-opacity-90"
                     : "bg-gray-300 text-gray-500 cursor-not-allowed")

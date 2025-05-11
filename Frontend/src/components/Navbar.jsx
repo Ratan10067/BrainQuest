@@ -1,100 +1,160 @@
-import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { Menu, X, User as UserIcon } from "lucide-react";
 
 export default function Navbar() {
-  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // On mount, check for token in localStorage
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      setIsAuthenticated(true);
+    } else {
+      setIsAuthenticated(false);
+    }
+  }, []);
+
+  const handleMenuToggle = () => setMenuOpen((open) => !open);
 
   return (
-    <nav className="bg-[#2c3250]  shadow-md">
+    <nav className="bg-[#2c3250] shadow-md relative">
       <div className="container mx-auto px-6 py-4 flex justify-between items-center">
         {/* Logo */}
         <div className="text-2xl font-bold text-white flex items-center">
-          <span className="bg-amber-300 text-black w-6 h-7 text-center rounded-1">
-            B
+          <span>B</span>
+          <span>
+            <NavLink
+              to="/"
+              className={({ isActive }) =>
+                `text-white cursor-pointer hover:text-gray-400 ${
+                  isActive ? "underline" : ""
+                }`
+              }
+            ></NavLink>
+            rainQuest
           </span>
-          <span>rainQuest</span>
         </div>
 
         {/* Desktop Links */}
-        <div className="hidden md:flex space-x-9">
-          <NavLink to="/" className="text-white hover:text-gray-400">
+        <div className="hidden md:flex space-x-6">
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              `text-white hover:text-gray-400 ${isActive ? "underline" : ""}`
+            }
+          >
             Home
           </NavLink>
-          <NavLink to="/quiz" className="text-white hover:text-gray-400">
+          <NavLink
+            to="/quiz"
+            className={({ isActive }) =>
+              `text-white hover:text-gray-400 ${isActive ? "underline" : ""}`
+            }
+          >
             Quiz
           </NavLink>
-          <NavLink to="/leaderboard" className="text-white hover:text-gray-400">
+          <NavLink
+            to="/leaderboard"
+            className={({ isActive }) =>
+              `text-white hover:text-gray-400 ${isActive ? "underline" : ""}`
+            }
+          >
             Leaderboard
           </NavLink>
         </div>
 
-        {/* Desktop Auth Buttons */}
-        <div className="hidden md:flex space-x-2">
-          <NavLink
-            to="/signin"
-            className="px-4 py-2 border border-white text-white rounded-lg hover:bg-gray-800"
-          >
-            Sign In
-          </NavLink>
-          <NavLink
-            to="/signup"
-            className="px-4 py-2 border border-white text-white rounded-lg hover:bg-gray-800"
-          >
-            Sign Up
-          </NavLink>
+        {/* Desktop Auth/Profile */}
+        <div className="hidden md:flex items-center space-x-4">
+          {isAuthenticated ? (
+            <button
+              onClick={() => navigate("/profile")}
+              className="text-white hover:text-gray-400 flex items-center cursor-pointer"
+            >
+              <UserIcon size={20} />
+            </button>
+          ) : (
+            <>
+              <NavLink
+                to="/signin"
+                className="px-4 py-2 border border-white text-white rounded-lg hover:bg-gray-800"
+              >
+                Sign In
+              </NavLink>
+              <NavLink
+                to="/signup"
+                className="px-4 py-2 border border-white text-white rounded-lg hover:bg-gray-800"
+              >
+                Sign Up
+              </NavLink>
+            </>
+          )}
         </div>
 
         {/* Mobile Hamburger */}
         <button
           className="md:hidden text-white"
-          onClick={() => setOpen((o) => !o)}
+          onClick={handleMenuToggle}
           aria-label="Toggle Menu"
         >
-          {open ? <X size={24} /> : <Menu size={24} />}
+          {menuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
 
       {/* Mobile Menu */}
-      {open && (
+      {menuOpen && (
         <div className="md:hidden bg-[#2c3250]">
           <NavLink
             to="/"
-            onClick={() => setOpen(false)}
+            onClick={handleMenuToggle}
             className="block px-6 py-3 text-white hover:bg-[#1f233d]"
           >
             Home
           </NavLink>
           <NavLink
             to="/quiz"
-            onClick={() => setOpen(false)}
+            onClick={handleMenuToggle}
             className="block px-6 py-3 text-white hover:bg-[#1f233d]"
           >
             Quiz
           </NavLink>
           <NavLink
             to="/leaderboard"
-            onClick={() => setOpen(false)}
+            onClick={handleMenuToggle}
             className="block px-6 py-3 text-white hover:bg-[#1f233d]"
           >
             Leaderboard
           </NavLink>
-          <div className="border-t border-[#3a3f60]">
-            <NavLink
-              to="/signin"
-              onClick={() => setOpen(false)}
-              className="block px-6 py-3 text-white hover:bg-[#1f233d]"
+          {isAuthenticated ? (
+            <button
+              onClick={() => {
+                navigate("/profile");
+                setMenuOpen(false);
+              }}
+              className="w-full text-left px-6 py-3 text-white hover:bg-[#1f233d] flex items-center"
             >
-              Sign In
-            </NavLink>
-            <NavLink
-              to="/signup"
-              onClick={() => setOpen(false)}
-              className="block px-6 py-3 text-white hover:bg-[#1f233d]"
-            >
-              Sign Up
-            </NavLink>
-          </div>
+              <UserIcon size={20} className="mr-2" /> Profile
+            </button>
+          ) : (
+            <>
+              <NavLink
+                to="/signin"
+                onClick={handleMenuToggle}
+                className="block px-6 py-3 text-white hover:bg-[#1f233d]"
+              >
+                Sign In
+              </NavLink>
+              <NavLink
+                to="/signup"
+                onClick={handleMenuToggle}
+                className="block px-6 py-3 text-white hover:bg-[#1f233d]"
+              >
+                Sign Up
+              </NavLink>
+            </>
+          )}
         </div>
       )}
     </nav>

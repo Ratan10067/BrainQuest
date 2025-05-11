@@ -1,6 +1,7 @@
 const User = require("../models/user.model");
 const { validationResult } = require("express-validator");
 module.exports.registerUser = async (req, res, next) => {
+  console.log("register me yaha aa rha ha");
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     console.log("yaha aa rha ha");
@@ -24,6 +25,7 @@ module.exports.registerUser = async (req, res, next) => {
   return res.status(201).json({ token: token, user });
 };
 module.exports.login = async (req, res, next) => {
+  console.log("login me yaha aa rha ha");
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -47,6 +49,7 @@ module.exports.login = async (req, res, next) => {
 };
 
 module.exports.logout = async (req, res, next) => {
+  console.log("logout me yaha aa rha ha");
   const token = req.cookies.token || req.headers.authorization?.split("")[1];
   res.clearCookie("token");
   res.status(200).json({ message: "Logout Successfully" });

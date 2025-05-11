@@ -1,45 +1,77 @@
 import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate, NavLink } from "react-router-dom";
 
 export default function UserSignIn() {
   const [credentials, setCredentials] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
+  const [modal, setModal] = useState({
+    open: false,
+    success: false,
+    message: "",
+  });
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setCredentials((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: integrate signin API logic
-    console.log("Signing in with:", credentials);
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        "http://localhost:4000/users/user-login",
+        credentials
+      );
+      if (response.status === 200) {
+        localStorage.setItem("token", response.data.token);
+        setModal({
+          open: true,
+          success: true,
+          message: "Login successful! Redirecting to quiz section.",
+        });
+        setTimeout(() => navigate("/quiz"), 2000);
+      } else {
+        setModal({
+          open: true,
+          success: false,
+          message: "Unexpected response. Please try again.",
+        });
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      const msg =
+        error.response?.data?.message ||
+        "Login failed. Please check your credentials.";
+      setModal({ open: true, success: false, message: msg });
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const closeModal = () =>
+    setModal({ open: false, success: false, message: "" });
+
   return (
-    <div
-      className="flex items-center justify-center min-h-screen"
-      style={{ backgroundColor: "#2c3250" }}
-    >
+    <div className="flex items-center justify-center min-h-screen bg-[#2c3250] p-4">
       <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-lg overflow-hidden flex">
         {/* 3D Illustration Panel */}
         <div
-          className="w-1/2 hidden lg:block"
+          className="w-1/2 hidden lg:flex items-center justify-center p-6"
           style={{ perspective: "1000px" }}
         >
-          <div className="h-full flex items-center justify-center">
-            <img
-              src="/3d-login.png"
-              alt="3D Sign In Illustration"
-              className="w-3/4 transition-transform duration-500 hover:rotate-y-12 hover:-rotate-x-6"
-              style={{ transformStyle: "preserve-3d" }}
-            />
-          </div>
+          <img
+            src="/3d-login.png"
+            alt="3D Sign In Illustration"
+            className="w-3/4 transition-transform duration-500 hover:rotate-y-12 hover:-rotate-x-6"
+            style={{ transformStyle: "preserve-3d" }}
+          />
         </div>
 
         {/* Form Panel */}
-        <div
-          className="w-full lg:w-1/2 p-10"
-          style={{ backgroundColor: "#fff" }}
-        >
+        <div className="w-full lg:w-1/2 p-10">
           <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
             Welcome Back to BrainQuest
           </h2>
@@ -56,7 +88,7 @@ export default function UserSignIn() {
                 value={credentials.email}
                 onChange={handleChange}
                 placeholder="john@example.com"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2c3250]"
               />
             </div>
             <div className="mb-8">
@@ -71,30 +103,63 @@ export default function UserSignIn() {
                 value={credentials.password}
                 onChange={handleChange}
                 placeholder="••••••••"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2c3250]"
               />
             </div>
             <button
               type="submit"
-              className="w-full py-3 rounded-lg text-white font-semibold transition-transform transform hover:scale-105"
-              style={{ backgroundColor: "#2c3250" }}
+              disabled={loading}
+              className={`w-full py-3 rounded-lg text-white cursor-pointer font-semibold transition-transform transform hover:scale-105 ${
+                loading ? "bg-gray-400 cursor-not-allowed" : "bg-[#2c3250]"
+              }`}
             >
-              Sign In
+              {loading ? "Signing In..." : "Sign In"}
             </button>
           </form>
           <p className="mt-4 text-center text-gray-600">
             Don't have an account?{" "}
-            <a href="/signup" className="text-indigo-600">
+            <NavLink to="/signup" className="text-indigo-600 hover:underline">
               Sign Up
-            </a>
+            </NavLink>
           </p>
         </div>
       </div>
 
-      {/* Scoped Styles for 3D Hover Effect */}
+      {/* Modal */}
+      {modal.open && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white rounded-3xl shadow-2xl w-80 p-6 text-center animate-fade-in">
+            <div className="text-6xl mb-4">{modal.success ? "😊" : "😢"}</div>
+            <h3 className="text-2xl font-bold mb-2 text-gray-800">
+              {modal.success ? "Welcome!" : "Login Failed"}
+            </h3>
+            <p className="text-gray-600 mb-6">{modal.message}</p>
+            {!modal.success && (
+              <button
+                onClick={closeModal}
+                className="px-6 py-2 bg-[#2c3250] text-white rounded-full hover:bg-opacity-90 transition cursor-pointer"
+              >
+                Try Again
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* CSS for fade-in animation */}
       <style jsx>{`
-        img:hover {
-          transform: rotateY(15deg) rotateX(-7deg);
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.3s ease-out;
         }
       `}</style>
     </div>
