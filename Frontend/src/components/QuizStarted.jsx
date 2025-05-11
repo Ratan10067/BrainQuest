@@ -1,7 +1,7 @@
 // src/components/QuizStarted.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Configuration, OpenAIApi } from "openai";
+// import { Configuration, OpenAIApi } from "openai";
 const questions = [
   {
     text: "The characteristic distance at which quantum gravitational effects are significant is called?",
