@@ -7,7 +7,6 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // On mount, check for token in localStorage
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {

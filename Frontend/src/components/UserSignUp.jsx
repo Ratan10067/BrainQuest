@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router-dom";
 
 export default function UserSignUp() {
   const [formData, setFormData] = useState({
@@ -67,7 +67,7 @@ export default function UserSignUp() {
           style={{ perspective: "1000px" }}
         >
           <img
-            src="/3d-model.png"
+            src="https://cdn3d.iconscout.com/3d/premium/thumb/young-man-doing-online-registration-and-sign-up-3d-illustration-download-in-png-blend-fbx-gltf-file-formats--signup-create-account-form-pack-crime-security-illustrations-10209162.png"
             alt="3D Illustration"
             className="w-3/4 transition-transform duration-500 hover:rotate-y-12 hover:-rotate-x-6"
             style={{ transformStyle: "preserve-3d" }}
@@ -127,6 +127,38 @@ export default function UserSignUp() {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2c3250]"
               />
             </div>
+            {/* Location */}
+            {/* <div className="mb-6">
+              <label htmlFor="location" className="block text-gray-700 mb-2">
+                Location
+              </label>
+              <input
+                id="location"
+                name="location"
+                type="text"
+                required
+                value={formData.location}
+                onChange={handleChange}
+                placeholder="City, Country"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2c3250]"
+              />
+            </div> */}
+            {/* Phone */}
+            {/* <div className="mb-6">
+              <label htmlFor="phone" className="block text-gray-700 mb-2">
+                Phone Number
+              </label>
+              <input
+                id="phone"
+                name="phone"
+                type="text"
+                required
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="+1234567890"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2c3250]"
+              />
+            </div> */}
             {/* Submit */}
             <button
               type="submit"
@@ -138,6 +170,12 @@ export default function UserSignUp() {
               {loading ? "Creating Account..." : "Create Account"}
             </button>
           </form>
+          <div className="mt-4 text-center text-gray-600">
+            Already have an account??{" "}
+            <NavLink to="/signin" className="text-indigo-600 hover:underline">
+              Sign In
+            </NavLink>
+          </div>
         </div>
       </div>
 

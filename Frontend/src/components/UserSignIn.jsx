@@ -63,7 +63,7 @@ export default function UserSignIn() {
           style={{ perspective: "1000px" }}
         >
           <img
-            src="/3d-login.png"
+            src="https://cdn3d.iconscout.com/3d/free/preview/free-login-3d-illustration-download-in-png-blend-fbx-gltf-file-formats--password-security-lock-empty-state-pack-seo-web-illustrations-2969410.png?f=webp&h=700"
             alt="3D Sign In Illustration"
             className="w-3/4 transition-transform duration-500 hover:rotate-y-12 hover:-rotate-x-6"
             style={{ transformStyle: "preserve-3d" }}

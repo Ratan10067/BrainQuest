@@ -21,8 +21,25 @@ module.exports.registerUser = async (req, res, next) => {
     password: hashPassword,
   });
   const token = await user.generateAuthToken();
-  res.cookie("token", token);
-  return res.status(201).json({ token: token, user });
+
+  // Set token in cookie and send in response headers
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
+
+  // Send token in response body for frontend to store in localStorage
+  return res.status(201).json({
+    success: true,
+    token: token,
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+    },
+  });
 };
 module.exports.login = async (req, res, next) => {
   console.log("login me yaha aa rha ha");
@@ -57,5 +74,32 @@ module.exports.logout = async (req, res, next) => {
 
 module.exports.getProfile = async (req, res, next) => {
   console.log(req.user);
-  return res.json({ user: req.user });
+  return res.status(200).json({ user: req.user });
+};
+
+module.exports.updateProfile = async (req, res, next) => {
+  console.log("update profile me yaha aa rha ha");
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  console.log(req.body);
+  const { name, email, phone, location, avatar } = req.body;
+  console.log("update profile me yaha aa rha ha", req.user._id);
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      name,
+      email,
+      phone,
+      location,
+      avatar,
+    },
+    { new: true }
+  );
+  console.log(user);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  return res.status(200).json({ user });
 };

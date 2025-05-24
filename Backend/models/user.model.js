@@ -13,6 +13,16 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    phone: {
+      type: String,
+      required: true,
+      default: "Not provided", // Default value if phone number is not provided
+    },
+    location: {
+      type: String,
+      required: true,
+      default: "Unknown", // Default location if not provided
+    },
     password: {
       type: String,
       required: true,

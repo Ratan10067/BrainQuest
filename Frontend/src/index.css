@@ -1,1 +1,17 @@
 @import "tailwindcss";
+@keyframes progress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+.progress-bar {
+  animation: progress 3s linear forwards;
+}
+
+.progress-bar-paused {
+  animation-play-state: paused;
+}

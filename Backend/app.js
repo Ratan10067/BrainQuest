@@ -4,6 +4,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const connectDB = require("./db/db");
 const userRoutes = require("./routes/user.routes");
+const quizRoutes = require("./routes/quiz.routes");
 const cookieParser = require("cookie-parser");
 dotenv.config();
 const app = express();
@@ -24,6 +25,7 @@ app.get("/", (req, res) => {
   res.send({ message: "Server is Wroking Properly" });
 });
 app.use("/users", userRoutes);
+app.use("/quiz", quizRoutes);
 app.listen(PORT, () => {
   console.log(`Server is Listening at Port ${PORT}`);
 });

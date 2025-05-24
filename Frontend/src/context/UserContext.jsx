@@ -1,10 +1,11 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+// src/context/UserContext.js
+import React, { createContext, useState, useEffect } from "react";
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [questions, setQuestions] = useState({});
 
   // On mount, initialize from localStorage
   useEffect(() => {
@@ -24,10 +25,16 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider
-      value={{ token, login, logout, isAuthenticated: !!token }}
+      value={{
+        token,
+        login,
+        logout,
+        isAuthenticated: !!token,
+        questions,
+        setQuestions,
+      }}
     >
       {children}
     </AuthContext.Provider>
   );
 }
-

@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
-
+import { useContext } from "react";
+import axios from "axios";
+import { AuthContext } from "../context/UserContext";
 export default function QuizSection() {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
+  const [selectedDifficulty, setSelectedDifficulty] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
+  const { questions, setQuestions } = useContext(AuthContext);
+  console.log("questions", questions);
+  console.log("setQuestions", setQuestions);
   // Check auth status on mount
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -14,12 +19,11 @@ export default function QuizSection() {
   }, []);
 
   const newQuizzes = [
-    { id: 1, title: "Test Your C Language" },
+    { id: 1, title: "Test Your Python Language" },
     { id: 2, title: "Test Your C++ Language" },
     { id: 3, title: "Test Your JavaScript Skills" },
   ];
 
-  // Example past quiz details
   const pastQuizzes = [
     {
       id: 101,
@@ -46,12 +50,33 @@ export default function QuizSection() {
 
   const openModal = () => {
     setSelectedQuiz(null);
+    setSelectedDifficulty(null);
     setIsModalOpen(true);
   };
   const closeModal = () => setIsModalOpen(false);
-  const handleStart = () => {
-    navigate(`/quiz-started`);
-    closeModal();
+
+  const handleStart = async () => {
+    if (selectedQuiz && selectedDifficulty) {
+      // Pass selected quiz and difficulty to the quiz start route
+      const response = await axios.get(`http://localhost:4000/quiz/start`, {
+        params: {
+          quizId: selectedQuiz,
+          subject: "Python",
+          difficulty: selectedDifficulty,
+        },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      console.log(response.data);
+      if (response.status === 200) {
+        setQuestions(response.data);
+        navigate(`/quiz-started`, {
+          state: { quizId: selectedQuiz, difficulty: selectedDifficulty },
+        });
+        closeModal();
+      }
+    }
   };
 
   // If user is not signed in
@@ -82,7 +107,7 @@ export default function QuizSection() {
       {/* Create Quiz Button */}
       <button
         onClick={openModal}
-        className="px-6 py-3 font-semibold rounded-lg text-white bg-[#2c3250] hover:bg-opacity-90 transition"
+        className="px-6 py-3 font-semibold rounded-lg text-white bg-[#2c3250] hover:bg-opacity-90 transition cursor-pointer"
       >
         Create Quiz
       </button>
@@ -133,43 +158,57 @@ export default function QuizSection() {
               </button>
             </div>
             <div className="p-6">
+              {/* Quiz Selection */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {newQuizzes.map((quiz) => {
-                  const selected = selectedQuiz === quiz.id;
-                  return (
-                    <div
-                      key={quiz.id}
-                      onClick={() => setSelectedQuiz(quiz.id)}
-                      className={
-                        `cursor-pointer p-6 rounded-lg transition transform hover:scale-105 border-2 ` +
-                        (selected
-                          ? "border-[#2c3250] bg-gray-50 shadow-lg"
-                          : "border-gray-200 bg-white")
-                      }
-                    >
-                      <h5 className="text-gray-800 font-semibold mb-2">
-                        {quiz.title}
-                      </h5>
-                      {selected && (
-                        <span className="text-xs text-[#2c3250]">
-                          Selected ✅
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
+                {newQuizzes.map((quiz) => (
+                  <div
+                    key={quiz.id}
+                    onClick={() => setSelectedQuiz(quiz.id)}
+                    className={`cursor-pointer p-6 rounded-lg transition transform hover:scale-105 border-2 ${
+                      selectedQuiz === quiz.id
+                        ? "border-[#2c3250] bg-gray-50 shadow-lg"
+                        : "border-gray-200 bg-white"
+                    }`}
+                  >
+                    <h5 className="text-gray-800 font-semibold mb-2">
+                      {quiz.title}
+                    </h5>
+                    {selectedQuiz === quiz.id && (
+                      <span className="text-xs text-[#2c3250]">
+                        Selected ✅
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Difficulty Selection */}
+              <div className="flex justify-center mt-6 space-x-4">
+                {["Easy", "Medium", "Hard"].map((level) => (
+                  <button
+                    key={level}
+                    onClick={() => setSelectedDifficulty(level)}
+                    className={`px-4 py-2 rounded-lg font-semibold transition cursor-pointer ${
+                      selectedDifficulty === level
+                        ? "bg-[#2c3250] text-white"
+                        : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                    }`}
+                  >
+                    {level.charAt(0).toUpperCase() + level.slice(1)}
+                  </button>
+                ))}
               </div>
             </div>
+
             <div className="p-4 border-t flex justify-end">
               <button
                 onClick={handleStart}
-                disabled={!selectedQuiz}
-                className={
-                  `px-6 py-3 rounded-full font-semibold transition cursor-pointer ` +
-                  (selectedQuiz
+                disabled={!selectedQuiz || !selectedDifficulty}
+                className={`px-6 py-3 rounded-full font-semibold transition cursor-pointer ${
+                  selectedQuiz && selectedDifficulty
                     ? "bg-[#2c3250] text-white hover:bg-opacity-90"
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed")
-                }
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }`}
               >
                 Get Started
               </button>

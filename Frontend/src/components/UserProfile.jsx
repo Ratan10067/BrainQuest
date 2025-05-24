@@ -1,5 +1,5 @@
-// src/components/UserProfile.jsx
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
   ChevronRight,
@@ -8,28 +8,68 @@ import {
   LogOut as LogoutIcon,
   Globe as LanguageIcon,
   Edit2 as EditIcon,
+  CheckCircle,
+  AlertCircle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+
 export default function UserProfile() {
   const navigate = useNavigate();
   const [editMode, setEditMode] = useState(false);
   const avatarInput = useRef();
+  const [modal, setModal] = useState({ show: false, type: "", message: "" });
+  const [notification, setNotification] = useState({
+    show: false,
+    type: "",
+    message: "",
+  });
   const [profile, setProfile] = useState({
     name: "Ratan Kumar",
     email: "Ratankumar10cr7@gmail.com",
-    mobile: "7643070223",
-    location: "USA",
-    avatar: "./assets/logo.png",
+    phone: "Not provided",
+    location: "Not provided",
+    avatar: "./assets/default.jpg",
   });
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:4000/users/user-profile",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          const user = response.data;
+          setProfile((p) => ({
+            ...p,
+            name: user.user.name,
+            email: user.user.email,
+            avatar: "./assets/default.jpg",
+            phone: user.user.phone || "Not provided",
+            location: user.user.location || "Not provided",
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error.message);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
 
   const handleAvatarClick = () => avatarInput.current.click();
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (file) setProfile((p) => ({ ...p, avatar: URL.createObjectURL(file) }));
   };
+
   const handleLogOut = async () => {
-    console.log("Logout clicked");
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
@@ -38,7 +78,6 @@ export default function UserProfile() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (response.status === 200) {
-        console.log("Logout successful");
         localStorage.removeItem("token");
         navigate("/signin");
       } else {
@@ -48,11 +87,44 @@ export default function UserProfile() {
       console.error("Logout error:", error);
     }
   };
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(
+        "http://localhost:4000/users/user-update",
+        profile,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        setEditMode(false);
+        setNotification({
+          show: true,
+          type: "success",
+          message: "Profile updated successfully! 🎉",
+        });
+      }
+    } catch (error) {
+      setNotification({
+        show: true,
+        type: "error",
+        message: "Oops! Something went wrong 😟",
+      });
+    }
+    // Auto hide notification after 3 seconds
+    // setTimeout(() => {
+    //   setNotification({ show: false, type: "", message: "" });
+    // }, 3000);
+  };
   return (
     <div className="min-h-screen bg-[#2c3250] p-8">
       <div className="flex flex-col md:flex-row gap-6 w-full max-w-6xl mx-auto">
         {/* Sidebar */}
-        <aside className="bg-white rounded-2xl shadow-lg w-full md:w-1/3 p-6 space-y-6">
+        <aside className="bg-white rounded-2xl shadow-lg md:w-[380px] flex-shrink-0 h-fit p-6 space-y-6">
           <div className="flex items-center space-x-4">
             <img
               src={profile.avatar}
@@ -94,17 +166,25 @@ export default function UserProfile() {
 
         {/* Main Content */}
         <section className="bg-white rounded-2xl shadow-lg w-full md:w-2/3 p-8 relative">
-          {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">
+            <h1 className="text-2xl font-bold text-gray-800 cursor-pointer">
               {editMode ? "Edit Profile" : "My Profile"}
             </h1>
             <button
               onClick={() => setEditMode((m) => !m)}
               className="flex items-center space-x-2 text-gray-600 hover:text-gray-800"
             >
-              <EditIcon size={20} />
-              <span>{editMode ? "Cancel" : "Edit Profile"}</span>
+              {editMode ? (
+                <>
+                  <X size={20} />
+                  <span className="cursor-pointer">Cancel</span>
+                </>
+              ) : (
+                <>
+                  <EditIcon size={20} />
+                  <span className="cursor-pointer">Edit Profile</span>
+                </>
+              )}
             </button>
           </div>
 
@@ -122,7 +202,7 @@ export default function UserProfile() {
               <div className="flex justify-between border-b pb-2">
                 <span className="text-gray-600">Mobile Number</span>
                 <span className="text-gray-800">
-                  {profile.mobile || "Add number"}
+                  {profile.phone || "Add number"}
                 </span>
               </div>
               <div className="flex justify-between border-b pb-2">
@@ -131,7 +211,7 @@ export default function UserProfile() {
               </div>
             </div>
           ) : (
-            <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+            <form className="space-y-6" onSubmit={handleUpdateProfile}>
               <div className="relative w-28">
                 <img
                   src={profile.avatar}
@@ -187,7 +267,7 @@ export default function UserProfile() {
                   type="text"
                   value={profile.mobile}
                   onChange={(e) =>
-                    setProfile((p) => ({ ...p, mobile: e.target.value }))
+                    setProfile((p) => ({ ...p, phone: e.target.value }))
                   }
                   placeholder="Add number"
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2c3250]"
@@ -200,6 +280,7 @@ export default function UserProfile() {
                 <input
                   type="text"
                   value={profile.location}
+                  placeholder="Add Location"
                   onChange={(e) =>
                     setProfile((p) => ({ ...p, location: e.target.value }))
                   }
@@ -208,7 +289,7 @@ export default function UserProfile() {
               </div>
               <button
                 type="submit"
-                className="mt-4 bg-[#1f2b48] text-white rounded-lg py-3 px-6 font-semibold hover:bg-opacity-90 transition"
+                className="mt-4 bg-[#1f2b48] text-white rounded-lg py-3 px-6 font-semibold hover:bg-opacity-90 transition cursor-pointer"
               >
                 Save Change
               </button>
@@ -216,6 +297,62 @@ export default function UserProfile() {
           )}
         </section>
       </div>
+      <AnimatePresence>
+        {notification.show && (
+          <motion.div
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 100 }}
+            className="fixed bottom-4 right-4 max-w-xl"
+          >
+            <div
+              className={`relative overflow-hidden rounded-lg shadow-lg hover:scale-102 transition-transform duration-200 ${
+                notification.type === "success" ? "bg-green-500" : "bg-red-500"
+              }`}
+              onMouseEnter={(e) => {
+                const progressBar =
+                  e.currentTarget.querySelector(".progress-bar");
+                progressBar?.classList.add("progress-bar-paused");
+              }}
+              onMouseLeave={(e) => {
+                const progressBar =
+                  e.currentTarget.querySelector(".progress-bar");
+                progressBar?.classList.remove("progress-bar-paused");
+              }}
+            >
+              <div className="px-8 py-4 flex items-center space-x-3">
+                {notification.type === "success" ? (
+                  <CheckCircle className="w-6 h-6 text-white" />
+                ) : (
+                  <AlertCircle className="w-6 h-6 text-white" />
+                )}
+                <span className="text-white font-medium text-lg">
+                  {notification.message}
+                </span>
+                <button
+                  onClick={() =>
+                    setNotification({ show: false, type: "", message: "" })
+                  }
+                  className="ml-4 text-white hover:opacity-80 transition-opacity"
+                >
+                  <X className="w-5 h-5 cursor-pointer" />
+                </button>
+              </div>
+
+              <div
+                className={`absolute bottom-0 left-0 h-1.5 progress-bar ${
+                  notification.type === "success"
+                    ? "bg-green-300"
+                    : "bg-red-300"
+                }`}
+                onAnimationEnd={() => {
+                  setNotification({ show: false, type: "", message: "" });
+                }}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

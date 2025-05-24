@@ -1,0 +1,224 @@
+{
+  "Python": [
+    {
+      "question": "What is the output of `len([1, 2, 3] * 2)`?",
+      "options": {
+        "A": "3",
+        "B": "6",
+        "C": "Error",
+        "D": "2"
+      },
+      "correct": "B",
+      "difficulty": "easy"
+    },
+    {
+      "question": "Which of these is the correct way to open a file for reading?",
+      "options": {
+        "A": "open('file.txt', 'r')",
+        "B": "file.open('file.txt', 'r')",
+        "C": "open('file.txt', 'read')",
+        "D": "File('file.txt', 'r')"
+      },
+      "correct": "A",
+      "difficulty": "easy"
+    },
+    {
+      "question": "Which built-in type is immutable?",
+      "options": {
+        "A": "list",
+        "B": "dict",
+        "C": "tuple",
+        "D": "set"
+      },
+      "correct": "C",
+      "difficulty": "easy"
+    },
+    {
+      "question": "What does `str.upper()` return?",
+      "options": {
+        "A": "Modifies string in place",
+        "B": "A new uppercase string",
+        "C": "None",
+        "D": "Error"
+      },
+      "correct": "B",
+      "difficulty": "easy"
+    },
+    {
+      "question": "How do you create a virtual environment in Python 3?",
+      "options": {
+        "A": "python -m venv venv",
+        "B": "virtualenv venv",
+        "C": "pip install venv",
+        "D": "python create venv"
+      },
+      "correct": "A",
+      "difficulty": "easy"
+    },
+    {
+      "question": "What will `print('5' + str(5))` output?",
+      "options": {
+        "A": "10",
+        "B": "55",
+        "C": "5str(5)",
+        "D": "Error"
+      },
+      "correct": "B",
+      "difficulty": "easy"
+    },
+    {
+      "question": "Which of these creates a list comprehension?",
+      "options": {
+        "A": "[x for x in range(5)]",
+        "B": "(x for x in range(5))",
+        "C": "{x for x in range(5)}",
+        "D": "<x for x in range(5)>"
+      },
+      "correct": "A",
+      "difficulty": "medium"
+    },
+    {
+      "question": "What does `dict.get(key, default)` return if key is missing?",
+      "options": {
+        "A": "None",
+        "B": "KeyError",
+        "C": "default",
+        "D": "''"
+      },
+      "correct": "C",
+      "difficulty": "medium"
+    },
+    {
+      "question": "Which module provides high-precision decimal arithmetic?",
+      "options": {
+        "A": "math",
+        "B": "decimal",
+        "C": "fractions",
+        "D": "statistics"
+      },
+      "correct": "B",
+      "difficulty": "medium"
+    },
+    {
+      "question": "What keyword is used to define an anonymous function?",
+      "options": {
+        "A": "def",
+        "B": "lambda",
+        "C": "anon",
+        "D": "func"
+      },
+      "correct": "B",
+      "difficulty": "medium"
+    },
+    {
+      "question": "Which construct ensures resources are cleaned up automatically?",
+      "options": {
+        "A": "try/finally",
+        "B": "with statement",
+        "C": "lambda",
+        "D": "decorator"
+      },
+      "correct": "B",
+      "difficulty": "medium"
+    },
+    {
+      "question": "What does the `@staticmethod` decorator do?",
+      "options": {
+        "A": "Creates class method",
+        "B": "Creates instance method",
+        "C": "Creates method without `self`",
+        "D": "Prevents method overriding"
+      },
+      "correct": "C",
+      "difficulty": "medium"
+    },
+    {
+      "question": "Which of these is true about generators?",
+      "options": {
+        "A": "They return a list",
+        "B": "They use `yield`",
+        "C": "They are memory-inefficient",
+        "D": "They require async"
+      },
+      "correct": "B",
+      "difficulty": "medium"
+    },
+    {
+      "question": "How do you catch multiple exception types?",
+      "options": {
+        "A": "except (TypeError, ValueError):",
+        "B": "except TypeError, ValueError:",
+        "C": "catch TypeError | ValueError:",
+        "D": "except TypeError or ValueError:"
+      },
+      "correct": "A",
+      "difficulty": "medium"
+    },
+    {
+      "question": "What is the Global Interpreter Lock (GIL)?",
+      "options": {
+        "A": "A memory manager",
+        "B": "A lock preventing multiple native threads from executing Python bytecodes simultaneously",
+        "C": "A file lock",
+        "D": "A security feature"
+      },
+      "correct": "B",
+      "difficulty": "hard"
+    },
+    {
+      "question": "Which method creates a coroutine in async programming?",
+      "options": {
+        "A": "def async func():",
+        "B": "async def func():",
+        "C": "def func() async:",
+        "D": "coroutine def func():"
+      },
+      "correct": "B",
+      "difficulty": "hard"
+    },
+    {
+      "question": "What is a descriptor in Python?",
+      "options": {
+        "A": "A built-in function",
+        "B": "An object attribute with `__get__`, `__set__`, or `__delete__` methods",
+        "C": "A logger",
+        "D": "A decorator"
+      },
+      "correct": "B",
+      "difficulty": "hard"
+    },
+    {
+      "question": "How do you define a metaclass for a class?",
+      "options": {
+        "A": "class C(metaclass=Meta):",
+        "B": "class C: Meta",
+        "C": "class C(Meta):",
+        "D": "class C __metaclass__ = Meta"
+      },
+      "correct": "A",
+      "difficulty": "hard"
+    },
+    {
+      "question": "Which context manager protocol methods are required?",
+      "options": {
+        "A": "__enter__ only",
+        "B": "__exit__ only",
+        "C": "__enter__ and __exit__",
+        "D": "__init__"
+      },
+      "correct": "C",
+      "difficulty": "hard"
+    },
+    {
+      "question": "What does `asyncio.gather()` do?",
+      "options": {
+        "A": "Runs coroutines sequentially",
+        "B": "Runs multiple coroutines concurrently and aggregates results",
+        "C": "Creates tasks without running",
+        "D": "Cancels coroutines"
+      },
+      "correct": "B",
+      "difficulty": "hard"
+    }
+  ]
+}

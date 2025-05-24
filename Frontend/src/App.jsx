@@ -10,6 +10,7 @@ import QuizSection from "./components/Quiz";
 import Leaderboard from "./components/Leaderboard";
 import UserProfile from "./components/UserProfile";
 import QuizStarted from "./components/QuizStarted";
+import Result from "./components/Result";
 export default function App() {
   return (
     <BrowserRouter>
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/quiz-started" element={<QuizStarted />} />
+          <Route path="/results" element={<Result />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
