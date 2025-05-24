@@ -42,7 +42,6 @@ const userSchema = new mongoose.Schema(
     progressHistory: [
       {
         quizId: { type: mongoose.Schema.Types.ObjectId, ref: "Quiz" }, // Reference to the quiz
-        score: Number,
         completedAt: Date,
       },
     ],

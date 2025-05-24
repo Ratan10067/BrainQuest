@@ -25,7 +25,7 @@ export default function App() {
           <Route path="/quiz" element={<QuizSection />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/profile" element={<UserProfile />} />
-          <Route path="/quiz-started" element={<QuizStarted />} />
+          <Route path="/quiz-started/:quizId" element={<QuizStarted />} />
           <Route path="/results" element={<Result />} />
         </Routes>
       </AuthProvider>

@@ -21,7 +21,10 @@ module.exports.registerUser = async (req, res, next) => {
     password: hashPassword,
   });
   const token = await user.generateAuthToken();
-
+  console.log("token", token);
+  if (!token) {
+    return res.status(500).json({ message: "Token generation failed" });
+  }
   // Set token in cookie and send in response headers
   res.cookie("token", token, {
     httpOnly: true,

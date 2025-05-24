@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
 import { useContext } from "react";
 import axios from "axios";
@@ -10,6 +10,7 @@ export default function QuizSection() {
   const [selectedDifficulty, setSelectedDifficulty] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { questions, setQuestions } = useContext(AuthContext);
+  const [titleOfTheQuiz, setTitleOfTheQuiz] = useState("");
   console.log("questions", questions);
   console.log("setQuestions", setQuestions);
   // Check auth status on mount
@@ -23,31 +24,51 @@ export default function QuizSection() {
     { id: 2, title: "Test Your C++ Language" },
     { id: 3, title: "Test Your JavaScript Skills" },
   ];
+  const [pastQuizzes, setPastQuizzes] = useState([]);
+  const formatTime = (startTime, endTime) => {
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    console.log("start", start);
+    console.log("end", end);
+    const timeDiff = Math.floor((end - start) / 1000); // Convert to seconds
 
-  const pastQuizzes = [
-    {
-      id: 101,
-      title: "Algebra Basics Quiz",
-      score: "85%",
-      timeTaken: "5m 30s",
-      date: "2025-05-10",
-    },
-    {
-      id: 102,
-      title: "History 101 Quiz",
-      score: "92%",
-      timeTaken: "4m 12s",
-      date: "2025-05-09",
-    },
-    {
-      id: 103,
-      title: "Biology Fundamentals",
-      score: "78%",
-      timeTaken: "6m 05s",
-      date: "2025-05-08",
-    },
-  ];
+    const minutes = Math.floor(timeDiff / 60);
+    const seconds = timeDiff % 60;
 
+    return `${minutes}m ${seconds}s`;
+  };
+
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString("en-US", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
+  useEffect(() => {
+    const fetchPastQuizzes = async () => {
+      try {
+        const response = await axios.get("http://localhost:4000/quiz/past", {
+          params: {
+            userId: localStorage.getItem("userId"),
+          },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        console.log("Past quizzes response:", response.data);
+        if (response.status === 200) {
+          setPastQuizzes(response.data);
+          console.log("Past quizzes set:", response.data);
+        } else {
+          console.error("Failed to fetch past quizzes:", response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching past quizzes:", error);
+      }
+    };
+    fetchPastQuizzes();
+  }, []);
   const openModal = () => {
     setSelectedQuiz(null);
     setSelectedDifficulty(null);
@@ -63,6 +84,7 @@ export default function QuizSection() {
           quizId: selectedQuiz,
           subject: "Python",
           difficulty: selectedDifficulty,
+          title: titleOfTheQuiz,
         },
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -70,8 +92,10 @@ export default function QuizSection() {
       });
       console.log(response.data);
       if (response.status === 200) {
-        setQuestions(response.data);
-        navigate(`/quiz-started`, {
+        console.log("response check kr rha hu", response.data);
+        setQuestions(response.data.questions);
+        const quizId = response.data.quizId;
+        navigate(`/quiz-started/${quizId}`, {
           state: { quizId: selectedQuiz, difficulty: selectedDifficulty },
         });
         closeModal();
@@ -113,6 +137,7 @@ export default function QuizSection() {
       </button>
 
       {/* Past Quizzes Section */}
+      {console.log("pastQuizzes", pastQuizzes)}
       <div className="mt-10">
         <h4 className="text-2xl font-semibold text-[#2c3250] mb-4">
           Your Past Quizzes
@@ -125,12 +150,12 @@ export default function QuizSection() {
             >
               <div>
                 <h5 className="text-lg font-medium text-gray-800">
-                  {quiz.title}
+                  {quiz.Title}
                 </h5>
                 <div className="flex space-x-4 text-sm text-gray-600 mt-1">
                   <span>Score: {quiz.score}</span>
-                  <span>Time: {quiz.timeTaken}</span>
-                  <span>Date: {quiz.date}</span>
+                  <span>Time: {formatTime(quiz.startTime, quiz.endTime)}</span>
+                  <span>Date: {formatDate(quiz.startTime)}</span>
                 </div>
               </div>
               <button
@@ -146,8 +171,8 @@ export default function QuizSection() {
 
       {/* Modal for Selecting New Quiz */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl shadow-2xl w-11/12 md:w-3/4 lg:w-2/3 xl:w-1/2 max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-0 backdrop-blur-sm bg-white/30 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white/90 rounded-2xl shadow-2xl w-11/12 md:w-3/4 lg:w-2/3 xl:w-1/2 max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between p-4 bg-[#2c3250] rounded-t-2xl">
               <h3 className="text-xl font-bold text-white">Select a Quiz</h3>
               <button
@@ -163,7 +188,10 @@ export default function QuizSection() {
                 {newQuizzes.map((quiz) => (
                   <div
                     key={quiz.id}
-                    onClick={() => setSelectedQuiz(quiz.id)}
+                    onClick={() => {
+                      setSelectedQuiz(quiz.id);
+                      setTitleOfTheQuiz(quiz.title);
+                    }}
                     className={`cursor-pointer p-6 rounded-lg transition transform hover:scale-105 border-2 ${
                       selectedQuiz === quiz.id
                         ? "border-[#2c3250] bg-gray-50 shadow-lg"

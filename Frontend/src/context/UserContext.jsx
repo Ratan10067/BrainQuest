@@ -6,7 +6,8 @@ export const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(null);
   const [questions, setQuestions] = useState({});
-
+  const [userId, setUserId] = useState(null);
+  const [pastQuizzes, setPastQuizzes] = useState([]);
   // On mount, initialize from localStorage
   useEffect(() => {
     const t = localStorage.getItem("authToken");
@@ -32,6 +33,10 @@ export function AuthProvider({ children }) {
         isAuthenticated: !!token,
         questions,
         setQuestions,
+        userId,
+        setUserId,
+        pastQuizzes,
+        setPastQuizzes,
       }}
     >
       {children}

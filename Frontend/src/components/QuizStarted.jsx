@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/UserContext";
-
+import axios from "axios";
 function WarningModal({ onConfirm, onCancel }) {
   return (
     <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50">
@@ -49,7 +49,7 @@ function WarningModal({ onConfirm, onCancel }) {
 }
 export default function QuizStarted() {
   const navigate = useNavigate();
-  const { questions } = useContext(AuthContext);
+  const { questions, setPastQuizzes, pastQuizzes } = useContext(AuthContext);
   const total = questions.length || 0;
 
   const [current, setCurrent] = useState(0);
@@ -165,26 +165,38 @@ export default function QuizStarted() {
     setSelected(null);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Remove the beforeunload so navigation is clean
     window.removeEventListener("beforeunload", () => {});
-    // Calculate score
-    let score = 0;
-    questions.forEach((q, idx) => {
-      const a = answers[idx];
-      if (a == null) return;
-      score += a === q.correctOption ? 4 : -1;
-    });
-    navigate("/results", { state: { questions, answers, status, score } });
+    console.log("Submitting quiz with answers:");
+    const quizId = window.location.pathname.split("/").pop();
+
+    // Prepare submission data
+    const submissionData = {
+      userId: localStorage.getItem("userId"),
+      quizId: quizId,
+      endTime: new Date(),
+    };
+    const response = await axios.post(
+      `http://localhost:4000/quiz/submit`,
+      submissionData,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+    if (response.status === 200) {
+      console.log("Quiz submitted successfully:", response.data);
+      setPastQuizzes((prev) => [...prev, response.data.result]);
+      navigate("/results");
+    }
   };
 
   return (
     <div className="min-h-screen p-8 bg-white flex">
       {showNavModal && (
-        <WarningModal
-          onConfirm={handleSubmit}
-          onCancel={cancelNavigation}
-        />
+        <WarningModal onConfirm={handleSubmit} onCancel={cancelNavigation} />
       )}
 
       {/* Main Content */}
@@ -254,7 +266,7 @@ export default function QuizStarted() {
         <div className="flex justify-end">
           <button
             onClick={handleSubmit}
-            className="bg-green-600 text-white px-6 py-2 rounded"
+            className="bg-green-600 text-white px-6 py-2 rounded cursor-pointer"
           >
             Submit Quiz
           </button>

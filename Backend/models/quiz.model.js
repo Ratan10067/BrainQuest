@@ -23,6 +23,10 @@ const quizSchema = new mongoose.Schema({
       },
     },
   ],
+  Title: {
+    type: String,
+    required: true, // Title of the quiz
+  },
   startTime: {
     type: Date,
     default: Date.now, // Quiz start time

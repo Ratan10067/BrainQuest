@@ -26,7 +26,9 @@ export default function UserSignIn() {
         credentials
       );
       if (response.status === 200) {
+        console.log("User logged in successfully:", response.data);
         localStorage.setItem("token", response.data.token);
+        localStorage.setItem("userId", response.data.user._id);
         setModal({
           open: true,
           success: true,

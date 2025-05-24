@@ -36,6 +36,9 @@ export default function UserSignUp() {
           message:
             "Your account has been created! You will be redirected to the quiz section shortly.",
         });
+        console.log("User registered successfully:", response.data);
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("userId", response.data.user.id);
         setTimeout(() => navigate("/quiz"), 2000);
       } else {
         setModal({
@@ -163,7 +166,7 @@ export default function UserSignUp() {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-3 rounded-lg text-white font-semibold transition-transform transform hover:scale-105 ${
+              className={`w-full py-3 rounded-lg text-white font-semibold transition-transform transform hover:scale-105 cursor-pointer ${
                 loading ? "bg-gray-400 cursor-not-allowed" : "bg-[#2c3250]"
               }`}
             >
