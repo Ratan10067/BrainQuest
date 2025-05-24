@@ -200,7 +200,7 @@ export default function UserProfile() {
                 <span className="text-gray-800">{profile.email}</span>
               </div>
               <div className="flex justify-between border-b pb-2">
-                <span className="text-gray-600">Mobile Number</span>
+                <span className="text-gray-600">Phone Number</span>
                 <span className="text-gray-800">
                   {profile.phone || "Add number"}
                 </span>
@@ -261,11 +261,11 @@ export default function UserProfile() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Mobile Number
+                  Phone Number
                 </label>
                 <input
                   type="text"
-                  value={profile.mobile}
+                  value={profile.phone}
                   onChange={(e) =>
                     setProfile((p) => ({ ...p, phone: e.target.value }))
                   }
