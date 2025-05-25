@@ -26,7 +26,7 @@ export default function App() {
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/quiz-started/:quizId" element={<QuizStarted />} />
-          <Route path="/results" element={<Result />} />
+          <Route path="/results/:quizId" element={<Result />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

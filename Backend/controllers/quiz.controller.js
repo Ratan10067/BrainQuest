@@ -159,9 +159,9 @@ module.exports.startQuiz = async (req, res) => {
 
 module.exports.submitQuiz = async (req, res) => {
   console.log("Submit Quiz me aaya hhu", req.body);
-  const { userId, quizId } = req.body;
+  const { userId, quizId,answers } = req.body;
   try {
-    console.log(userId, quizId);
+    console.log(userId, quizId, answers);
     const quiz = await Quiz.findOne({ userId, status: "Started", _id: quizId });
     const user = await User.findById(userId);
     console.log("Quiz found:", quiz);

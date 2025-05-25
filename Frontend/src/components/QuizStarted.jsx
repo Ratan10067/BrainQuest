@@ -2,7 +2,9 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/UserContext";
+import "../App.css";
 import axios from "axios";
+
 function WarningModal({ onConfirm, onCancel }) {
   return (
     <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50">
@@ -59,6 +61,7 @@ export default function QuizStarted() {
   const [timeLeft, setTimeLeft] = useState(1 * 60);
   const [showNavModal, setShowNavModal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   // Ref to control whether to allow the next popstate
   const allowNavRef = useRef(false);
 
@@ -135,7 +138,7 @@ export default function QuizStarted() {
     });
     setAnswers((ans) => {
       const c = [...ans];
-      c[current] = selected;
+      c[current] = selected; // This will store both number and value
       return c;
     });
   };
@@ -209,16 +212,15 @@ export default function QuizStarted() {
   };
 
   const confirmSubmit = async () => {
-    // Your existing submit logic here
-    const quizId = window.location.pathname.split("/").pop();
-    const submissionData = {
-      userId: localStorage.getItem("userId"),
-      quizId: quizId,
-      endTime: new Date(),
-      answers: answers,
-    };
-
     try {
+      const quizId = window.location.pathname.split("/").pop();
+      const submissionData = {
+        userId: localStorage.getItem("userId"),
+        quizId: quizId,
+        endTime: new Date(),
+        answers: answers,
+      };
+
       const response = await axios.post(
         `http://localhost:4000/quiz/submit`,
         submissionData,
@@ -230,41 +232,17 @@ export default function QuizStarted() {
       );
 
       if (response.status === 200) {
-        setPastQuizzes((prev) => [...prev, response.data.result]);
-        navigate("/results");
+        setShowSubmitModal(false);
+        setShowSuccess(true); // Show success animation
+        // Navigation will be handled by SuccessAnimation component
+        setTimeout(() => {
+          navigate(`/results/${quizId}`);
+        }, 3000);
       }
     } catch (error) {
       console.error("Error submitting quiz:", error);
     }
   };
-  // const handleSubmit = async () => {
-  //   // Remove the beforeunload so navigation is clean
-  //   window.removeEventListener("beforeunload", () => {});
-  //   console.log("Submitting quiz with answers:");
-  //   const quizId = window.location.pathname.split("/").pop();
-
-  //   // Prepare submission data
-  //   const submissionData = {
-  //     userId: localStorage.getItem("userId"),
-  //     quizId: quizId,
-  //     endTime: new Date(),
-  //   };
-  //   const response = await axios.post(
-  //     `http://localhost:4000/quiz/submit`,
-  //     submissionData,
-  //     {
-  //       headers: {
-  //         Authorization: `Bearer ${localStorage.getItem("token")}`,
-  //       },
-  //     }
-  //   );
-  //   if (response.status === 200) {
-  //     console.log("Quiz submitted successfully:", response.data);
-  //     setPastQuizzes((prev) => [...prev, response.data.result]);
-  //     navigate("/results");
-  //   }
-  // };
-
   return (
     <div className="min-h-screen p-8 bg-white flex">
       {showNavModal && (
@@ -293,14 +271,14 @@ export default function QuizStarted() {
           {questions[current]?.options.map((opt, i) => (
             <button
               key={i}
-              onClick={() => setSelected(opt)}
+              onClick={() => setSelected({ number: i + 1, value: opt })}
               className={`w-full text-left px-4 py-3 rounded-lg border cursor-pointer ${
-                selected === opt
+                selected?.value === opt
                   ? "border-blue-500 bg-blue-50"
                   : "border-gray-300"
               } hover:border-blue-400`}
             >
-              {opt}
+              <span className="font-medium mr-2">{i + 1}.</span> {opt}
             </button>
           ))}
         </div>
@@ -392,6 +370,13 @@ export default function QuizStarted() {
           timeUp={timeLeft <= 0} // Pass the timeUp prop
         />
       )}
+      {showSuccess && (
+        <SuccessAnimation
+          onComplete={() =>
+            navigate(`/results/${window.location.pathname.split("/").pop()}`)
+          }
+        />
+      )}
     </div>
   );
 }
@@ -411,7 +396,7 @@ function SubmitConfirmationModal({
   answers,
   questions,
   status,
-  timeUp = false
+  timeUp = false,
 }) {
   const answered = status.filter((s) => s === "answered").length;
   const markedForReview = status.filter((s) => s === "review").length;
@@ -504,7 +489,9 @@ function SubmitConfirmationModal({
                 {answers[index] && (
                   <div className="mt-2 text-sm text-gray-600">
                     Selected Option:{" "}
-                    <span className="font-medium">{answers[index]}</span>
+                    <span className="font-medium">
+                      {answers[index].number} → {answers[index].value}
+                    </span>
                   </div>
                 )}
               </div>
@@ -529,6 +516,35 @@ function SubmitConfirmationModal({
             {timeUp ? "Submit" : "Submit Quiz"}
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function SuccessAnimation({ onComplete }) {
+  useEffect(() => {
+    const timer = setTimeout(onComplete, 2000); // Redirect after 2 seconds
+    return () => clearTimeout(timer);
+  }, [onComplete]);
+
+  return (
+    <div className="fixed inset-0 bg-white/90 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="flex flex-col items-center transform scale-up">
+        {/* Success checkmark animation */}
+        <div className="success-checkmark scale-up">
+          <div className="check-icon">
+            <span className="icon-line line-tip"></span>
+            <span className="icon-line line-long"></span>
+            <div className="icon-circle"></div>
+            <div className="icon-fix"></div>
+          </div>
+        </div>
+        <h2 className="text-2xl font-semibold text-gray-800 mt-4 animate-fade-in">
+          Quiz Submitted Successfully!
+        </h2>
+        <p className="text-gray-600 mt-2 animate-fade-in-delay">
+          Redirecting to results...
+        </p>
       </div>
     </div>
   );
