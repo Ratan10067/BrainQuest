@@ -56,9 +56,9 @@ export default function QuizStarted() {
   const [selected, setSelected] = useState(null);
   const [status, setStatus] = useState([]);
   const [answers, setAnswers] = useState([]);
-  const [timeLeft, setTimeLeft] = useState(3 * 60);
+  const [timeLeft, setTimeLeft] = useState(1 * 60);
   const [showNavModal, setShowNavModal] = useState(false);
-
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
   // Ref to control whether to allow the next popstate
   const allowNavRef = useRef(false);
 
@@ -110,7 +110,7 @@ export default function QuizStarted() {
   // — Timer countdown —
   useEffect(() => {
     if (timeLeft <= 0) {
-      handleSubmit();
+      setShowSubmitModal(true); // Show the modal
       return;
     }
     const timer = setInterval(() => setTimeLeft((t) => t - 1), 1000);
@@ -141,16 +141,50 @@ export default function QuizStarted() {
   };
 
   const handleNext = () => {
-    recordAnswer("answered");
-    if (current < total - 1) setCurrent((c) => c + 1);
+    // Record answer regardless of navigation possibility
+    if (selected) {
+      setStatus((st) => {
+        const newStatus = [...st];
+        newStatus[current] = "answered";
+        return newStatus;
+      });
+      setAnswers((ans) => {
+        const newAnswers = [...ans];
+        newAnswers[current] = selected;
+        return newAnswers;
+      });
+    }
+
+    // Navigate if not on last question
+    if (current < total - 1) {
+      setCurrent((c) => c + 1);
+    }
+  };
+
+  const handleSaveMark = () => {
+    // Record answer regardless of navigation possibility
+    if (selected) {
+      setStatus((st) => {
+        const newStatus = [...st];
+        newStatus[current] = "review";
+        return newStatus;
+      });
+      setAnswers((ans) => {
+        const newAnswers = [...ans];
+        newAnswers[current] = selected;
+        return newAnswers;
+      });
+    }
+
+    // Navigate if not on last question
+    if (current < total - 1) {
+      setCurrent((c) => c + 1);
+    }
   };
   const handleBack = () => {
     if (current > 0) setCurrent((c) => c - 1);
   };
-  const handleSaveMark = () => {
-    recordAnswer("review");
-    if (current < total - 1) setCurrent((c) => c + 1);
-  };
+
   const handleClear = () => {
     setAnswers((ans) => {
       const c = [...ans];
@@ -165,33 +199,71 @@ export default function QuizStarted() {
     setSelected(null);
   };
 
-  const handleSubmit = async () => {
-    // Remove the beforeunload so navigation is clean
-    window.removeEventListener("beforeunload", () => {});
-    console.log("Submitting quiz with answers:");
-    const quizId = window.location.pathname.split("/").pop();
+  const handleWithoutNext = () => {
+    if (current < total - 1) {
+      setCurrent((prev) => prev + 1);
+    }
+  };
+  const handleSubmit = () => {
+    setShowSubmitModal(true);
+  };
 
-    // Prepare submission data
+  const confirmSubmit = async () => {
+    // Your existing submit logic here
+    const quizId = window.location.pathname.split("/").pop();
     const submissionData = {
       userId: localStorage.getItem("userId"),
       quizId: quizId,
       endTime: new Date(),
+      answers: answers,
     };
-    const response = await axios.post(
-      `http://localhost:4000/quiz/submit`,
-      submissionData,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+
+    try {
+      const response = await axios.post(
+        `http://localhost:4000/quiz/submit`,
+        submissionData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setPastQuizzes((prev) => [...prev, response.data.result]);
+        navigate("/results");
       }
-    );
-    if (response.status === 200) {
-      console.log("Quiz submitted successfully:", response.data);
-      setPastQuizzes((prev) => [...prev, response.data.result]);
-      navigate("/results");
+    } catch (error) {
+      console.error("Error submitting quiz:", error);
     }
   };
+  // const handleSubmit = async () => {
+  //   // Remove the beforeunload so navigation is clean
+  //   window.removeEventListener("beforeunload", () => {});
+  //   console.log("Submitting quiz with answers:");
+  //   const quizId = window.location.pathname.split("/").pop();
+
+  //   // Prepare submission data
+  //   const submissionData = {
+  //     userId: localStorage.getItem("userId"),
+  //     quizId: quizId,
+  //     endTime: new Date(),
+  //   };
+  //   const response = await axios.post(
+  //     `http://localhost:4000/quiz/submit`,
+  //     submissionData,
+  //     {
+  //       headers: {
+  //         Authorization: `Bearer ${localStorage.getItem("token")}`,
+  //       },
+  //     }
+  //   );
+  //   if (response.status === 200) {
+  //     console.log("Quiz submitted successfully:", response.data);
+  //     setPastQuizzes((prev) => [...prev, response.data.result]);
+  //     navigate("/results");
+  //   }
+  // };
 
   return (
     <div className="min-h-screen p-8 bg-white flex">
@@ -237,29 +309,35 @@ export default function QuizStarted() {
           <button
             onClick={handleBack}
             disabled={current === 0}
-            className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
+            className="bg-gray-300 text-gray-700 px-4 py-2 rounded cursor-pointer"
           >
             Back
           </button>
           <button
             onClick={handleNext}
-            disabled={!selected || current === total - 1}
-            className="bg-green-500 text-white px-4 py-2 rounded"
+            disabled={!selected}
+            className="bg-green-500 text-white px-4 py-2 rounded cursor-pointer"
           >
             Save & Next
           </button>
           <button
             onClick={handleSaveMark}
-            disabled={!selected || current === total - 1}
-            className="bg-purple-500 text-white px-4 py-2 rounded"
+            disabled={!selected}
+            className="bg-purple-500 text-white px-4 py-2 rounded cursor-pointer"
           >
             Save & Review
           </button>
           <button
             onClick={handleClear}
-            className="bg-gray-200 text-gray-700 px-4 py-2 rounded"
+            className="bg-gray-200 text-gray-700 px-4 py-2 rounded cursor-pointer"
           >
             Clear
+          </button>
+          <button
+            onClick={handleWithoutNext}
+            className="bg-gray-200 text-gray-700 px-4 py-2 rounded cursor-pointer"
+          >
+            Next
           </button>
         </div>
 
@@ -304,6 +382,16 @@ export default function QuizStarted() {
           <Legend color="bg-purple-500 text-white" label="Marked for Review" />
         </div>
       </aside>
+      {showSubmitModal && (
+        <SubmitConfirmationModal
+          onConfirm={confirmSubmit}
+          onCancel={() => setShowSubmitModal(false)}
+          answers={answers}
+          questions={questions}
+          status={status}
+          timeUp={timeLeft <= 0} // Pass the timeUp prop
+        />
+      )}
     </div>
   );
 }
@@ -313,6 +401,135 @@ function Legend({ color, label }) {
     <div className="flex items-center">
       <div className={`${color} w-4 h-4 mr-2 rounded`} />
       <span>{label}</span>
+    </div>
+  );
+}
+
+function SubmitConfirmationModal({
+  onConfirm,
+  onCancel,
+  answers,
+  questions,
+  status,
+  timeUp = false
+}) {
+  const answered = status.filter((s) => s === "answered").length;
+  const markedForReview = status.filter((s) => s === "review").length;
+  const notAnswered = status.filter((s) => s === "notAnswered").length;
+  const notVisited = status.filter((s) => s === "notVisited").length;
+
+  return (
+    <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl w-[600px] shadow-2xl border border-gray-100 max-h-[80vh] overflow-hidden flex flex-col">
+        {/* Header */}
+        <div className="bg-[#2c3250] p-4">
+          <h2 className="text-xl font-semibold text-white">Quiz Summary</h2>
+        </div>
+
+        {/* Summary Statistics */}
+        <div className="p-6 border-b">
+          <div className="grid grid-cols-5 gap-4">
+            <div className="bg-gray-50 p-4 rounded-lg text-center">
+              <div className="text-2xl font-bold text-[#2c3250]">
+                {questions.length}
+              </div>
+              <div className="text-sm text-gray-600">Total</div>
+            </div>
+            <div className="bg-green-50 p-4 rounded-lg text-center">
+              <div className="text-2xl font-bold text-green-600">
+                {answered}
+              </div>
+              <div className="text-sm text-gray-600">Answered</div>
+            </div>
+            <div className="bg-purple-50 p-4 rounded-lg text-center">
+              <div className="text-2xl font-bold text-purple-600">
+                {markedForReview}
+              </div>
+              <div className="text-sm text-gray-600">For Review</div>
+            </div>
+            <div className="bg-red-50 p-4 rounded-lg text-center">
+              <div className="text-2xl font-bold text-red-600">
+                {notAnswered}
+              </div>
+              <div className="text-sm text-gray-600">Not Answered</div>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg text-center">
+              <div className="text-2xl font-bold text-gray-600">
+                {notVisited}
+              </div>
+              <div className="text-sm text-gray-600">Not Visited</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Questions Review - Now with review status */}
+        <div className="p-6 overflow-y-auto flex-1">
+          <h3 className="text-lg font-semibold mb-4">Question-wise Summary</h3>
+          <div className="space-y-4">
+            {questions.map((question, index) => (
+              <div
+                key={index}
+                className={`p-4 rounded-lg border ${
+                  status[index] === "answered"
+                    ? "border-green-200 bg-green-50"
+                    : status[index] === "review"
+                    ? "border-purple-200 bg-purple-50"
+                    : status[index] === "notAnswered"
+                    ? "border-red-200 bg-red-50"
+                    : "border-gray-200 bg-gray-50"
+                }`}
+              >
+                <div className="flex justify-between items-start">
+                  <div className="font-medium">Question {index + 1}</div>
+                  <div
+                    className={`px-2 py-1 rounded text-sm ${
+                      status[index] === "answered"
+                        ? "bg-green-100 text-green-700"
+                        : status[index] === "review"
+                        ? "bg-purple-100 text-purple-700"
+                        : status[index] === "notAnswered"
+                        ? "bg-red-100 text-red-700"
+                        : "bg-gray-100 text-gray-700"
+                    }`}
+                  >
+                    {status[index] === "answered"
+                      ? "Answered"
+                      : status[index] === "review"
+                      ? "Marked for Review"
+                      : status[index] === "notAnswered"
+                      ? "Not Answered"
+                      : "Not Visited"}
+                  </div>
+                </div>
+                {answers[index] && (
+                  <div className="mt-2 text-sm text-gray-600">
+                    Selected Option:{" "}
+                    <span className="font-medium">{answers[index]}</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer Actions */}
+        <div className="p-4 border-t bg-gray-50 flex justify-end space-x-4">
+          {!timeUp && ( // Only show Continue button if time isn't up
+            <button
+              onClick={onCancel}
+              className="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200 cursor-pointer"
+            >
+              Continue Quiz
+            </button>
+          )}
+          <button
+            onClick={onConfirm}
+            className="px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 cursor-pointer"
+          >
+            {timeUp ? "Submit" : "Submit Quiz"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
