@@ -159,7 +159,7 @@ module.exports.startQuiz = async (req, res) => {
 
 module.exports.submitQuiz = async (req, res) => {
   console.log("Submit Quiz me aaya hhu", req.body);
-  const { userId, quizId,answers } = req.body;
+  const { userId, quizId, answers } = req.body;
   try {
     console.log(userId, quizId, answers);
     const quiz = await Quiz.findOne({ userId, status: "Started", _id: quizId });
@@ -224,11 +224,67 @@ module.exports.getPastQuizzes = async (req, res) => {
     return res.status(400).json({ error: "User ID is required." });
   }
   try {
-    const quizzes = await Quiz.find({ userId, status: "Completed" })
+    const quizzes = await Quiz.find({ userId, status: "Completed" });
     console.log("Past quizzes found:", quizzes);
     res.status(200).json(quizzes);
   } catch (error) {
     console.error("Error fetching past quizzes:", error);
     res.status(500).json({ error: "Failed to fetch past quizzes." });
+  }
+};
+
+module.exports.getQuizResult = async (req, res) => {
+  try {
+    const { quizId } = req.params;
+    console.log("Fetching quiz result for quizId:", quizId);
+
+    const quiz = await Quiz.findById(quizId).populate({
+      path: "questions.questionId",
+      model: Question, // Use the actual model instead of string
+      select: "text options correctOption",
+    });
+
+    if (!quiz) {
+      return res.status(404).json({ error: "Quiz not found" });
+    }
+
+    const result = await Result.findOne({ quizId });
+
+    // Calculate time taken
+    const timeTaken = Math.floor(
+      (new Date(quiz.endTime) - new Date(quiz.startTime)) / 1000
+    );
+    const minutes = Math.floor(timeTaken / 60);
+    const seconds = timeTaken % 60;
+
+    // Transform questions data
+    const processedQuestions = quiz.questions.map((q) => ({
+      questionId: {
+        text: q.questionId.text,
+        options: q.questionId.options,
+        correctOption: q.questionId.correctOption,
+      },
+      userResponse: q.userResponse,
+      isCorrect: q.userResponse === q.questionId.correctOption,
+    }));
+
+    // Create response object
+    const quizResponse = {
+      ...quiz.toObject(),
+      questions: processedQuestions,
+    };
+
+    res.status(200).json({
+      quiz: quizResponse,
+      result,
+      timeTaken: `${minutes}m ${seconds}s`,
+      user: quiz.userId,
+    });
+  } catch (error) {
+    console.error("Error in getQuizResult:", error);
+    res.status(500).json({
+      error: "Failed to fetch quiz result",
+      details: error.message,
+    });
   }
 };

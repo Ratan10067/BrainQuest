@@ -186,3 +186,20 @@
     transform: translateY(0);
   }
 }
+@keyframes progress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+.progress-bar {
+  width: 100%;
+  animation: progress 3s linear;
+}
+
+.progress-bar-paused {
+  animation-play-state: paused;
+}

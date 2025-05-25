@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate, NavLink } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { User, Mail, Lock, Loader2, EyeIcon, EyeOff } from "lucide-react";
 
 export default function UserSignUp() {
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -14,7 +18,6 @@ export default function UserSignUp() {
     success: false,
     message: "",
   });
-  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,21 +37,13 @@ export default function UserSignUp() {
           open: true,
           success: true,
           message:
-            "Your account has been created! You will be redirected to the quiz section shortly.",
+            "Your account has been created! You will be redirected shortly.",
         });
-        console.log("User registered successfully:", response.data);
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("userId", response.data.user.id);
         setTimeout(() => navigate("/quiz"), 2000);
-      } else {
-        setModal({
-          open: true,
-          success: false,
-          message: "Unexpected response. Please try again.",
-        });
       }
     } catch (error) {
-      console.error(error);
       const msg =
         error.response?.data?.message ||
         "Signup failed. Please check your details and try again.";
@@ -62,163 +57,199 @@ export default function UserSignUp() {
     setModal({ open: false, success: false, message: "" });
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[#2c3250] p-4">
-      <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-lg overflow-hidden flex">
-        {/* 3D Illustration */}
-        <div
-          className="w-1/2 hidden md:flex items-center justify-center p-6"
-          style={{ perspective: "1000px" }}
-        >
-          <img
-            src="https://cdn3d.iconscout.com/3d/premium/thumb/young-man-doing-online-registration-and-sign-up-3d-illustration-download-in-png-blend-fbx-gltf-file-formats--signup-create-account-form-pack-crime-security-illustrations-10209162.png"
-            alt="3D Illustration"
-            className="w-3/4 transition-transform duration-500 hover:rotate-y-12 hover:-rotate-x-6"
-            style={{ transformStyle: "preserve-3d" }}
-          />
-        </div>
-        {/* Form Panel */}
-        <div className="w-full md:w-1/2 p-10">
-          <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
-            Sign Up to BrainQuest
-          </h2>
-          <form onSubmit={handleSubmit}>
-            {/* Name */}
-            <div className="mb-6">
-              <label htmlFor="name" className="block text-gray-700 mb-2">
-                Full Name
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="John Doe"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2c3250]"
-              />
-            </div>
-            {/* Email */}
-            <div className="mb-6">
-              <label htmlFor="email" className="block text-gray-700 mb-2">
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="john@example.com"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2c3250]"
-              />
-            </div>
-            {/* Password */}
-            <div className="mb-8">
-              <label htmlFor="password" className="block text-gray-700 mb-2">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2c3250]"
-              />
-            </div>
-            {/* Location */}
-            {/* <div className="mb-6">
-              <label htmlFor="location" className="block text-gray-700 mb-2">
-                Location
-              </label>
-              <input
-                id="location"
-                name="location"
-                type="text"
-                required
-                value={formData.location}
-                onChange={handleChange}
-                placeholder="City, Country"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2c3250]"
-              />
-            </div> */}
-            {/* Phone */}
-            {/* <div className="mb-6">
-              <label htmlFor="phone" className="block text-gray-700 mb-2">
-                Phone Number
-              </label>
-              <input
-                id="phone"
-                name="phone"
-                type="text"
-                required
-                value={formData.phone}
-                onChange={handleChange}
-                placeholder="+1234567890"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2c3250]"
-              />
-            </div> */}
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              className={`w-full py-3 rounded-lg text-white font-semibold transition-transform transform hover:scale-105 cursor-pointer ${
-                loading ? "bg-gray-400 cursor-not-allowed" : "bg-[#2c3250]"
-              }`}
-            >
-              {loading ? "Creating Account..." : "Create Account"}
-            </button>
-          </form>
-          <div className="mt-4 text-center text-gray-600">
-            Already have an account??{" "}
-            <NavLink to="/signin" className="text-indigo-600 hover:underline">
-              Sign In
-            </NavLink>
-          </div>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-[#1a1f37] to-[#2c3250] flex items-center justify-center p-4 md:p-8">
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-yellow-400/20 to-transparent rounded-full blur-3xl transform rotate-12 opacity-20" />
+        <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-orange-500/20 to-transparent rounded-full blur-3xl transform -rotate-12 opacity-20" />
       </div>
 
-      {/* Styled Modal */}
-      {modal.open && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
-          <div className="bg-white rounded-3xl shadow-2xl w-80 p-6 text-center animate-fade-in">
-            <div className="text-6xl mb-4">{modal.success ? "😊" : "😢"}</div>
-            <h3 className="text-2xl font-bold mb-2 text-gray-800">
-              {modal.success ? "Success!" : "Oops!"}
-            </h3>
-            <p className="text-gray-600 mb-6">{modal.message}</p>
-            {!modal.success && (
-              <button
-                onClick={closeModal}
-                className="px-6 py-2 bg-[#2c3250] text-white rounded-full hover:bg-opacity-90 transition"
-              >
-                Try Again
-              </button>
-            )}
-          </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="relative w-full max-w-4xl mx-auto bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden flex border border-white/20"
+      >
+        {/* Left Panel - 3D Illustration */}
+        <div className="w-1/2 hidden lg:flex items-center justify-center p-12 relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/10 to-orange-500/10 backdrop-blur-sm" />
+          <motion.div
+            initial={{ scale: 0.8, rotateY: -20 }}
+            animate={{ scale: 1, rotateY: 0 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="relative z-10"
+          >
+            <img
+              src="/assets/signup-illustration.png"
+              alt="Sign Up Illustration"
+              className="w-full max-w-md transform transition-transform duration-700 hover:scale-105"
+            />
+          </motion.div>
         </div>
-      )}
 
-      {/* CSS for fade-in animation */}
-      <style jsx>{`
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: scale(0.9);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-        .animate-fade-in {
-          animation: fade-in 0.3s ease-out;
-        }
-      `}</style>
+        {/* Right Panel - Form */}
+        <div className="w-full lg:w-1/2 p-8 md:p-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
+              Create Account
+            </h2>
+            <p className="text-gray-300 mb-8">
+              Join BrainQuest and start your learning journey
+            </p>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Name Input */}
+              <div className="relative group">
+                <User
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
+                               group-focus-within:text-yellow-400 transition-colors"
+                  size={20}
+                />
+                <input
+                  name="name"
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Full Name"
+                  className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 
+                           rounded-xl text-white placeholder-gray-400 focus:outline-none 
+                           focus:border-yellow-400/50 focus:ring-2 focus:ring-yellow-400/20 
+                           transition-all"
+                />
+              </div>
+
+              {/* Email Input */}
+              <div className="relative group">
+                <Mail
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
+                               group-focus-within:text-yellow-400 transition-colors"
+                  size={20}
+                />
+                <input
+                  name="email"
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Email Address"
+                  className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 
+                           rounded-xl text-white placeholder-gray-400 focus:outline-none 
+                           focus:border-yellow-400/50 focus:ring-2 focus:ring-yellow-400/20 
+                           transition-all"
+                />
+              </div>
+
+              {/* Password Input */}
+              <div className="relative group">
+                <Lock
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
+                               group-focus-within:text-yellow-400 transition-colors"
+                  size={20}
+                />
+                <input
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Password"
+                  className="w-full pl-11 pr-12 py-3 bg-white/5 border border-white/10 
+                           rounded-xl text-white placeholder-gray-400 focus:outline-none 
+                           focus:border-yellow-400/50 focus:ring-2 focus:ring-yellow-400/20 
+                           transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 
+                           hover:text-white transition-colors"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <EyeIcon size={20} />}
+                </button>
+              </div>
+
+              {/* Submit Button */}
+              <motion.button
+                type="submit"
+                disabled={loading}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-yellow-400 
+                         to-orange-500 text-[#1a1f37] font-semibold flex items-center 
+                         justify-center space-x-2 hover:shadow-lg hover:shadow-yellow-500/25 
+                         transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="animate-spin" size={20} />
+                    <span>Creating Account...</span>
+                  </>
+                ) : (
+                  <span>Create Account</span>
+                )}
+              </motion.button>
+            </form>
+
+            <div className="mt-6 text-center">
+              <p className="text-gray-400">
+                Already have an account?{" "}
+                <NavLink
+                  to="/signin"
+                  className="text-yellow-400 hover:text-yellow-300 
+                                               transition-colors"
+                >
+                  Sign In
+                </NavLink>
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </motion.div>
+
+      {/* Modal */}
+      <AnimatePresence>
+        {modal.open && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 flex items-center justify-center bg-black/60 
+                     backdrop-blur-sm z-50 p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl w-full 
+                       max-w-md p-8 border border-white/20"
+            >
+              <div className="text-6xl mb-4 flex justify-center">
+                {modal.success ? "🎉" : "😢"}
+              </div>
+              <h3 className="text-2xl font-bold mb-2 text-white text-center">
+                {modal.success ? "Welcome Aboard!" : "Oops!"}
+              </h3>
+              <p className="text-gray-300 text-center mb-6">{modal.message}</p>
+              {!modal.success && (
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={closeModal}
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-yellow-400 
+                           to-orange-500 text-[#1a1f37] font-semibold hover:shadow-lg 
+                           hover:shadow-yellow-500/25 transition-all"
+                >
+                  Try Again
+                </motion.button>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
