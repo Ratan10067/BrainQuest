@@ -8,10 +8,15 @@ export function AuthProvider({ children }) {
   const [questions, setQuestions] = useState({});
   const [userId, setUserId] = useState(null);
   const [pastQuizzes, setPastQuizzes] = useState([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   // On mount, initialize from localStorage
   useEffect(() => {
-    const t = localStorage.getItem("authToken");
-    if (t) setToken(t);
+    const token = localStorage.getItem("token");
+    if (token) {
+      setIsAuthenticated(true);
+    } else {
+      setIsAuthenticated(false);
+    }
   }, []);
 
   const login = (newToken) => {
@@ -30,7 +35,8 @@ export function AuthProvider({ children }) {
         token,
         login,
         logout,
-        isAuthenticated: !!token,
+        isAuthenticated,
+        setIsAuthenticated,
         questions,
         setQuestions,
         userId,

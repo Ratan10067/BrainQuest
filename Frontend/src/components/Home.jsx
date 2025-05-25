@@ -107,7 +107,7 @@ export default function HomePage() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleCheckUserSigIn}
-                  className="group flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-[#1a1f37] font-semibold px-8 py-4 rounded-full hover:shadow-lg hover:shadow-yellow-500/25 transition-all duration-300"
+                  className="group flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-[#1a1f37] font-semibold px-8 py-4 rounded-full hover:shadow-lg hover:shadow-yellow-500/25 transition-all duration-300 cursor-pointer"
                 >
                   Get Started
                   <ArrowRight className="group-hover:translate-x-1 transition-transform" />
@@ -209,9 +209,21 @@ export default function HomePage() {
 
             <div className="flex gap-6">
               {[
-                { name: "Facebook", icon: "/icons/facebook.svg", url: "#" },
-                { name: "Instagram", icon: "/icons/instagram.svg", url: "#" },
-                { name: "LinkedIn", icon: "/icons/linkedin.svg", url: "#" },
+                {
+                  name: "Facebook",
+                  icon: "https://upload.wikimedia.org/wikipedia/en/thumb/0/04/Facebook_f_logo_%282021%29.svg/640px-Facebook_f_logo_%282021%29.svg.png",
+                  url: "#",
+                },
+                {
+                  name: "Instagram",
+                  icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Instagram_logo_2022.svg/2048px-Instagram_logo_2022.svg.png",
+                  url: "#",
+                },
+                {
+                  name: "LinkedIn",
+                  icon: "/assets/Linkedin.png",
+                  url: "https://www.linkedin.com/in/ratan-kumar-24961b285/",
+                },
               ].map((social, index) => (
                 <motion.a
                   key={index}

@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import axios from "axios";
 import { useNavigate, NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { User, Mail, Lock, Loader2, EyeIcon, EyeOff } from "lucide-react";
-
+import { AuthContext } from "../context/UserContext";
 export default function UserSignUp() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -18,6 +18,7 @@ export default function UserSignUp() {
     success: false,
     message: "",
   });
+  const { isAuthenticated, setIsAuthenticated } = useContext(AuthContext);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -41,6 +42,7 @@ export default function UserSignUp() {
         });
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("userId", response.data.user.id);
+        setIsAuthenticated(true);
         setTimeout(() => navigate("/quiz"), 2000);
       }
     } catch (error) {

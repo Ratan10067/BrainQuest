@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   Menu,
@@ -11,28 +11,21 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-
+import { AuthContext } from "../context/UserContext";
 export default function Navbar() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { isAuthenticated, setIsAuthenticated } = useContext(AuthContext);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [userName, setUserName] = useState("");
 
-  useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem("token");
-      setIsAuthenticated(!!token);
-    };
-
-    checkAuth();
-    // Add event listener for storage changes
-    window.addEventListener("storage", checkAuth);
-    return () => window.removeEventListener("storage", checkAuth);
-  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("userName");
     setIsAuthenticated(false);
+    setUserName("");
     navigate("/");
     setProfileDropdownOpen(false);
   };
@@ -87,9 +80,11 @@ export default function Navbar() {
               <div className="relative">
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center space-x-2 text-white px-4 py-2 rounded-xl bg-[#2c3250] hover:bg-[#2c3250]/80 transition-colors"
+                  className="flex items-center space-x-2 text-white px-4 py-2 rounded-xl bg-[#2c3250] hover:bg-[#2c3250]/80 transition-colors cursor-pointer"
                 >
-                  <UserIcon size={20} />
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center">
+                    <UserIcon size={18} className="text-[#1a1f37]" />
+                  </div>
                   <ChevronDown
                     size={16}
                     className={`transform transition-transform ${
@@ -106,19 +101,25 @@ export default function Navbar() {
                       exit={{ opacity: 0, y: 10 }}
                       className="absolute right-0 mt-2 w-48 py-2 bg-[#2c3250] rounded-xl shadow-xl border border-white/10"
                     >
+                      <div className="px-4 py-2 border-b border-white/10">
+                        <p className="text-sm text-gray-400">Signed in as</p>
+                        <p className="text-sm font-medium text-white truncate">
+                          {userName || "User"}
+                        </p>
+                      </div>
                       <button
                         onClick={() => {
                           navigate("/profile");
                           setProfileDropdownOpen(false);
                         }}
-                        className="w-full text-left px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 flex items-center space-x-2"
+                        className="w-full text-left px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 flex items-center space-x-2 cursor-pointer"
                       >
                         <UserIcon size={16} />
                         <span>Profile</span>
                       </button>
                       <button
                         onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 text-red-400 hover:text-red-300 hover:bg-white/10 flex items-center space-x-2"
+                        className="w-full text-left px-4 py-2 text-red-400 hover:text-red-300 hover:bg-white/10 flex items-center space-x-2 cursor-pointer"
                       >
                         <LogOut size={16} />
                         <span>Logout</span>
@@ -127,27 +128,12 @@ export default function Navbar() {
                   )}
                 </AnimatePresence>
               </div>
-            ) : (
-              <div className="flex items-center space-x-4">
-                <NavLink
-                  to="/signin"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Sign In
-                </NavLink>
-                <NavLink
-                  to="/signup"
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-yellow-400 to-orange-500 text-[#1a1f37] font-medium hover:shadow-lg hover:shadow-yellow-500/25 transition-all"
-                >
-                  Sign Up
-                </NavLink>
-              </div>
-            )}
+            ) : null}
           </div>
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden text-white p-2 hover:bg-white/10 rounded-lg transition-colors"
+            className="md:hidden cursor-pointer text-white p-2 hover:bg-white/10 rounded-lg transition-colors"
             onClick={() => setMenuOpen(!menuOpen)}
           >
             {menuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -202,22 +188,13 @@ export default function Navbar() {
                     </button>
                   </>
                 ) : (
-                  <div className="grid gap-2 px-4 pt-2">
-                    <NavLink
-                      to="/signin"
-                      onClick={() => setMenuOpen(false)}
-                      className="w-full py-3 text-center text-gray-300 hover:text-white rounded-xl border border-white/10 hover:bg-white/5 transition-colors"
-                    >
-                      Sign In
-                    </NavLink>
-                    <NavLink
-                      to="/signup"
-                      onClick={() => setMenuOpen(false)}
-                      className="w-full py-3 text-center rounded-xl bg-gradient-to-r from-yellow-400 to-orange-500 text-[#1a1f37] font-medium"
-                    >
-                      Sign Up
-                    </NavLink>
-                  </div>
+                  <NavLink
+                    to="/"
+                    onClick={() => setMenuOpen(false)}
+                    className="block px-4 py-3 text-center rounded-xl bg-gradient-to-r from-yellow-400 to-orange-500 text-[#1a1f37] font-medium cursor-pointer"
+                  >
+                    Get Started
+                  </NavLink>
                 )}
               </div>
             </motion.div>

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -18,13 +18,13 @@ import {
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Settings from "./Settings";
-
+import { AuthContext } from "../context/UserContext";
 export default function UserProfile() {
   const navigate = useNavigate();
   const [editMode, setEditMode] = useState(false);
   const avatarInput = useRef();
   const [activeView, setActiveView] = useState("profile");
-
+  const { isAuthenticated, setIsAuthenticated } = useContext(AuthContext);
   const [profile, setProfile] = useState({
     name: "John Doe",
     email: "john@example.com",
@@ -142,6 +142,8 @@ export default function UserProfile() {
 
       if (response.status === 200) {
         localStorage.removeItem("token");
+        localStorage.removeItem("userId");
+        setIsAuthenticated(false);
         navigate("/signin");
       }
     } catch (error) {

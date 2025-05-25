@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import axios from "axios";
 import { useNavigate, NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Lock, Loader2, EyeIcon, EyeOff } from "lucide-react";
-
+import { AuthContext } from "../context/UserContext";
 export default function UserSignIn() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -17,7 +17,7 @@ export default function UserSignIn() {
     success: false,
     message: "",
   });
-
+  const { setIsAuthenticated } = useContext(AuthContext);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setCredentials((prev) => ({ ...prev, [name]: value }));
@@ -39,6 +39,7 @@ export default function UserSignIn() {
           success: true,
           message: "Welcome back! Redirecting to quiz section.",
         });
+        setIsAuthenticated(true);
         setTimeout(() => navigate("/quiz"), 2000);
       }
     } catch (error) {
@@ -79,7 +80,7 @@ export default function UserSignIn() {
             className="relative z-10"
           >
             <img
-              src="/assets/signin-illustration.png"
+              src="/assets/signIn.png"
               alt="Sign In Illustration"
               className="w-full max-w-md transform transition-transform duration-700 hover:scale-105"
             />

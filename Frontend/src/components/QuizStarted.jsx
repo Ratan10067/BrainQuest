@@ -2,6 +2,16 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/UserContext";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Clock,
+  ChevronLeft,
+  ChevronRight,
+  Save,
+  Bookmark,
+  XCircle,
+  Send,
+} from "lucide-react";
 import "../App.css";
 import axios from "axios";
 
@@ -244,122 +254,195 @@ export default function QuizStarted() {
     }
   };
   return (
-    <div className="min-h-screen p-8 bg-white flex">
+    <div className="min-h-screen bg-gradient-to-br from-[#1a1f37] to-[#2c3250] p-8">
       {showNavModal && (
         <WarningModal onConfirm={handleSubmit} onCancel={cancelNavigation} />
       )}
 
-      {/* Main Content */}
-      <div className="flex-1">
-        <div className="text-right mb-4 font-mono">
-          Time Left: {Math.floor(timeLeft / 60)}:
-          {String(timeLeft % 60).padStart(2, "0")}
-        </div>
+      <div className="max-w-7xl mx-auto flex gap-8">
+        {/* Main Content */}
+        <div className="flex-1 bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+          {/* Timer */}
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-white">
+              Question {current + 1} of {total}
+            </h2>
+            <div className="flex items-center gap-2 bg-[#2c3250] px-4 py-2 rounded-xl border border-white/10">
+              <Clock className="text-yellow-400" size={20} />
+              <span className="font-mono text-white">
+                {Math.floor(timeLeft / 60)}:
+                {String(timeLeft % 60).padStart(2, "0")}
+              </span>
+            </div>
+          </div>
 
-        <h2 className="text-xl font-semibold mb-2">
-          Question {current + 1} of {total}
-        </h2>
-        <div className="text-sm border-l pl-4 flex gap-4 mb-4">
-          <span className="text-green-600 font-medium">+4 correct</span>
-          <span className="text-red-600 font-medium">-1 wrong</span>
-        </div>
-        <div className="border rounded-lg p-4 mb-4 text-gray-800">
-          {questions[current]?.text || "Loading question..."}
-        </div>
+          {/* Score Info */}
+          <div className="flex gap-4 mb-6">
+            <div className="bg-green-500/10 text-green-400 px-4 py-2 rounded-lg border border-green-500/20">
+              +4 correct
+            </div>
+            <div className="bg-red-500/10 text-red-400 px-4 py-2 rounded-lg border border-red-500/20">
+              -1 wrong
+            </div>
+          </div>
 
-        <div className="space-y-3 mb-4">
-          {questions[current]?.options.map((opt, i) => (
-            <button
-              key={i}
-              onClick={() => setSelected({ number: i + 1, value: opt })}
-              className={`w-full text-left px-4 py-3 rounded-lg border cursor-pointer ${
-                selected?.value === opt
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-300"
-              } hover:border-blue-400`}
+          {/* Question */}
+          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 mb-6">
+            <p className="text-lg text-white">
+              {questions[current]?.text || "Loading question..."}
+            </p>
+          </div>
+
+          {/* Options */}
+          <div className="space-y-4 mb-6">
+            {questions[current]?.options.map((opt, i) => (
+              <motion.button
+                key={i}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                onClick={() => setSelected({ number: i + 1, value: opt })}
+                className={`w-full text-left px-6 py-4 rounded-xl backdrop-blur-sm transition-all ${
+                  selected?.value === opt
+                    ? "bg-yellow-400/20 border-2 border-yellow-400/50 text-white"
+                    : "bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10"
+                }`}
+              >
+                <span className="font-medium mr-3">{i + 1}.</span> {opt}
+              </motion.button>
+            ))}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-wrap gap-3">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleBack}
+              disabled={current === 0}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 text-white border border-white/10 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span className="font-medium mr-2">{i + 1}.</span> {opt}
-            </button>
-          ))}
+              <ChevronLeft size={18} />
+              Back
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleNext}
+              disabled={!selected}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-green-400 to-green-500 text-white hover:shadow-lg hover:shadow-green-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Save size={18} />
+              Save & Next
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleSaveMark}
+              disabled={!selected}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-400 to-purple-500 text-white hover:shadow-lg hover:shadow-purple-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Bookmark size={18} />
+              Save & Review
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleClear}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 text-white border border-white/10 hover:bg-white/10"
+            >
+              <XCircle size={18} />
+              Clear
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleWithoutNext}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 text-white border border-white/10 hover:bg-white/10"
+            >
+              <ChevronRight size={18} />
+              Next
+            </motion.button>
+          </div>
+
+          {/* Submit Button */}
+          <div className="mt-8 flex justify-end">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleSubmit}
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-medium hover:shadow-lg hover:shadow-orange-500/25"
+            >
+              <Send size={18} />
+              Submit Quiz
+            </motion.button>
+          </div>
         </div>
 
-        <div className="flex space-x-2 mb-4">
-          <button
-            onClick={handleBack}
-            disabled={current === 0}
-            className="bg-gray-300 text-gray-700 px-4 py-2 rounded cursor-pointer"
-          >
-            Back
-          </button>
-          <button
-            onClick={handleNext}
-            disabled={!selected}
-            className="bg-green-500 text-white px-4 py-2 rounded cursor-pointer"
-          >
-            Save & Next
-          </button>
-          <button
-            onClick={handleSaveMark}
-            disabled={!selected}
-            className="bg-purple-500 text-white px-4 py-2 rounded cursor-pointer"
-          >
-            Save & Review
-          </button>
-          <button
-            onClick={handleClear}
-            className="bg-gray-200 text-gray-700 px-4 py-2 rounded cursor-pointer"
-          >
-            Clear
-          </button>
-          <button
-            onClick={handleWithoutNext}
-            className="bg-gray-200 text-gray-700 px-4 py-2 rounded cursor-pointer"
-          >
-            Next
-          </button>
-        </div>
+        {/* Question Navigation Sidebar */}
+        <div className="w-64 flex flex-col gap-6">
+          {/* Question Grid */}
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+            <h3 className="text-white font-medium mb-4">Question Navigation</h3>
+            <div className="grid grid-cols-5 gap-2">
+              {Array.from({ length: total }).map((_, i) => {
+                const s = status[i] || "notVisited";
+                const bg =
+                  s === "notVisited"
+                    ? "bg-white/5 text-gray-400 border border-white/10"
+                    : s === "notAnswered"
+                    ? "bg-red-500/20 text-red-400 border-2 border-red-500/50"
+                    : s === "answered"
+                    ? "bg-green-500/20 text-green-400 border-2 border-green-500/50"
+                    : "bg-purple-500/20 text-purple-400 border-2 border-purple-500/50";
+                return (
+                  <motion.button
+                    key={i}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setCurrent(i)}
+                    className={`${bg} h-8 flex items-center justify-center rounded-lg font-medium hover:bg-white/10`}
+                  >
+                    {i + 1}
+                  </motion.button>
+                );
+              })}
+            </div>
+          </div>
 
-        <div className="flex justify-end">
-          <button
-            onClick={handleSubmit}
-            className="bg-green-600 text-white px-6 py-2 rounded cursor-pointer"
-          >
-            Submit Quiz
-          </button>
+          {/* Legend */}
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
+            <h3 className="text-white font-medium mb-4">Legend</h3>
+            <div className="space-y-3">
+              <Legend
+                color="bg-white/5 border border-white/10"
+                textColor="text-gray-400"
+                label="Not Visited"
+              />
+              <Legend
+                color="bg-red-500/20 border-2 border-red-500/50"
+                textColor="text-red-400"
+                label="Not Answered"
+              />
+              <Legend
+                color="bg-green-500/20 border-2 border-green-500/50"
+                textColor="text-green-400"
+                label="Answered"
+              />
+              <Legend
+                color="bg-purple-500/20 border-2 border-purple-500/50"
+                textColor="text-purple-400"
+                label="Marked for Review"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Sidebar */}
-      <aside className="w-48 ml-6">
-        <div className="grid grid-cols-5 gap-2">
-          {Array.from({ length: total }).map((_, i) => {
-            const s = status[i] || "notVisited";
-            const bg =
-              s === "notVisited"
-                ? "bg-gray-200"
-                : s === "notAnswered"
-                ? "bg-red-500 text-white"
-                : s === "answered"
-                ? "bg-green-500 text-white"
-                : "bg-purple-500 text-white";
-            return (
-              <div
-                key={i}
-                className={`${bg} h-8 flex items-center justify-center rounded cursor-pointer`}
-                onClick={() => setCurrent(i)}
-              >
-                {i + 1}
-              </div>
-            );
-          })}
-        </div>
-        <div className="mt-4 space-y-1 text-sm">
-          <Legend color="bg-gray-200" label="Not Visited" />
-          <Legend color="bg-red-500 text-white" label="Not Answered" />
-          <Legend color="bg-green-500 text-white" label="Answered" />
-          <Legend color="bg-purple-500 text-white" label="Marked for Review" />
-        </div>
-      </aside>
+      {/* Modals */}
       {showSubmitModal && (
         <SubmitConfirmationModal
           onConfirm={confirmSubmit}
@@ -367,9 +450,10 @@ export default function QuizStarted() {
           answers={answers}
           questions={questions}
           status={status}
-          timeUp={timeLeft <= 0} // Pass the timeUp prop
+          timeUp={timeLeft <= 0}
         />
       )}
+
       {showSuccess && (
         <SuccessAnimation
           onComplete={() =>
@@ -381,11 +465,12 @@ export default function QuizStarted() {
   );
 }
 
-function Legend({ color, label }) {
+// Update the Legend component
+function Legend({ color, textColor, label }) {
   return (
-    <div className="flex items-center">
-      <div className={`${color} w-4 h-4 mr-2 rounded`} />
-      <span>{label}</span>
+    <div className="flex items-center gap-3">
+      <div className={`${color} w-6 h-6 rounded-lg`} />
+      <span className={`${textColor}`}>{label}</span>
     </div>
   );
 }

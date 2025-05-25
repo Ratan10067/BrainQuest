@@ -20,6 +20,20 @@ const mockLeaderboardData = [
     ],
   },
   {
+    subject: "Mathematics",
+    leaders: [
+      { name: "John Doe", score: 980, attempts: 15 },
+      { name: "Alice Smith", score: 945, attempts: 12 },
+      { name: "Bob Johnson", score: 920, attempts: 10 },
+      { name: "Emma Wilson", score: 890, attempts: 8 },
+      { name: "Mike Brown", score: 875, attempts: 7 },
+      { name: "Mike Brown", score: 875, attempts: 7 },
+      { name: "Mike Brown", score: 875, attempts: 7 },
+      { name: "Mike Brown", score: 875, attempts: 7 },
+      { name: "Mike Brown", score: 875, attempts: 7 },
+    ],
+  },
+  {
     subject: "Science",
     leaders: [
       { name: "Emily Taylor", score: 990, attempts: 20 },
