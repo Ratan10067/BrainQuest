@@ -7,6 +7,8 @@ const {
   logout,
   getProfile,
   updateProfile,
+  sendOtp,
+  verifyOtp,
 } = require("../controllers/user.controller");
 const { authUser } = require("../middlewares/auth.middlewares");
 router.post(
@@ -19,7 +21,8 @@ router.post(
   ],
   registerUser
 );
-
+router.post("/send-otp", sendOtp);
+router.post("/verify-otp", verifyOtp);
 router.post(
   "/user-login",
   [

@@ -301,7 +301,7 @@ export default function QuizStarted() {
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}
                 onClick={() => setSelected({ number: i + 1, value: opt })}
-                className={`w-full text-left px-6 py-4 rounded-xl backdrop-blur-sm transition-all ${
+                className={`w-full text-left px-6 py-4 rounded-xl backdrop-blur-sm transition-all cursor-pointer ${
                   selected?.value === opt
                     ? "bg-yellow-400/20 border-2 border-yellow-400/50 text-white"
                     : "bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10"
@@ -330,7 +330,7 @@ export default function QuizStarted() {
               whileTap={{ scale: 0.98 }}
               onClick={handleNext}
               disabled={!selected}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-green-400 to-green-500 text-white hover:shadow-lg hover:shadow-green-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-green-400 to-green-500 text-white hover:shadow-lg hover:shadow-green-500/25 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               <Save size={18} />
               Save & Next
@@ -341,7 +341,7 @@ export default function QuizStarted() {
               whileTap={{ scale: 0.98 }}
               onClick={handleSaveMark}
               disabled={!selected}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-400 to-purple-500 text-white hover:shadow-lg hover:shadow-purple-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-400 to-purple-500 text-white hover:shadow-lg hover:shadow-purple-500/25 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               <Bookmark size={18} />
               Save & Review
@@ -351,7 +351,7 @@ export default function QuizStarted() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleClear}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 text-white border border-white/10 hover:bg-white/10"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 text-white border border-white/10 hover:bg-white/10 cursor-pointer"
             >
               <XCircle size={18} />
               Clear
@@ -361,7 +361,7 @@ export default function QuizStarted() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleWithoutNext}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 text-white border border-white/10 hover:bg-white/10"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 text-white border border-white/10 hover:bg-white/10 cursor-pointer"
             >
               <ChevronRight size={18} />
               Next
@@ -374,7 +374,7 @@ export default function QuizStarted() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleSubmit}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-medium hover:shadow-lg hover:shadow-orange-500/25"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-medium hover:shadow-lg hover:shadow-orange-500/25 cursor-pointer"
             >
               <Send size={18} />
               Submit Quiz
@@ -404,7 +404,7 @@ export default function QuizStarted() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setCurrent(i)}
-                    className={`${bg} h-8 flex items-center justify-center rounded-lg font-medium hover:bg-white/10`}
+                    className={`${bg} cursor-pointer h-8 flex items-center justify-center rounded-lg font-medium hover:bg-white/10`}
                   >
                     {i + 1}
                   </motion.button>

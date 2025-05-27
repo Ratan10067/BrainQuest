@@ -162,7 +162,7 @@ export default function QuizSection() {
             onClick={() => setIsModalOpen(true)}
             className="px-6 py-3 bg-gradient-to-r from-yellow-400 to-orange-500 
                      text-white font-semibold rounded-xl flex items-center gap-2 
-                     hover:shadow-lg hover:shadow-yellow-500/25 transition-all"
+                     hover:shadow-lg hover:shadow-yellow-500/25 transition-all cursor-pointer"
           >
             <Brain className="w-5 h-5" />
             Start New Quiz
@@ -207,7 +207,7 @@ export default function QuizSection() {
                     onClick={() => navigate(`/results/${quiz._id}`)}
                     className="w-full py-2 bg-white/10 text-white rounded-xl 
                            hover:bg-white/20 transition-all flex items-center 
-                           justify-center gap-2"
+                           justify-center gap-2  cursor-pointer"
                   >
                     <Award className="w-4 h-4" />
                     View Results
@@ -300,7 +300,7 @@ export default function QuizSection() {
                         setSelectedQuiz(quiz.id);
                         setTitleOfTheQuiz(quiz.title);
                       }}
-                      className={`p-6 rounded-xl border transition-all ${
+                      className={`p-6 rounded-xl border transition-all cursor-pointer ${
                         selectedQuiz === quiz.id
                           ? "border-yellow-400/50 bg-white/10"
                           : "border-white/10 hover:border-white/20"
@@ -327,7 +327,7 @@ export default function QuizSection() {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setSelectedDifficulty(level)}
-                      className={`px-6 py-2 rounded-xl font-semibold transition-all ${
+                      className={`px-6 py-2 rounded-xl font-semibold transition-all cursor-pointer ${
                         selectedDifficulty === level
                           ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white"
                           : "bg-white/10 text-white hover:bg-white/20"
@@ -346,7 +346,7 @@ export default function QuizSection() {
                   onClick={handleStart}
                   disabled={!selectedQuiz || !selectedDifficulty}
                   className={`w-full py-3 rounded-xl font-semibold transition-all
-                           flex items-center justify-center gap-2 ${
+                           flex items-center justify-center gap-2 cursor-pointer ${
                              selectedQuiz && selectedDifficulty
                                ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white"
                                : "bg-white/10 text-gray-400 cursor-not-allowed"

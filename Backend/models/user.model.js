@@ -45,9 +45,36 @@ const userSchema = new mongoose.Schema(
         completedAt: Date,
       },
     ],
+    otp: {
+      code: {
+        type: String,
+        default: null,
+      },
+      expiry: {
+        type: Date,
+        default: null,
+      },
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
+userSchema.methods.clearOTP = async function () {
+  this.otp.code = null;
+  this.otp.expiry = null;
+  await this.save();
+};
+
+// Add method to set OTP
+userSchema.methods.setOTP = async function (otp) {
+  this.otp.code = otp;
+  this.otp.expiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes from now
+  await this.save();
+};
+
 
 userSchema.methods.generateAuthToken = async function () {
   const user = this;
