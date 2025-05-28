@@ -3,6 +3,16 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
+import { ClipboardCheck } from "lucide-react";
+import {
+  Clock,
+  Timer,
+  Target,
+  Award,
+  CheckCircle2,
+  XCircle,
+  HelpCircle,
+} from "lucide-react";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -20,87 +30,103 @@ function StatCard({ title, value, bgColor, icon }) {
   );
 }
 
-function QuestionCard({ question, userResponse, isCorrect, index }) {
-  if (!question) return null;
 
+function QuestionCard({
+  question,
+  userResponse,
+  correctOption,
+  isCorrect,
+  index,
+}) {
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
+    <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden">
       <div
         className={`p-6 ${
           isCorrect
-            ? "bg-gradient-to-r from-green-50 to-green-100"
+            ? "bg-[#2e384c]"
             : userResponse
-            ? "bg-gradient-to-r from-red-50 to-red-100"
-            : "bg-gradient-to-r from-gray-50 to-gray-100"
+            ? "bg-[#2e384c]"
+            : "bg-white/5"
         }`}
       >
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center">
-            <span className="w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center mr-3 text-gray-700 font-semibold">
-              {index + 1}
-            </span>
-            <h3 className="text-lg font-semibold text-gray-800">
-              Question {index + 1}
-            </h3>
-          </div>
+          <h3 className="text-lg font-semibold ">
+            Question {index + 1}
+          </h3>
           <span
             className={`px-4 py-1.5 rounded-full text-sm font-medium ${
               isCorrect
-                ? "bg-green-200 text-green-800"
+                ? "bg-green-400/10 text-[#61b387]"
                 : userResponse
-                ? "bg-red-200 text-red-800"
-                : "bg-gray-200 text-gray-800"
+                ? "bg-red-400/10 text-red-400"
+                : "bg-gray-400/10 text-gray-400"
             }`}
           >
             {isCorrect
               ? "✓ Correct"
               : userResponse
               ? "✗ Incorrect"
-              : "○ Not Attempted"}
+              : "Not Attempted"}
           </span>
         </div>
-        <p className="text-gray-800 font-medium mb-4">{question.text}</p>
-        <div className="space-y-2">
-          {question.options?.map((opt, i) => (
-            <div
-              key={i}
-              className={`p-4 rounded-lg transition-all duration-200 flex items-center ${
-                opt === question.correctOption
-                  ? "bg-green-100 border-2 border-green-300 text-green-800"
-                  : opt === userResponse
-                  ? "bg-red-100 border-2 border-red-300 text-red-800"
-                  : "bg-white border-2 border-gray-200 text-gray-700"
-              } ${
-                opt === userResponse
-                  ? "shadow-md transform hover:-translate-y-1"
-                  : "hover:bg-gray-50"
-              }`}
-            >
-              <span
-                className={`w-6 h-6 rounded-full flex items-center justify-center text-sm mr-3 ${
-                  opt === question.correctOption
-                    ? "bg-green-200"
-                    : opt === userResponse
-                    ? "bg-red-200"
-                    : "bg-gray-200"
+
+        <p className="text-gray-300 font-medium mb-4">{question.text}</p>
+
+        <div className="space-y-3">
+          {question.options.map((option, i) => {
+            const optionLetter = String.fromCharCode(65 + i);
+            const isCorrectOption = optionLetter === correctOption;
+            const isSelectedOption = userResponse?.number === optionLetter;
+
+            return (
+              <div
+                key={i}
+                className={`p-4 rounded-lg border ${
+                  isCorrectOption
+                    ? "bg-green-400/10 border-green-600"
+                    : isSelectedOption && !isCorrect
+                    ? "bg-red-400/10 border-red-400/50"
+                    : "bg-white/5 border-white/10"
                 }`}
               >
-                {String.fromCharCode(65 + i)}
-              </span>
-              <span className="flex-1">{opt}</span>
-              {opt === question.correctOption && (
-                <span className="text-green-600 ml-2">✓</span>
-              )}
-              {opt === userResponse && opt !== question.correctOption && (
-                <span className="text-red-600 ml-2">✗</span>
-              )}
-            </div>
-          ))}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <span
+                      className={`w-8 h-8 flex items-center justify-center rounded-full ${
+                        isCorrectOption
+                          ? "bg-green-600 text-green-700"
+                          : isSelectedOption && !isCorrect
+                          ? "bg-red-300 text-red-400"
+                          : "bg-white/10 text-white"
+                      }`}
+                    >
+                      {optionLetter}
+                    </span>
+                    <span className="text-gray-300">{option}</span>
+                  </div>
+                  {(isSelectedOption || isCorrectOption) && (
+                    <span
+                      className={`text-sm font-medium ${
+                        isCorrectOption ? "text-green-400" : "text-red-400"
+                      }`}
+                    >
+                      {isCorrectOption
+                        ? isSelectedOption
+                          ? "Correct Answer ✓"
+                          : "Correct Answer"
+                        : "Your Answer ✗"}
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
   );
 }
+
 
 export default function Result() {
   const { quizId } = useParams();
@@ -121,6 +147,7 @@ export default function Result() {
           }
         );
         setResult(response.data);
+        console.log("result data", response.data);
       } catch (err) {
         setError(err.response?.data?.error || "Failed to fetch result");
       } finally {
@@ -137,23 +164,6 @@ export default function Result() {
       </div>
     );
   }
-
-  // if (error) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-  //       <div className="bg-white p-8 rounded-lg shadow-lg text-center">
-  //         <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
-  //         <p className="text-gray-700">{error}</p>
-  //         <button
-  //           onClick={() => navigate("/quiz")}
-  //           className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-  //         >
-  //           Back to Quiz Section
-  //         </button>
-  //       </div>
-  //     </div>
-  //   );
-  // }
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
@@ -225,21 +235,6 @@ export default function Result() {
   const correctAnswers = quiz.questions.filter((q) => q.isCorrect).length;
   const accuracy = ((correctAnswers / quiz.totalQuestions) * 100).toFixed(2);
 
-  // const chartData = {
-  //   labels: ["Correct", "Incorrect", "Not Attempted"],
-  //   datasets: [
-  //     {
-  //       data: [
-  //         correctAnswers,
-  //         quiz.questions.filter((q) => !q.isCorrect && q.userResponse).length,
-  //         quiz.questions.filter((q) => !q.userResponse).length,
-  //       ],
-  //       backgroundColor: ["#4ade80", "#f87171", "#d1d5db"],
-  //       borderColor: ["#22c55e", "#ef4444", "#9ca3af"],
-  //       borderWidth: 1,
-  //     },
-  //   ],
-  // };
   const chartData = {
     labels: ["Correct", "Incorrect", "Not Attempted"],
     datasets: [
@@ -265,22 +260,6 @@ export default function Result() {
     ],
   };
 
-  // const chartOptions = {
-  //   plugins: {
-  //     legend: {
-  //       position: "bottom",
-  //       labels: {
-  //         padding: 20,
-  //         font: { size: 14 },
-  //       },
-  //     },
-  //   },
-  //   cutout: "70%",
-  //   animation: {
-  //     animateScale: true,
-  //     animateRotate: true,
-  //   },
-  // };
   const chartOptions = {
     plugins: {
       legend: {
@@ -316,7 +295,7 @@ export default function Result() {
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
-        <div className="bg-white rounded-xl shadow-lg p-8 mb-6 transform hover:shadow-xl transition-all duration-300">
+        {/* <div className="bg-white rounded-xl shadow-lg p-8 mb-6 transform hover:shadow-xl transition-all duration-300">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-3xl font-bold text-gray-800">Quiz Result</h1>
             <div className="px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
@@ -373,10 +352,35 @@ export default function Result() {
               <span>Final Score: {quiz.score} points</span>
             </div>
           </div>
+        </div> */}
+        <div className="bg-white/10 backdrop-blur-xl rounded-xl shadow-lg p-8 mb-6 border border-white/10">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-3xl font-bold ">
+              {result.quiz.Title}
+            </h1>
+            <div className="px-4 py-2 bg-yellow-400/10 text-yellow-700 rounded-full text-sm font-medium">
+              {result.quiz.subject} - {result.quiz.difficulty}
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-gray-300">
+            <div className="flex items-center">
+              <Clock className="w-5 h-5 mr-2 text-yellow-400" />
+              <span>
+                Completed: {new Date(result.quiz.endTime).toLocaleString()}
+              </span>
+            </div>
+            <div className="flex items-center">
+              <Timer className="w-5 h-5 mr-2 text-yellow-400" />
+              <span>Duration: {result.timeStats.timeTaken}</span>
+            </div>
+            <div className="flex items-center">
+              <Target className="w-5 h-5 mr-2 text-yellow-400" />
+              <span>Final Score: {result.score} points</span>
+            </div>
+          </div>
         </div>
-
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <StatCard
             title="Total Questions"
             value={quiz.totalQuestions}
@@ -457,8 +461,33 @@ export default function Result() {
               </svg>
             }
           />
+        </div> */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <StatCard
+            title="Total Questions"
+            value={result.quiz.totalQuestions}
+            bgColor="bg-[#2c3250]"
+            icon={<Award className="w-6 h-6 text-yellow-400" />}
+          />
+          <StatCard
+            title="Correct Answers"
+            value={result.statistics.correctAnswers}
+            bgColor="bg-[#2c3250]"
+            icon={<CheckCircle2 className="w-6 h-6 text-green-400" />}
+          />
+          <StatCard
+            title="Accuracy"
+            value={`${result.statistics.accuracy}%`}
+            bgColor="bg-[#2c3250]"
+            icon={<Target className="w-6 h-6 text-yellow-400" />}
+          />
+          <StatCard
+            title="Total Score"
+            value={result.score}
+            bgColor="bg-[#2c3250]"
+            icon={<Award className="w-6 h-6 text-yellow-400" />}
+          />
         </div>
-
         {/* Chart and Questions Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="bg-white rounded-xl shadow-lg p-8 lg:col-span-1 transform hover:shadow-2xl transition-all duration-300 h-10%">
@@ -555,16 +584,38 @@ export default function Result() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6 lg:col-span-2">
-            <h2 className="text-xl font-semibold mb-6">Question Details</h2>
+          {/* <div className="bg-white rounded-xl shadow-lg p-6 lg:col-span-2">
+            <h2 className="text-xl font-semibold mb-6 flex items-center">
+              <ClipboardCheck className="w-6 h-6 mr-2 text-blue-500" />
+              Question Details
+            </h2>
             <div className="space-y-6">
-              {quiz.questions.map((q, idx) => (
+              {result.quiz.questions.map((q, idx) => (
+                <QuestionCard
+                  key={idx}
+                  question={q.questionId}
+                  userResponse={q.userResponse}
+                  correctOption={q.questionId.correctOption}
+                  index={idx}
+                />
+              ))}
+            </div>
+          </div>
+        </div> */}
+          <div className="bg-white/10 backdrop-blur-xl rounded-xl shadow-lg p-6 lg:col-span-2 border border-white/10">
+            <h2 className="text-xl font-semibold mb-6  flex items-center">
+              <ClipboardCheck className="w-6 h-6 mr-2 text-yellow-400" />
+              Question Details
+            </h2>
+            <div className="space-y-6">
+              {result.quiz.questions.map((q, idx) => (
                 <QuestionCard
                   key={idx}
                   question={q.questionId}
                   userResponse={q.userResponse}
                   isCorrect={q.isCorrect}
                   index={idx}
+                  correctOption={q.questionId.correctOption}
                 />
               ))}
             </div>

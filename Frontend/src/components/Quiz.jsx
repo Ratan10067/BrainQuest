@@ -26,7 +26,7 @@ export default function QuizSection() {
   const { questions, setQuestions } = useContext(AuthContext);
   const [titleOfTheQuiz, setTitleOfTheQuiz] = useState("");
   const [pastQuizzes, setPastQuizzes] = useState([]);
-
+  const [loading, setLoading] = useState(true);
   const newQuizzes = [
     {
       id: 1,
@@ -61,6 +61,7 @@ export default function QuizSection() {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         if (response.status === 200) {
+          setLoading(false);
           setPastQuizzes(response.data);
         }
       } catch (error) {
@@ -170,7 +171,30 @@ export default function QuizSection() {
         </div>
 
         {/* Past Quizzes Grid */}
-        {pastQuizzes.length > 0 ? (
+        {loading ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="bg-[#2c3250]/80 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-2xl"
+          >
+            <div className="flex flex-col items-center space-y-6">
+              <div className="relative">
+                <div className="w-20 h-20 rounded-full border-4 border-yellow-400/20 border-t-yellow-400 animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full animate-pulse" />
+                </div>
+              </div>
+              <div className="text-center">
+                <h3 className="text-xl font-bold mb-2 bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+                  Loading Your Quizzes
+                </h3>
+                <p className="text-gray-400 text-sm">
+                  Please wait while we fetch your quiz history
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        ) : pastQuizzes.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {pastQuizzes.map((quiz) => (
               <motion.div

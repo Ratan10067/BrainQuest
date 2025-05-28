@@ -28,5 +28,6 @@ const questionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Question = mongoose.model("question", questionSchema);
+// Change model name to uppercase 'Question'
+const Question = mongoose.model("Question", questionSchema);
 module.exports = Question;

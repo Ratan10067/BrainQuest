@@ -63,7 +63,7 @@ export default function QuizStarted() {
   const navigate = useNavigate();
   const { questions, setPastQuizzes, pastQuizzes } = useContext(AuthContext);
   const total = questions.length || 0;
-
+  const [submitting, setSubmitting] = useState(false);
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState(null);
   const [status, setStatus] = useState([]);
@@ -230,6 +230,8 @@ export default function QuizStarted() {
         endTime: new Date(),
         answers: answers,
       };
+      setShowSubmitModal(false);
+      setSubmitting(true); // Add this state at the top: const [submitting, setSubmitting] = useState(false);
 
       const response = await axios.post(
         `http://localhost:4000/quiz/submit`,
@@ -253,6 +255,92 @@ export default function QuizStarted() {
       console.error("Error submitting quiz:", error);
     }
   };
+  // const LoadingDots = () => {
+  //   const [dots, setDots] = useState("");
+
+  //   useEffect(() => {
+  //     const interval = setInterval(() => {
+  //       setDots((prev) => (prev.length >= 3 ? "" : prev + "."));
+  //     }, 500);
+  //     return () => clearInterval(interval);
+  //   }, []);
+
+  //   return (
+  //     <div className="fixed inset-0 backdrop-blur-sm bg-black/50 flex items-center justify-center z-50">
+  //       <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 flex flex-col items-center">
+  //         <div className="animate-spin mb-4">
+  //           <svg className="w-12 h-12 text-yellow-400" viewBox="0 0 24 24">
+  //             <circle
+  //               className="opacity-25"
+  //               cx="12"
+  //               cy="12"
+  //               r="10"
+  //               stroke="currentColor"
+  //               strokeWidth="4"
+  //               fill="none"
+  //             />
+  //             <path
+  //               className="opacity-75"
+  //               fill="currentColor"
+  //               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+  //             />
+  //           </svg>
+  //         </div>
+  //         <p className="text-xl text-white font-medium">
+  //           Submitting Quiz{dots}
+  //         </p>
+  //       </div>
+  //     </div>
+  //   );
+  // };
+  // Replace the existing LoadingDots component with this enhanced version
+  const LoadingDots = () => {
+    const [progress, setProgress] = useState(0);
+
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setProgress((prev) => (prev >= 100 ? 0 : prev + 1));
+      }, 30);
+      return () => clearInterval(interval);
+    }, []);
+
+    return (
+      <div className="fixed inset-0 backdrop-blur-lg bg-[#1a1f37]/80 flex items-center justify-center z-50">
+        <div className="bg-[#2c3250]/80 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-2xl">
+          <div className="flex flex-col items-center space-y-6">
+            {/* Spinning ring with pulsing center */}
+            <div className="relative">
+              <div className="w-20 h-20 rounded-full border-4 border-yellow-400/20 border-t-yellow-400 animate-spin" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full animate-pulse" />
+              </div>
+            </div>
+
+            {/* Progress bar */}
+            <div className="w-48 h-1.5 bg-white/10 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-yellow-400 to-orange-500 transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+
+            {/* Text with gradient */}
+            <div className="text-center">
+              <h3 className="text-xl font-bold mb-2 bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+                Submitting Quiz
+              </h3>
+              <p className="text-gray-400 text-sm">
+                Please wait while we evaluate your answers
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Add these animations to your existing CSS file
+  // filepath: /Users/pawan/Desktop/BrainQuest/Frontend/src/App.css
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1a1f37] to-[#2c3250] p-8">
       {showNavModal && (
@@ -300,14 +388,22 @@ export default function QuizStarted() {
                 key={i}
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}
-                onClick={() => setSelected({ number: i + 1, value: opt })}
+                onClick={() =>
+                  setSelected({
+                    number: String.fromCharCode(65 + i),
+                    value: opt,
+                  })
+                }
                 className={`w-full text-left px-6 py-4 rounded-xl backdrop-blur-sm transition-all cursor-pointer ${
                   selected?.value === opt
                     ? "bg-yellow-400/20 border-2 border-yellow-400/50 text-white"
                     : "bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10"
                 }`}
               >
-                <span className="font-medium mr-3">{i + 1}.</span> {opt}
+                <span className="font-medium mr-3">
+                  {String.fromCharCode(65 + i)}.
+                </span>{" "}
+                {opt}
               </motion.button>
             ))}
           </div>
@@ -453,7 +549,7 @@ export default function QuizStarted() {
           timeUp={timeLeft <= 0}
         />
       )}
-
+      {submitting && <LoadingDots />}
       {showSuccess && (
         <SuccessAnimation
           onComplete={() =>

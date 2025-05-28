@@ -14,7 +14,7 @@ const quizSchema = new mongoose.Schema({
         required: true,
       },
       userResponse: {
-        type: String, // User's selected option
+        type: mongoose.Schema.Types.Mixed, // User's selected option
         default: null,
       },
       isCorrect: {
@@ -47,6 +47,14 @@ const quizSchema = new mongoose.Schema({
   totalQuestions: {
     type: Number,
     default: 0, // Total number of questions in this quiz
+  },
+  subject: {
+    type: String,
+    required: true,
+  },
+  difficulty: {
+    type: String,
+    required: true,
   },
 });
 

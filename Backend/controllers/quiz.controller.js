@@ -157,67 +157,205 @@ module.exports.startQuiz = async (req, res) => {
   }
 };
 
+// module.exports.submitQuiz = async (req, res) => {
+//   console.log("Submit Quiz me aaya hhu", req.body);
+//   const { userId, quizId, answers,endTime } = req.body;
+//   try {
+//     const quiz = await Quiz.findOne({ userId, status: "Started", _id: quizId });
+//     const user = await User.findById(userId);
+//     console.log("Quiz found:", quiz);
+//     if (!quiz) {
+//       return res.status(404).json({ error: "Quiz not found." });
+//     }
+//     const questions = quiz.questions;
+//     let score = 0;
+//     console.log("Questions in quiz:", questions);
+//     const results = questions.map((q, index) => {
+//       const userResponse = answers[index];
+//       const isCorrect = userResponse === q.questionId.correctOption;
+//       if (isCorrect) score += 4;
+//       else score -= 1;
+//       return {
+//         questionId: q.questionId,
+//         userResponse,
+//         isCorrect,
+//       };
+//     });
+//     quiz.questions = results;
+//     quiz.endTime = endTime;
+//     quiz.score = score;
+//     quiz.status = "Completed";
+//     const result = new Result({
+//       userId,
+//       quizId: quiz._id,
+//       score,
+//       totalQuestions: quiz.totalQuestions,
+//       subject: quiz.subject,
+//       difficulty: quiz.difficulty,
+//       startTime: quiz.startTime,
+//       endTime: quiz.endTime,
+//       timeTaken: Math.floor((quiz.endTime - quiz.startTime) / 1000), // Time taken in seconds
+//     });
+//     user.quizzesTaken += 1;
+//     user.totalScore += score;
+//     user.progressHistory.push({
+//       quizId: quiz._id,
+//       completedAt: new Date(),
+//     });
+//     await result.save();
+//     await quiz.save();
+//     await user.save();
+//     console.log("Quiz submit me aaya hu", result);
+//     res.status(200).json({
+//       message: "Quiz submitted successfully.",
+//       score,
+//       totalQuestions: quiz.totalQuestions,
+//       result,
+//     });
+//   } catch (error) {
+//     console.error("Error submitting quiz:", error);
+//     res.status(500).json({ error: "Failed to submit quiz." });
+//   }
+// };
 module.exports.submitQuiz = async (req, res) => {
-  console.log("Submit Quiz me aaya hhu", req.body);
-  const { userId, quizId, answers } = req.body;
   try {
-    console.log(userId, quizId, answers);
-    const quiz = await Quiz.findOne({ userId, status: "Started", _id: quizId });
-    const user = await User.findById(userId);
-    console.log("Quiz found:", quiz);
+    const { userId, quizId, answers, endTime } = req.body;
+
+    // Find the quiz and ensure it exists and belongs to the user
+    console.log("Submitting quiz for user:", userId, "Quiz ID:", quizId);
+    console.log("Answers provided:", answers);
+
+    const quiz = await Quiz.findOne({
+      _id: quizId,
+      userId,
+      status: "Started",
+    }).populate("questions.questionId");
+
     if (!quiz) {
-      return res.status(404).json({ error: "Quiz not found." });
+      return res.status(404).json({
+        success: false,
+        message: "Quiz not found or already submitted.",
+      });
     }
-    const questions = quiz.questions;
+    console.log("Quiz found yessssss:", quiz);
+    // Get the user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    // Calculate score and evaluate answers
     let score = 0;
-    // const results = questions.map((q, index) => {
-    //   const userResponse = answers[index];
-    //   const isCorrect = userResponse === q.questionId.correctOption;
-    //   if (isCorrect) score += 4;
-    //   else score -= 1;
-    //   return {
-    //     questionId: q.questionId,
-    //     userResponse,
-    //     isCorrect,
-    //   };
-    // });
-    // quiz.questions = results;
-    quiz.endTime = new Date();
+    const evaluatedQuestions = quiz.questions.map((question, index) => {
+      const userAnswer = answers[index]?.number || null;
+      const correctAnswer = question.questionId.correctOption;
+      console.log("correctAnswer:", correctAnswer);
+      console.log("userAnswer:", userAnswer);
+      const isCorrect = userAnswer === correctAnswer;
+
+      if (isCorrect) {
+        score += 4;
+      } else if (userAnswer) {
+        score -= 1;
+      }
+
+      return {
+        questionId: question.questionId._id,
+        selectedOption: userAnswer?.value || null,
+        correctOption: correctAnswer,
+        isCorrect: isCorrect,
+      };
+    });
+    console.log("Evaluated questions:", evaluatedQuestions);
+    // Calculate statistics
+    const totalQuestions = quiz.questions.length;
+    const attemptedQuestions = answers.filter(
+      (answer) => answer?.value != null
+    ).length;
+    const correctAnswers = evaluatedQuestions.filter((q) => q.isCorrect).length;
+    const incorrectAnswers = attemptedQuestions - correctAnswers;
+    const skippedQuestions = totalQuestions - attemptedQuestions;
+    const accuracy = (correctAnswers / totalQuestions) * 100;
+
+    // Update quiz with results
+    quiz.questions = evaluatedQuestions;
+    quiz.endTime = endTime;
     quiz.score = score;
     quiz.status = "Completed";
+    await quiz.save();
+
+    // Create result document with all required fields
     const result = new Result({
       userId,
       quizId: quiz._id,
       score,
-      totalQuestions: quiz.totalQuestions,
-      subject: quiz.subject,
-      difficulty: quiz.difficulty,
-      startTime: quiz.startTime,
-      endTime: quiz.endTime,
-      timeTaken: Math.floor((quiz.endTime - quiz.startTime) / 1000), // Time taken in seconds
+      totalQuestions,
+      subject: quiz.subject || "Python", // Make sure subject is passed
+      difficulty: quiz.difficulty || "Medium", // Make sure difficulty is passed
+      questions: evaluatedQuestions,
+      timeStats: {
+        startTime: quiz.startTime,
+        endTime: endTime,
+        timeTaken: Math.floor(
+          (new Date(endTime) - new Date(quiz.startTime)) / 1000
+        ),
+      },
+      statistics: {
+        attemptedQuestions,
+        correctAnswers,
+        incorrectAnswers,
+        accuracy: parseFloat(accuracy.toFixed(2)),
+        skippedQuestions,
+      },
+      date: new Date(), // Add current date
     });
+
+    await result.save();
+
+    // Update user statistics
     user.quizzesTaken += 1;
     user.totalScore += score;
     user.progressHistory.push({
       quizId: quiz._id,
-      completedAt: new Date(),
-    });
-    await result.save();
-    await quiz.save();
-    await user.save();
-    console.log("Quiz submit me aaya hu", result);
-    res.status(200).json({
-      message: "Quiz submitted successfully.",
       score,
-      totalQuestions: quiz.totalQuestions,
-      result,
+      completedAt: new Date(),
+      accuracy: parseFloat(accuracy.toFixed(2)),
+    });
+    await user.save();
+
+    // Send response
+    return res.status(200).json({
+      success: true,
+      message: "Quiz submitted successfully",
+      data: {
+        quizId: quiz._id,
+        score,
+        totalQuestions,
+        statistics: {
+          attemptedQuestions,
+          correctAnswers,
+          incorrectAnswers,
+          accuracy: accuracy.toFixed(2),
+          skippedQuestions,
+          timeTaken: `${Math.floor(result.timeStats.timeTaken / 60)}m ${
+            result.timeStats.timeTaken % 60
+          }s`,
+        },
+        result: result._id,
+      },
     });
   } catch (error) {
     console.error("Error submitting quiz:", error);
-    res.status(500).json({ error: "Failed to submit quiz." });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to submit quiz",
+      error: error.message,
+    });
   }
 };
-
 module.exports.getPastQuizzes = async (req, res) => {
   const userId = req.query.userId;
   if (!userId) {
@@ -233,14 +371,80 @@ module.exports.getPastQuizzes = async (req, res) => {
   }
 };
 
+// module.exports.getQuizResult = async (req, res) => {
+//   try {
+//     const { quizId } = req.params;
+//     console.log("Fetching quiz result for quizId:", quizId);
+
+//     const quiz = await Quiz.findById(quizId).populate({
+//       path: "questions.questionId",
+//       model: Question, // Use the actual model instead of string
+//       select: "text options correctOption",
+//     });
+
+//     if (!quiz) {
+//       return res.status(404).json({ error: "Quiz not found" });
+//     }
+
+//     const result = await Result.findOne({ quizId });
+
+//     // Calculate time taken
+//     const timeTaken = Math.floor(
+//       (new Date(quiz.endTime) - new Date(quiz.startTime)) / 1000
+//     );
+//     const minutes = Math.floor(timeTaken / 60);
+//     const seconds = timeTaken % 60;
+
+//     // Transform questions data
+//     const processedQuestions = quiz.questions.map((q) => ({
+//       questionId: {
+//         text: q.questionId.text,
+//         options: q.questionId.options,
+//         correctOption: q.questionId.correctOption,
+//       },
+//       userResponse: q.userResponse,
+//       isCorrect: q.userResponse === q.questionId.correctOption,
+//     }));
+
+//     // Create response object
+//     const quizResponse = {
+//       ...quiz.toObject(),
+//       questions: processedQuestions,
+//     };
+
+//     res.status(200).json({
+//       quiz: quizResponse,
+//       result,
+//       timeTaken: `${minutes}m ${seconds}s`,
+//       user: quiz.userId,
+//     });
+//   } catch (error) {
+//     console.error("Error in getQuizResult:", error);
+//     res.status(500).json({
+//       error: "Failed to fetch quiz result",
+//       details: error.message,
+//     });
+//   }
+// };
+
 module.exports.getQuizResult = async (req, res) => {
   try {
     const { quizId } = req.params;
     console.log("Fetching quiz result for quizId:", quizId);
 
+    // Find the result with populated questions
+    const result = await Result.findOne({ quizId }).populate({
+      path: "questions.questionId",
+      select: "text options correctOption",
+    });
+
+    if (!result) {
+      return res.status(404).json({ error: "Result not found" });
+    }
+
+    // Find the related quiz
     const quiz = await Quiz.findById(quizId).populate({
       path: "questions.questionId",
-      model: Question, // Use the actual model instead of string
       select: "text options correctOption",
     });
 
@@ -248,38 +452,49 @@ module.exports.getQuizResult = async (req, res) => {
       return res.status(404).json({ error: "Quiz not found" });
     }
 
-    const result = await Result.findOne({ quizId });
-
-    // Calculate time taken
-    const timeTaken = Math.floor(
-      (new Date(quiz.endTime) - new Date(quiz.startTime)) / 1000
-    );
-    const minutes = Math.floor(timeTaken / 60);
-    const seconds = timeTaken % 60;
-
-    // Transform questions data
-    const processedQuestions = quiz.questions.map((q) => ({
-      questionId: {
-        text: q.questionId.text,
-        options: q.questionId.options,
-        correctOption: q.questionId.correctOption,
+    // Create the response object with all necessary data
+    const response = {
+      quiz: {
+        _id: quiz._id,
+        Title: quiz.Title || "Quiz",
+        subject: quiz.subject,
+        difficulty: quiz.difficulty,
+        totalQuestions: quiz.totalQuestions,
+        score: result.score,
+        startTime: quiz.startTime,
+        endTime: quiz.endTime,
+        questions: result.questions.map((q) => ({
+          questionId: {
+            text: q.questionId.text,
+            options: q.questionId.options,
+            correctOption: q.correctOption, // Changed from q.questionId.correctOption
+          },
+          userResponse: {
+            // Add the proper userResponse structure
+            number: q.selectedOption
+              ? String.fromCharCode(
+                  65 + q.questionId.options.indexOf(q.selectedOption)
+                )
+              : null,
+            value: q.selectedOption,
+          },
+          isCorrect: q.isCorrect,
+        })),
       },
-      userResponse: q.userResponse,
-      isCorrect: q.userResponse === q.questionId.correctOption,
-    }));
-
-    // Create response object
-    const quizResponse = {
-      ...quiz.toObject(),
-      questions: processedQuestions,
+      statistics: result.statistics,
+      timeStats: {
+        startTime: result.timeStats.startTime,
+        endTime: result.timeStats.endTime,
+        timeTaken: `${Math.floor(result.timeStats.timeTaken / 60)}m ${
+          result.timeStats.timeTaken % 60
+        }s`,
+      },
+      score: result.score,
+      accuracy: result.statistics.accuracy,
+      user: quiz.userId,
     };
 
-    res.status(200).json({
-      quiz: quizResponse,
-      result,
-      timeTaken: `${minutes}m ${seconds}s`,
-      user: quiz.userId,
-    });
+    res.status(200).json(response);
   } catch (error) {
     console.error("Error in getQuizResult:", error);
     res.status(500).json({

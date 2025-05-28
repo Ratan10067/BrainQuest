@@ -188,13 +188,14 @@ export default function Navbar() {
                     </button>
                   </>
                 ) : (
-                  <NavLink
-                    to="/"
-                    onClick={() => setMenuOpen(false)}
-                    className="block px-4 py-3 text-center rounded-xl bg-gradient-to-r from-yellow-400 to-orange-500 text-[#1a1f37] font-medium cursor-pointer"
-                  >
-                    Get Started
-                  </NavLink>
+                  // <NavLink
+                  //   to="/"
+                  //   onClick={() => setMenuOpen(false)}
+                  //   className="block px-4 py-3 text-center rounded-xl bg-gradient-to-r from-yellow-400 to-orange-500 text-[#1a1f37] font-medium cursor-pointer"
+                  // >
+                  //   Get Started
+                  // </NavLink>
+                  null
                 )}
               </div>
             </motion.div>
