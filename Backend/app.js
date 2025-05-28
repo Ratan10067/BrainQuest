@@ -6,6 +6,8 @@ const connectDB = require("./db/db");
 const userRoutes = require("./routes/user.routes");
 const quizRoutes = require("./routes/quiz.routes");
 const cookieParser = require("cookie-parser");
+const { authUser } = require("./middlewares/auth.middlewares");
+const {contactUs} = require("./controllers/contact.controller");
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -26,6 +28,7 @@ app.get("/", (req, res) => {
 });
 app.use("/users", userRoutes);
 app.use("/quiz", quizRoutes);
+app.post("/contact", authUser, contactUs);
 app.listen(PORT, () => {
   console.log(`Server is Listening at Port ${PORT}`);
 });
