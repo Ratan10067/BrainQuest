@@ -190,6 +190,7 @@ module.exports.contactUs = async (req, res) => {
         email: email,
         subject: subject || "No subject",
         query: message,
+        subject: subject || "No subject",
         createdAt: new Date(),
       });
       await query.save();
@@ -207,4 +208,32 @@ module.exports.contactUs = async (req, res) => {
       success: false,
     });
   }
+};
+
+module.exports.getQueries = async (req, res) => {
+  console.log(req.params);
+  const { userId } = req.query;
+  console.log("Fetching queries for user:", userId);
+  if (!userId) {
+    return res.status(400).json({
+      error: "User ID is required to fetch queries.",
+      success: false,
+    });
+  }
+  // Fetch queries from the database for the authenticated user
+  const queries = await Query.find({
+    userId: userId,
+  }).sort({ createdAt: -1 });
+
+  if (!queries || queries.length === 0) {
+    return res.status(404).json({
+      message: "No past queries found for this user.",
+      success: false,
+    });
+  }
+  return res.status(200).json({
+    message: "Queries fetched successfully.",
+    queries: queries,
+    success: true,
+  });
 };

@@ -41,56 +41,61 @@ export default function ContactUs() {
       // Simulate API call delay
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      // Mock data - replace with actual API call
-      const mockQueries = [
+      // Get token and userId from localStorage
+      const token = localStorage.getItem("token");
+      const userId = localStorage.getItem("userId");
+
+      // Debug: Check if token exists
+      console.log("Token from localStorage:", token);
+      console.log("UserId from localStorage:", userId);
+
+      if (!token) {
+        console.error("No token found in localStorage");
+        // Handle missing token case
+        return;
+      }
+
+      // Correct axios configuration - combine params and headers in single config object
+      const response = await axios.get(
+        "http://localhost:4000/contact/past-queries",
         {
-          id: 1,
-          subject: "Login Issue",
-          message: "I'm having trouble logging into my account. Can you help?",
-          status: "resolved",
-          createdAt: "2024-01-15T10:30:00Z",
-          resolvedAt: "2024-01-16T14:20:00Z",
-        },
-        {
-          id: 2,
-          subject: "Feature Request",
-          message: "Would it be possible to add dark mode to the application?",
-          status: "pending",
-          createdAt: "2024-01-20T09:15:00Z",
-        },
-        {
-          id: 3,
-          subject: "Billing Question",
-          message:
-            "I was charged twice for my subscription. Please help resolve this.",
-          status: "in_progress",
-          createdAt: "2024-01-22T16:45:00Z",
-        },
-      ];
-      setPastQueries(mockQueries);
-      const response = await axios.get('http://localhost:4000/contact/queries', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+          params: {
+            userId: userId,
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
       if (response.status === 200) {
         console.log("Fetched past queries successfully:", response.data);
-        // Replace mock data with actual response
-        const queries = response.data.map((query) => ({
+
+        // Process the response data
+        const queries = response.data.queries.map((query) => ({
           ...query,
           createdAt: new Date(query.createdAt).toISOString(),
           resolvedAt: query.resolvedAt
             ? new Date(query.resolvedAt).toISOString()
             : null,
         }));
-        console.log("Queries:", queries);
-        // setPastQueries(queries);
+
+        console.log("Processed queries:", queries);
+        setPastQueries(queries);
       } else {
         console.error("Error fetching queries:", response.data);
       }
-      setPastQueries(mockQueries);
     } catch (error) {
       console.error("Error fetching queries:", error);
+
+      // Check if it's an authentication error
+      if (error.response?.status === 401) {
+        console.error(
+          "Authentication failed - token might be invalid or expired"
+        );
+        // Optionally redirect to login or refresh token
+      }
     } finally {
       setIsLoadingQueries(false);
     }
@@ -516,7 +521,7 @@ export default function ContactUs() {
                       </div>
 
                       <p className="text-gray-400 text-xs mb-3 line-clamp-2">
-                        {query.message}
+                        {query.query}
                       </p>
 
                       <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">

@@ -7,6 +7,10 @@ const querySchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    subject: {
+      type: String,
+      required: true,
+    },
     query: {
       type: String,
       required: true,
@@ -25,4 +29,3 @@ const querySchema = new mongoose.Schema(
 );
 const Query = mongoose.model("query", querySchema);
 module.exports = Query;
-

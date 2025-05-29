@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { body } = require("express-validator");
-const { contactUs } = require("../controllers/contact.controller");
+const { contactUs, getQueries } = require("../controllers/contact.controller");
 const { authUser } = require("../middlewares/auth.middlewares");
 router.post(
   "/submit-query",
@@ -13,5 +13,7 @@ router.post(
   authUser,
   contactUs
 );
+
+router.get("/past-queries", authUser, getQueries);
 
 module.exports = router;
