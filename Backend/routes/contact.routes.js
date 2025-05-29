@@ -1,7 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const { body } = require("express-validator");
-const { contactUs, getQueries } = require("../controllers/contact.controller");
+const {
+  contactUs,
+  getQueries,
+  updateQueryStatus,
+} = require("../controllers/contact.controller");
 const { authUser } = require("../middlewares/auth.middlewares");
 router.post(
   "/submit-query",
@@ -15,5 +19,5 @@ router.post(
 );
 
 router.get("/past-queries", authUser, getQueries);
-
+router.put("/update-query-status", authUser, updateQueryStatus);
 module.exports = router;

@@ -116,7 +116,6 @@ export default function ContactUs() {
     setIsSubmitting(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
       const response = await axios.post(
         "http://localhost:4000/contact/submit-query",
         formData,
@@ -130,6 +129,7 @@ export default function ContactUs() {
         console.log("Form submitted successfully:", response.data);
         setSubmitted(true);
         setIsSubmitting(false);
+        fetchPastQueries();
       } else {
         console.error("Error submitting form:", response.data);
       }
@@ -153,21 +153,33 @@ export default function ContactUs() {
 
   const updateQueryStatus = async (queryId, newStatus) => {
     try {
-      // Simulate API call to update status
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      setPastQueries((prev) =>
-        prev.map((query) =>
-          query.id === queryId
-            ? {
-                ...query,
-                status: newStatus,
-                resolvedAt:
-                  newStatus === "resolved" ? new Date().toISOString() : null,
-              }
-            : query
-        )
+      const response = await axios.put(
+        "http://localhost:4000/contact/update-query-status",
+        {
+          queryId,
+          status: newStatus,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
+      if (response.status === 200) {
+        console.log("Query status updated successfully:", response.data);
+        setPastQueries((prev) =>
+          prev.map((query) =>
+            query._id === queryId
+              ? {
+                  ...query,
+                  status: newStatus,
+                  resolvedAt:
+                    newStatus === "resolved" ? new Date().toISOString() : null,
+                }
+              : query
+          )
+        );
+      }
     } catch (error) {
       console.error("Error updating query status:", error);
     }
@@ -414,7 +426,7 @@ export default function ContactUs() {
                         whileTap={{ scale: 0.98 }}
                         onClick={handleSubmit}
                         disabled={isSubmitting}
-                        className="w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white hover:shadow-lg hover:shadow-yellow-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white hover:shadow-lg hover:shadow-yellow-500/25 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                       >
                         {isSubmitting ? (
                           <>
@@ -533,9 +545,9 @@ export default function ContactUs() {
                         <div className="flex gap-2">
                           <button
                             onClick={() =>
-                              updateQueryStatus(query.id, "resolved")
+                              updateQueryStatus(query._id, "resolved")
                             }
-                            className="flex-1 py-1.5 px-3 bg-green-500/20 text-green-400 rounded-lg text-xs font-medium hover:bg-green-500/30 transition-colors flex items-center justify-center gap-1"
+                            className="flex-1 py-1.5 px-3 bg-green-500/20 text-green-400 rounded-lg text-xs font-medium hover:bg-green-500/30 transition-colors flex items-center justify-center gap-1 cursor-pointer"
                           >
                             <CheckCircle className="w-3 h-3" />
                             Mark Resolved

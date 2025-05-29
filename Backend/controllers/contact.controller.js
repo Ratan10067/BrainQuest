@@ -237,3 +237,43 @@ module.exports.getQueries = async (req, res) => {
     success: true,
   });
 };
+
+module.exports.updateQueryStatus = async (req, res) => {
+  const { queryId, status } = req.body;
+  console.log("Updating query status:", queryId, status);
+  // Validate required fields
+  if (!queryId || !status) {
+    return res.status(400).json({
+      error: "Query ID and status are required to update the query.",
+      success: false,
+    });
+  }
+
+  // Update the query status in the database
+  try {
+    const updatedQuery = await Query.findByIdAndUpdate(
+      queryId,
+      { status: status },
+      { new: true }
+    );
+
+    if (!updatedQuery) {
+      return res.status(404).json({
+        error: "Query not found.",
+        success: false,
+      });
+    }
+
+    return res.status(200).json({
+      message: "Query status updated successfully.",
+      query: updatedQuery,
+      success: true,
+    });
+  } catch (err) {
+    console.error("Error updating query status:", err);
+    return res.status(500).json({
+      error: "Failed to update query status. Please try again later.",
+      success: false,
+    });
+  }
+};
