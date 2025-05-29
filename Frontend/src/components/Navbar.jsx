@@ -34,6 +34,7 @@ export default function Navbar() {
     { path: "/", label: "Home", icon: <Home size={18} /> },
     { path: "/quiz", label: "Quiz", icon: <Brain size={18} /> },
     { path: "/leaderboard", label: "Leaderboard", icon: <Trophy size={18} /> },
+    {path: "/Contact-us", label: "Contact Us", icon: <UserIcon size={18} /> },
   ];
 
   return (

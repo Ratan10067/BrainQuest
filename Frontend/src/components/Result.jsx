@@ -30,6 +30,101 @@ function StatCard({ title, value, bgColor, icon }) {
   );
 }
 
+// function QuestionCard({
+//   question,
+//   userResponse,
+//   correctOption,
+//   isCorrect,
+//   index,
+// }) {
+//   return (
+//     <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden">
+//       <div
+//         className={`p-6 ${
+//           isCorrect
+//             ? "bg-[#2e384c]"
+//             : userResponse
+//             ? "bg-[#2e384c]"
+//             : "bg-white/5"
+//         }`}
+//       >
+//         <div className="flex items-center justify-between mb-4">
+//           <h3 className="text-lg font-semibold ">
+//             Question {index + 1}
+//           </h3>
+//           <span
+//             className={`px-4 py-1.5 rounded-full text-sm font-medium ${
+//               isCorrect
+//                 ? "bg-green-400/10 text-[#61b387]"
+//                 : userResponse
+//                 ? "bg-red-400/10 text-red-400"
+//                 : "bg-gray-400/10 text-gray-400"
+//             }`}
+//           >
+//             {isCorrect
+//               ? "✓ Correct"
+//               : userResponse
+//               ? "✗ Incorrect"
+//               : "Not Attempted"}
+//           </span>
+//         </div>
+
+//         <p className="text-gray-300 font-medium mb-4">{question.text}</p>
+
+//         <div className="space-y-3">
+//           {question.options.map((option, i) => {
+//             const optionLetter = String.fromCharCode(65 + i);
+//             const isCorrectOption = optionLetter === correctOption;
+//             const isSelectedOption = userResponse?.number === optionLetter;
+
+//             return (
+//               <div
+//                 key={i}
+//                 className={`p-4 rounded-lg border ${
+//                   isCorrectOption
+//                     ? "bg-green-400/10 border-green-600"
+//                     : isSelectedOption && !isCorrect
+//                     ? "bg-red-400/10 border-red-400/50"
+//                     : "bg-white/5 border-white/10"
+//                 }`}
+//               >
+//                 <div className="flex items-center justify-between">
+//                   <div className="flex items-center space-x-3">
+//                     <span
+//                       className={`w-8 h-8 flex items-center justify-center rounded-full ${
+//                         isCorrectOption
+//                           ? "bg-green-600 text-green-700"
+//                           : isSelectedOption && !isCorrect
+//                           ? "bg-red-300 text-red-400"
+//                           : "bg-white/10 text-white"
+//                       }`}
+//                     >
+//                       {optionLetter}
+//                     </span>
+//                     <span className="text-gray-300">{option}</span>
+//                   </div>
+//                   {(isSelectedOption || isCorrectOption) && (
+//                     <span
+//                       className={`text-sm font-medium ${
+//                         isCorrectOption ? "text-green-400" : "text-red-400"
+//                       }`}
+//                     >
+//                       {isCorrectOption
+//                         ? isSelectedOption
+//                           ? "Correct Answer ✓"
+//                           : "Correct Answer"
+//                         : "Your Answer ✗"}
+//                     </span>
+//                   )}
+//                 </div>
+//               </div>
+//             );
+//           })}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
 
 function QuestionCard({
   question,
@@ -40,25 +135,20 @@ function QuestionCard({
 }) {
   return (
     <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden">
-      <div
-        className={`p-6 ${
-          isCorrect
-            ? "bg-[#2e384c]"
-            : userResponse
-            ? "bg-[#2e384c]"
-            : "bg-white/5"
-        }`}
-      >
+      <div className="p-6 bg-[#2e384c]">
+        {" "}
+        {/* Fixed background color */}
+        {/* Question Header */}
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold ">
+          <h3 className="text-lg font-semibold text-white">
             Question {index + 1}
           </h3>
           <span
             className={`px-4 py-1.5 rounded-full text-sm font-medium ${
               isCorrect
-                ? "bg-green-400/10 text-[#61b387]"
+                ? "bg-green-500/20 text-green-400"
                 : userResponse
-                ? "bg-red-400/10 text-red-400"
+                ? "bg-red-500/20 text-red-400"
                 : "bg-gray-400/10 text-gray-400"
             }`}
           >
@@ -69,23 +159,24 @@ function QuestionCard({
               : "Not Attempted"}
           </span>
         </div>
-
+        {/* Question Text */}
         <p className="text-gray-300 font-medium mb-4">{question.text}</p>
-
+        {/* Options */}
         <div className="space-y-3">
           {question.options.map((option, i) => {
             const optionLetter = String.fromCharCode(65 + i);
             const isCorrectOption = optionLetter === correctOption;
             const isSelectedOption = userResponse?.number === optionLetter;
+            const isWrongAnswer = isSelectedOption && !isCorrect;
 
             return (
               <div
                 key={i}
                 className={`p-4 rounded-lg border ${
                   isCorrectOption
-                    ? "bg-green-400/10 border-green-600"
-                    : isSelectedOption && !isCorrect
-                    ? "bg-red-400/10 border-red-400/50"
+                    ? "bg-green-500/20 border-green-500"
+                    : isWrongAnswer
+                    ? "bg-red-500/20 border-red-500" // This will show red for wrong answers
                     : "bg-white/5 border-white/10"
                 }`}
               >
@@ -94,27 +185,64 @@ function QuestionCard({
                     <span
                       className={`w-8 h-8 flex items-center justify-center rounded-full ${
                         isCorrectOption
-                          ? "bg-green-600 text-green-700"
-                          : isSelectedOption && !isCorrect
-                          ? "bg-red-300 text-red-400"
+                          ? "bg-green-500/30 text-green-400"
+                          : isWrongAnswer
+                          ? "bg-red-500/30 text-red-400" // Red indicator for wrong answer
                           : "bg-white/10 text-white"
                       }`}
                     >
                       {optionLetter}
                     </span>
-                    <span className="text-gray-300">{option}</span>
+                    <span
+                      className={`text-base ${
+                        isCorrectOption
+                          ? "text-green-400"
+                          : isWrongAnswer
+                          ? "text-red-400" // Red text for wrong answer
+                          : "text-gray-300"
+                      }`}
+                    >
+                      {option}
+                    </span>
                   </div>
+                  {/* Labels for correct/wrong answers */}
                   {(isSelectedOption || isCorrectOption) && (
                     <span
-                      className={`text-sm font-medium ${
+                      className={`text-sm font-medium flex items-center space-x-2 ${
                         isCorrectOption ? "text-green-400" : "text-red-400"
                       }`}
                     >
-                      {isCorrectOption
-                        ? isSelectedOption
-                          ? "Correct Answer ✓"
-                          : "Correct Answer"
-                        : "Your Answer ✗"}
+                      {isCorrectOption ? (
+                        <>
+                          <span>Correct Answer</span>
+                          <svg
+                            className="w-5 h-5"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </>
+                      ) : (
+                        <>
+                          <span>Your Answer</span>
+                          <svg
+                            className="w-5 h-5"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </>
+                      )}
                     </span>
                   )}
                 </div>
@@ -126,8 +254,6 @@ function QuestionCard({
     </div>
   );
 }
-
-
 export default function Result() {
   const { quizId } = useParams();
   const navigate = useNavigate();
@@ -355,9 +481,7 @@ export default function Result() {
         </div> */}
         <div className="bg-white/10 backdrop-blur-xl rounded-xl shadow-lg p-8 mb-6 border border-white/10">
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-bold ">
-              {result.quiz.Title}
-            </h1>
+            <h1 className="text-3xl font-bold ">{result.quiz.Title}</h1>
             <div className="px-4 py-2 bg-yellow-400/10 text-yellow-700 rounded-full text-sm font-medium">
               {result.quiz.subject} - {result.quiz.difficulty}
             </div>
