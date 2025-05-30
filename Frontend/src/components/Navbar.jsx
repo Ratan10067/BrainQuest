@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   Menu,
@@ -18,8 +18,7 @@ export default function Navbar() {
   const { isAuthenticated, setIsAuthenticated } = useContext(AuthContext);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [userName, setUserName] = useState("");
-
-
+  const dropDownRef = useRef(null);
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
@@ -34,9 +33,22 @@ export default function Navbar() {
     { path: "/", label: "Home", icon: <Home size={18} /> },
     { path: "/quiz", label: "Quiz", icon: <Brain size={18} /> },
     { path: "/leaderboard", label: "Leaderboard", icon: <Trophy size={18} /> },
-    {path: "/Contact-us", label: "Contact Us", icon: <UserIcon size={18} /> },
+    { path: "/Contact-us", label: "Contact Us", icon: <UserIcon size={18} /> },
   ];
 
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropDownRef.current && !dropDownRef.current.contains(event.target)) {
+        setProfileDropdownOpen(false);
+      }
+    }
+    if (profileDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [profileDropdownOpen]);
   return (
     <nav className="bg-[#1a1f37]/95 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
       <div className="container mx-auto px-6 py-4">
@@ -78,7 +90,7 @@ export default function Navbar() {
           {/* Auth/Profile Section */}
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated ? (
-              <div className="relative">
+              <div className="relative" ref={dropDownRef}>
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                   className="flex items-center space-x-2 text-white px-4 py-2 rounded-xl bg-[#2c3250] hover:bg-[#2c3250]/80 transition-colors cursor-pointer"
@@ -188,16 +200,14 @@ export default function Navbar() {
                       <span>Logout</span>
                     </button>
                   </>
-                ) : (
-                  // <NavLink
-                  //   to="/"
-                  //   onClick={() => setMenuOpen(false)}
-                  //   className="block px-4 py-3 text-center rounded-xl bg-gradient-to-r from-yellow-400 to-orange-500 text-[#1a1f37] font-medium cursor-pointer"
-                  // >
-                  //   Get Started
-                  // </NavLink>
-                  null
-                )}
+                ) : // <NavLink
+                //   to="/"
+                //   onClick={() => setMenuOpen(false)}
+                //   className="block px-4 py-3 text-center rounded-xl bg-gradient-to-r from-yellow-400 to-orange-500 text-[#1a1f37] font-medium cursor-pointer"
+                // >
+                //   Get Started
+                // </NavLink>
+                null}
               </div>
             </motion.div>
           )}

@@ -116,6 +116,12 @@ export default function ContactUs() {
     setIsSubmitting(true);
 
     try {
+      if (!localStorage.getItem("token")) {
+        console.error("No token found in localStorage");
+        alert("You must be logged in to submit a query.");
+        setIsSubmitting(false);
+        return;
+      }
       const response = await axios.post(
         "http://localhost:4000/contact/submit-query",
         formData,
@@ -503,7 +509,7 @@ export default function ContactUs() {
                 </h2>
                 <button
                   onClick={fetchPastQueries}
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-gray-400 hover:text-white transition-colors cursor-pointer"
                   disabled={isLoadingQueries}
                 >
                   <RefreshCw

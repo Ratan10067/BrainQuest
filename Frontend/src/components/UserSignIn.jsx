@@ -161,7 +161,7 @@ export default function UserSignIn() {
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-yellow-400 
                          to-orange-500 text-[#1a1f37] font-semibold flex items-center 
                          justify-center space-x-2 hover:shadow-lg hover:shadow-yellow-500/25 
-                         transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                         transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 {loading ? (
                   <>
