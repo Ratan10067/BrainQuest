@@ -7,7 +7,7 @@ const userRoutes = require("./routes/user.routes");
 const quizRoutes = require("./routes/quiz.routes");
 const cookieParser = require("cookie-parser");
 const { authUser } = require("./middlewares/auth.middlewares");
-
+const {getLeaderboard} = require("./controllers/leaderboard.controller");
 const contactRoutes = require("./routes/contact.routes");
 dotenv.config();
 const app = express();
@@ -30,6 +30,7 @@ app.get("/", (req, res) => {
 app.use("/users", userRoutes);
 app.use("/quiz", quizRoutes);
 app.use("/contact", contactRoutes);
+app.get("/leaderboard", getLeaderboard);
 app.listen(PORT, () => {
   console.log(`Server is Listening at Port ${PORT}`);
 });
