@@ -12,6 +12,7 @@ import UserProfile from "./components/UserProfile";
 import QuizStarted from "./components/QuizStarted";
 import Result from "./components/Result";
 import ContactUs from "./components/ContactUs";
+import Premium from "./components/Premium";
 export default function App() {
   return (
     <BrowserRouter>
@@ -29,6 +30,7 @@ export default function App() {
           <Route path="/quiz-started/:quizId" element={<QuizStarted />} />
           <Route path="/results/:quizId" element={<Result />} />
           <Route path="/Contact-us" element={<ContactUs />} />
+          <Route path="/premium" element={<Premium />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

@@ -31,3 +31,15 @@ module.exports.getProfile = async (req, res) => {
     });
   }
 };
+
+module.exports.addFriendRequest = async (req, res) => {
+  const { friendUserId, userId } = req.body;
+  console.log("add Friend me aaya hu with", friendUserId, userId);
+  try {
+  } catch (error) {
+    res
+      .send(500)
+      .json({ message: "Server Error while sending the friend request" });
+  }
+  return res.status(200).json({ message: "Friend Request Send Successfully" });
+};

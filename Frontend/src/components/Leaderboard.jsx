@@ -266,7 +266,7 @@ export default function Leaderboard() {
             <button
               key={difficulty}
               onClick={() => setSelectedDifficulty(difficulty)}
-              className={`px-6 py-2 rounded-full transition-all duration-300 ${
+              className={`px-6 py-2 rounded-full transition-all duration-300 cursor-pointer ${
                 selectedDifficulty === difficulty
                   ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/25"
                   : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600"
@@ -390,7 +390,7 @@ export default function Leaderboard() {
                                     },
                                   });
                                 }}
-                                className="opacity-0 group-hover:opacity-100 text-blue-500 hover:text-blue-700 transition-all duration-300 p-1 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded"
+                                className="opacity-0 group-hover:opacity-100 text-blue-500 hover:text-blue-700 transition-all duration-300 p-1 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded cursor-pointer"
                                 title="View Profile"
                               >
                                 <FaEye className="text-sm" />
@@ -425,7 +425,7 @@ export default function Leaderboard() {
             <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
               <button
                 onClick={() => setModalData(board)}
-                className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-blue-500/25 font-medium"
+                className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-blue-500/25 font-medium cursor-pointer"
               >
                 View Complete Rankings
               </button>
@@ -470,7 +470,7 @@ export default function Leaderboard() {
                   </div>
                   <button
                     onClick={() => setModalData(null)}
-                    className="text-white hover:text-red-200 transition-colors p-2 hover:bg-white/20 rounded-full"
+                    className="text-white hover:text-red-200 transition-colors p-2 hover:bg-white/20 rounded-full cursor-pointer"
                   >
                     <IoMdClose size={28} />
                   </button>

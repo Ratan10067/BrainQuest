@@ -9,7 +9,6 @@ export function AuthProvider({ children }) {
   const [userId, setUserId] = useState(null);
   const [pastQuizzes, setPastQuizzes] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  // On mount, initialize from localStorage
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {

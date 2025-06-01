@@ -59,6 +59,35 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    friendList: [
+      {
+        userId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User", // Should match your model name
+        },
+        status: {
+          type: String,
+          enum: ["pending", "accepted", "blocked"],
+          default: "pending",
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+    rewards: [
+      {
+        badgeId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Badge",
+        },
+        earnedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );
@@ -74,7 +103,6 @@ userSchema.methods.setOTP = async function (otp) {
   this.otp.expiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes from now
   await this.save();
 };
-
 
 userSchema.methods.generateAuthToken = async function () {
   const user = this;

@@ -248,7 +248,7 @@ const ErrorState = ({
               <button
                 onClick={handleRetry}
                 disabled={isRetrying}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 <FaRedo
                   className={`text-sm ${isRetrying ? "animate-spin" : ""}`}
@@ -259,7 +259,7 @@ const ErrorState = ({
               <button
                 onClick={handleRefresh}
                 disabled={refreshing}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-xl hover:from-gray-600 hover:to-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-xl hover:from-gray-600 hover:to-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 <IoMdRefresh
                   className={`text-sm ${refreshing ? "animate-spin" : ""}`}
@@ -272,7 +272,7 @@ const ErrorState = ({
             {showHomeButton && onGoHome && (
               <button
                 onClick={onGoHome}
-                className="w-full flex items-center justify-center gap-2 px-6 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors text-sm border border-gray-300 dark:border-gray-600 rounded-xl hover:border-gray-400 dark:hover:border-gray-500"
+                className="w-full flex items-center justify-center gap-2 px-6 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors text-sm border border-gray-300 dark:border-gray-600 rounded-xl hover:border-gray-400 dark:hover:border-gray-500 cursor-pointer"
               >
                 <FaHome className="text-sm" />
                 Go to Home
@@ -283,7 +283,7 @@ const ErrorState = ({
             {enableAutoRefresh && (
               <button
                 onClick={toggleAutoRefresh}
-                className={`w-full px-6 py-2 text-sm rounded-xl transition-colors ${
+                className={`w-full px-6 py-2 text-sm rounded-xl transition-colors cursor-pointer ${
                   isAutoRefreshEnabled
                     ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700"
                     : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500"

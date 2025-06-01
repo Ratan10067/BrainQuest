@@ -1,13 +1,54 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 const UserProfileModal = ({ user, onClose, leaderboardEntry }) => {
   console.log("Enhanced User Profile Modal Loading...");
   if (!user) return null;
-
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [friendRequestSent, setFriendRequestSent] = useState(false);
+  const [showShareOptions, setShowShareOptions] = useState(false);
+  const handleNativeShare = async () => {
+    try {
+      await navigator.share({
+        title: `${user.name}'s Profile`,
+        text: `Check out ${user.name}'s quiz profile!`,
+        url: window.location.href,
+      });
+    } catch (err) {
+      console.log("Share cancelled:", err);
+    }
+  };
+
+  // Copy profile link
+  const copyProfileLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setShowShareOptions(false);
+    // Add toast notification
+  };
+
+  // Social media sharing
+  const shareOnTwitter = () => {
+    window.open(
+      `https://twitter.com/intent/tweet?text=Check%20out%20${user.name}'s%20quiz%20profile!&url=${window.location.href}`
+    );
+    setShowShareOptions(false);
+  };
+
+  const shareOnFacebook = () => {
+    window.open(
+      `https://www.facebook.com/sharer/sharer.php?u=${window.location.href}`
+    );
+    setShowShareOptions(false);
+  };
+  const handleReport = () => {
+    // Implement your report logic
+    navigate("/contact-us");
+    console.log("Report user:", user._id);
+  };
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -54,13 +95,34 @@ const UserProfileModal = ({ user, onClose, leaderboardEntry }) => {
   const handleAddFriend = async () => {
     setIsLoading(true);
     try {
-      // Backend integration placeholder
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setFriendRequestSent(true);
-      // Add your backend API call here
-      console.log("Friend request sent to:", user._id);
+      const response = await axios.post(
+        // Changed from GET to POST
+        "http://localhost:4000/profile/friend-request",
+        {
+          // Send data in request body instead of params
+          friendUserId: user._id,
+          userId: localStorage.getItem("userId"),
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setFriendRequestSent(true);
+        console.log("Friend request sent successfully to:", user._id);
+      }
     } catch (error) {
-      setError("Failed to send friend request");
+      console.error(
+        "Friend request error:",
+        error.response?.data || error.message
+      );
+      setError(
+        error.response?.data?.message || "Failed to send friend request"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -138,7 +200,7 @@ const UserProfileModal = ({ user, onClose, leaderboardEntry }) => {
   const TabButton = ({ tab, label, icon, isActive, onClick }) => (
     <button
       onClick={() => onClick(tab)}
-      className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
+      className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer ${
         isActive
           ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/25"
           : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
@@ -251,7 +313,7 @@ const UserProfileModal = ({ user, onClose, leaderboardEntry }) => {
             {/* Integrated Close Button - Fixed Position */}
             <button
               onClick={onClose}
-              className="absolute top-6 right-6 z-50 p-2 bg-gray-800 hover:bg-gray-700 rounded-full transition-all duration-200 border border-gray-600"
+              className="absolute top-6 right-6 z-50 p-2 bg-gray-800 hover:bg-gray-700 rounded-full transition-all duration-200 border border-gray-600 cursor-pointer"
               aria-label="Close profile modal"
             >
               <svg
@@ -303,7 +365,7 @@ const UserProfileModal = ({ user, onClose, leaderboardEntry }) => {
                       whileTap={{ scale: 0.95 }}
                       onClick={handleAddFriend}
                       disabled={isLoading || friendRequestSent}
-                      className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
+                      className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer ${
                         friendRequestSent
                           ? "bg-green-600 text-white"
                           : "bg-gray-700 text-gray-200 hover:bg-gray-600 border border-gray-600"
@@ -723,7 +785,7 @@ const UserProfileModal = ({ user, onClose, leaderboardEntry }) => {
                     </div>
 
                     <div className="text-center pt-8">
-                      <button className="px-6 py-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl text-gray-700 dark:text-gray-300 transition-colors duration-300">
+                      <button className="px-6 py-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl text-gray-700 dark:text-gray-300 transition-colors duration-300 cursor-pointer">
                         <i className="fas fa-history mr-2"></i>
                         View Full Activity History
                       </button>
@@ -734,20 +796,150 @@ const UserProfileModal = ({ user, onClose, leaderboardEntry }) => {
             </div>
 
             {/* Footer */}
-            <div className="px-8 py-6 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700">
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  <p>Last updated: {new Date().toLocaleString()}</p>
+            <div className="relative">
+              {/* Gradient border effect */}
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent"></div>
+
+              <div className="px-8 py-8 bg-gradient-to-br from-gray-50/80 via-white/50 to-gray-100/80 dark:from-gray-800/60 dark:via-gray-900/40 dark:to-gray-800/80 backdrop-blur-sm border-t border-gray-200/50 dark:border-gray-700/50">
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
+                  {/* Last Updated Section */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <div className="text-sm text-gray-600 dark:text-gray-300 font-medium">
+                      <p className="flex items-center gap-2">
+                        <i className="fas fa-clock text-gray-400 dark:text-gray-500"></i>
+                        Last updated:{" "}
+                        <span className="font-semibold text-gray-800 dark:text-gray-200">
+                          {new Date().toLocaleString()}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-4">
+                    {/* Share Button with Dropdown */}
+                    <div className="relative group">
+                      <button
+                        className="group/btn px-6 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 border border-blue-200 dark:border-blue-700/50 rounded-2xl hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/50 dark:hover:to-indigo-900/50 transition-all duration-300 flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer"
+                        onClick={() =>
+                          navigator.share
+                            ? handleNativeShare()
+                            : setShowShareOptions(!showShareOptions)
+                        }
+                      >
+                        <div className="w-5 h-5 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mr-3">
+                          <i className="fas fa-share-alt text-white text-xs"></i>
+                        </div>
+                        <span className="font-semibold text-gray-700 dark:text-gray-200 group-hover/btn:text-blue-700 dark:group-hover/btn:text-blue-300 transition-colors">
+                          Share Profile
+                        </span>
+                        <i
+                          className={`fas fa-chevron-down ml-3 text-xs text-gray-500 dark:text-gray-400 transition-all duration-300 ${
+                            showShareOptions
+                              ? "transform rotate-180 text-blue-600 dark:text-blue-400"
+                              : ""
+                          }`}
+                        ></i>
+                      </button>
+
+                      {/* Enhanced Share Options Dropdown */}
+                      {showShareOptions && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 15, scale: 0.95 }}
+                          transition={{ duration: 0.2 }}
+                          className="absolute right-0 bottom-full mb-3 w-56 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 z-20 overflow-hidden"
+                        >
+                          {/* Dropdown header */}
+                          <div className="px-4 py-3 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 border-b border-gray-200 dark:border-gray-600">
+                            <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                              Share this profile
+                            </p>
+                          </div>
+
+                          {/* Share options */}
+                          <div className="p-2">
+                            <button
+                              className="w-full px-4 py-3 text-left hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 dark:hover:from-blue-900/30 dark:hover:to-blue-800/30 rounded-xl flex items-center gap-3 transition-all duration-200 group"
+                              onClick={copyProfileLink}
+                            >
+                              <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <i className="fas fa-link text-blue-600 dark:text-blue-400 text-sm"></i>
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-800 dark:text-gray-200">
+                                  Copy Link
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                  Share via URL
+                                </p>
+                              </div>
+                            </button>
+
+                            <button
+                              className="w-full px-4 py-3 text-left hover:bg-gradient-to-r hover:from-sky-50 hover:to-sky-100 dark:hover:from-sky-900/30 dark:hover:to-sky-800/30 rounded-xl flex items-center gap-3 transition-all duration-200 group"
+                              onClick={shareOnTwitter}
+                            >
+                              <div className="w-8 h-8 bg-sky-100 dark:bg-sky-900/50 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <i className="fab fa-twitter text-sky-500 dark:text-sky-400 text-sm"></i>
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-800 dark:text-gray-200">
+                                  Twitter
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                  Post to timeline
+                                </p>
+                              </div>
+                            </button>
+
+                            <button
+                              className="w-full px-4 py-3 text-left hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 dark:hover:from-blue-900/30 dark:hover:to-blue-800/30 rounded-xl flex items-center gap-3 transition-all duration-200 group"
+                              onClick={shareOnFacebook}
+                            >
+                              <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <i className="fab fa-facebook text-blue-600 dark:text-blue-400 text-sm"></i>
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-800 dark:text-gray-200">
+                                  Facebook
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                  Share with friends
+                                </p>
+                              </div>
+                            </button>
+                          </div>
+                        </motion.div>
+                      )}
+                    </div>
+
+                    {/* Enhanced Report Button */}
+                    <button
+                      className="group/btn px-6 py-3 bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/30 dark:to-rose-900/30 border border-red-200 dark:border-red-700/50 rounded-2xl hover:from-red-100 hover:to-rose-100 dark:hover:from-red-900/50 dark:hover:to-rose-900/50 transition-all duration-300 flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer"
+                      onClick={handleReport}
+                    >
+                      <div className="w-5 h-5 bg-gradient-to-br from-red-500 to-rose-600 rounded-full flex items-center justify-center mr-3">
+                        <i className="fas fa-flag text-white text-xs"></i>
+                      </div>
+                      <span className="font-semibold text-gray-700 dark:text-gray-200 group-hover/btn:text-red-700 dark:group-hover/btn:text-red-300 transition-colors ">
+                        Report
+                      </span>
+                    </button>
+                  </div>
                 </div>
-                <div className="flex gap-3">
-                  <button className="px-6 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300">
-                    <i className="fas fa-share-alt mr-2"></i>
-                    Share Profile
-                  </button>
-                  <button className="px-6 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300">
-                    <i className="fas fa-flag mr-2"></i>
-                    Report
-                  </button>
+
+                {/* Optional subtle pattern overlay */}
+                <div className="absolute inset-0 opacity-5 dark:opacity-10 pointer-events-none">
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0,0,0,0.15) 1px, transparent 0)`,
+                      backgroundSize: "20px 20px",
+                    }}
+                  ></div>
                 </div>
               </div>
             </div>
