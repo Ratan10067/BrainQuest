@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Send,
@@ -17,6 +17,8 @@ import {
   RefreshCw,
 } from "lucide-react";
 import axios from "axios";
+import SessionExpiredModal from "./SessionExpiredModal";
+import { AuthContext } from "../context/UserContext";
 export default function ContactUs() {
   const [formData, setFormData] = useState({
     name: "",
@@ -29,6 +31,7 @@ export default function ContactUs() {
   const [pastQueries, setPastQueries] = useState([]);
   const [isLoadingQueries, setIsLoadingQueries] = useState(true);
   const [showNewQueryForm, setShowNewQueryForm] = useState(false);
+  const { sessionExpired, setSessionExpired } = useContext(AuthContext);
 
   // Simulate fetching past queries
   useEffect(() => {
@@ -38,10 +41,6 @@ export default function ContactUs() {
   const fetchPastQueries = async () => {
     setIsLoadingQueries(true);
     try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // Get token and userId from localStorage
       const token = localStorage.getItem("token");
       const userId = localStorage.getItem("userId");
 
@@ -94,6 +93,7 @@ export default function ContactUs() {
         console.error(
           "Authentication failed - token might be invalid or expired"
         );
+        setSessionExpired(true);
         // Optionally redirect to login or refresh token
       }
     } finally {
@@ -583,6 +583,7 @@ export default function ContactUs() {
           </div>
         </div>
       </div>
+      {sessionExpired && <SessionExpiredModal />}
     </div>
   );
 }

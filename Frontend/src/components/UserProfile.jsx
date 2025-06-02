@@ -19,12 +19,18 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Settings from "./Settings";
 import { AuthContext } from "../context/UserContext";
+import SessionExpiredModal from "./SessionExpiredModal";
 export default function UserProfile() {
   const navigate = useNavigate();
   const [editMode, setEditMode] = useState(false);
   const avatarInput = useRef();
   const [activeView, setActiveView] = useState("profile");
-  const { isAuthenticated, setIsAuthenticated } = useContext(AuthContext);
+  const {
+    isAuthenticated,
+    setIsAuthenticated,
+    sessionExpired,
+    setSessionExpired,
+  } = useContext(AuthContext);
   const [profile, setProfile] = useState({
     name: "John Doe",
     email: "john@example.com",
@@ -74,6 +80,13 @@ export default function UserProfile() {
           }));
         }
       } catch (error) {
+        if (error.response?.status === 401) {
+          console.error(
+            "Authentication failed - token might be invalid or expired"
+          );
+          setSessionExpired(true);
+          // Optionally redirect to login or refresh token
+        }
         console.error("Error fetching user profile:", error);
         setError({
           show: true,
@@ -533,6 +546,7 @@ export default function UserProfile() {
           </motion.div>
         )}
       </AnimatePresence>
+      {sessionExpired && <SessionExpiredModal />}
     </div>
   );
 }

@@ -216,7 +216,7 @@ const ErrorState = ({
               </div>
             )}
 
-            {usingMockData && (
+            {/* {usingMockData && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -226,7 +226,7 @@ const ErrorState = ({
                   📊 Showing sample data for demonstration
                 </p>
               </motion.div>
-            )}
+            )} */}
           </div>
 
           {/* Auto-refresh indicator */}

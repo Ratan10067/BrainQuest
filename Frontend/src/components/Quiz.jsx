@@ -16,6 +16,7 @@ import {
   Trophy,
   Sparkles,
 } from "lucide-react";
+import SessionExpiredModal from "./SessionExpiredModal";
 
 export default function QuizSection() {
   const navigate = useNavigate();
@@ -23,7 +24,8 @@ export default function QuizSection() {
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const { questions, setQuestions } = useContext(AuthContext);
+  const { questions, setQuestions, sessionExpired, setSessionExpired } =
+    useContext(AuthContext);
   const [titleOfTheQuiz, setTitleOfTheQuiz] = useState("");
   const [pastQuizzes, setPastQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -65,6 +67,13 @@ export default function QuizSection() {
           setPastQuizzes(response.data);
         }
       } catch (error) {
+        if (error.response?.status === 401) {
+          console.error(
+            "Authentication failed - token might be invalid or expired"
+          );
+          setSessionExpired(true);
+          // Optionally redirect to login or refresh token
+        }
         console.error("Error fetching past quizzes:", error);
       }
     };
@@ -390,6 +399,7 @@ export default function QuizSection() {
           </motion.div>
         )}
       </AnimatePresence>
+      {sessionExpired && <SessionExpiredModal />}
     </div>
   );
 }

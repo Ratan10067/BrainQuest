@@ -40,7 +40,7 @@ const EmailSignupForm = memo(
     >
       <button
         onClick={handleBackToSocial}
-        className="flex items-center text-gray-400 hover:text-white transition-colors"
+        className="flex items-center text-gray-400 hover:text-white transition-colors cursor-pointer"
       >
         <ArrowLeft size={20} className="mr-2" />
         Back to options
@@ -135,7 +135,7 @@ const EmailSignupForm = memo(
           className="w-full py-3 rounded-xl bg-gradient-to-r from-yellow-400 
                  to-orange-500 text-[#1a1f37] font-semibold flex items-center 
                  justify-center space-x-2 hover:shadow-lg hover:shadow-yellow-500/25 
-                 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
           {loading ? (
             <>
@@ -364,7 +364,7 @@ function SocialLoginOptions({
           whileTap={{ scale: 0.98 }}
           className="w-full bg-white hover:bg-gray-50 text-gray-700 font-semibold py-4 px-6 
                  rounded-xl shadow-sm transition-all duration-200 flex items-center justify-center 
-                 space-x-3 hover:shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
+                 space-x-3 hover:shadow-md disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
         >
           {socialLoading.google ? (
             <>
@@ -404,7 +404,7 @@ function SocialLoginOptions({
           whileTap={{ scale: 0.98 }}
           className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-4 px-6 
                  rounded-xl transition-all duration-200 flex items-center justify-center 
-                 space-x-3 hover:shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
+                 space-x-3 hover:shadow-md disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
         >
           {socialLoading.github ? (
             <>
@@ -437,7 +437,7 @@ function SocialLoginOptions({
         whileTap={{ scale: 0.98 }}
         className="w-full bg-white/10 hover:bg-white/20 text-white font-semibold py-4 px-6 
                rounded-xl border border-white/20 transition-all duration-200 flex items-center 
-               justify-center space-x-3 hover:shadow-md"
+               justify-center space-x-3 hover:shadow-md cursor-pointer"
       >
         <Mail className="w-5 h-5" />
         <span>Continue with Email</span>

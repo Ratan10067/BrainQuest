@@ -118,7 +118,7 @@ export default function Navbar() {
                 <>
                   <button
                     onClick={() => setPremiumDropdownOpen(!premiumDropdownOpen)}
-                    className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-gradient-to-r from-yellow-400 to-orange-500 text-[#1a1f37] font-medium hover:from-yellow-500 hover:to-orange-600 transition-all duration-300 transform hover:scale-105"
+                    className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-gradient-to-r from-yellow-400 to-orange-500 text-[#1a1f37] font-medium hover:from-yellow-500 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 cursor-pointer"
                   >
                     <Crown size={18} />
                     <span>Go Premium</span>
