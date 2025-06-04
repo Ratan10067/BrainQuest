@@ -9,6 +9,7 @@ import {
   FaChartLine,
   FaStar,
   FaEye,
+  FaSearch,
 } from "react-icons/fa";
 import { IoMdClose, IoMdTrendingUp } from "react-icons/io";
 import { HiOutlineSparkles } from "react-icons/hi";
@@ -116,6 +117,7 @@ export default function Leaderboard() {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [selectedDifficulty, setSelectedDifficulty] = useState("all");
   const [usingMockData, setUsingMockData] = useState(false);
+  const [searchSubject, setSearchSubject] = useState("");
 
   const getErrorMessage = (error) => {
     if (error.response) {
@@ -223,12 +225,17 @@ export default function Leaderboard() {
         return <FaStar className="text-blue-400 text-lg" />;
     }
   };
-  const filteredData =
-    selectedDifficulty === "all"
-      ? leaderboardData
-      : leaderboardData.filter(
-          (board) => board.difficulty?.toLowerCase() === selectedDifficulty
-        );
+  const filteredData = leaderboardData.filter((board) => {
+    const matchesDifficulty =
+      selectedDifficulty === "all" ||
+      board.difficulty?.toLowerCase() === selectedDifficulty;
+
+    const matchesSubject =
+      !searchSubject ||
+      board.subject.toLowerCase().includes(searchSubject.toLowerCase());
+
+    return matchesDifficulty && matchesSubject;
+  });
   if (error) {
     return (
       <ErrorState
@@ -242,7 +249,11 @@ export default function Leaderboard() {
   if (loading) {
     return <LoadingSkeleton />;
   }
-
+  const clearSearch = () => {
+    setSearchSubject("");
+    setSelectedDifficulty("all");
+    console.log(filteredData);
+  };
   return (
     <div className="min-h-screen p-8 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
@@ -261,22 +272,117 @@ export default function Leaderboard() {
         </div>
 
         {/* Difficulty Filter */}
-        <div className="flex justify-center gap-4 mb-8">
-          {["all", "easy", "medium", "hard"].map((difficulty) => (
-            <button
-              key={difficulty}
-              onClick={() => setSelectedDifficulty(difficulty)}
-              className={`px-6 py-2 rounded-full transition-all duration-300 cursor-pointer ${
-                selectedDifficulty === difficulty
-                  ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/25"
-                  : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600"
-              }`}
-            >
-              {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
-            </button>
-          ))}
+        <div className="max-w-4xl mx-auto mb-8">
+          {/* Subject Search */}
+          <div className="relative mb-6">
+            <div className="relative">
+              <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search subjects (e.g., Mathematics, Physics, Chemistry...)"
+                value={searchSubject}
+                onChange={(e) => setSearchSubject(e.target.value)}
+                className="w-full pl-12 pr-12 py-4 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-lg"
+              />
+              {searchSubject && (
+                <button
+                  onClick={() => setSearchSubject("")}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                >
+                  <IoMdClose size={20} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Difficulty Filter */}
+          <div className="flex flex-wrap justify-center gap-4 mb-6">
+            {["all", "easy", "medium", "hard"].map((difficulty) => (
+              <button
+                key={difficulty}
+                onClick={() => setSelectedDifficulty(difficulty)}
+                className={`px-6 py-3 rounded-full transition-all duration-300 font-medium cursor-pointer ${
+                  selectedDifficulty === difficulty
+                    ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/25 transform scale-105"
+                    : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 hover:scale-105"
+                }`}
+              >
+                {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          {/* Active Filters & Clear */}
+          {(searchSubject || selectedDifficulty !== "all") && (
+            <div className="flex flex-wrap items-center justify-center gap-4 mb-4">
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <span>Active filters:</span>
+                {searchSubject && (
+                  <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full">
+                    Subject: "{searchSubject}"
+                  </span>
+                )}
+                {selectedDifficulty !== "all" && (
+                  <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-3 py-1 rounded-full">
+                    Difficulty: {selectedDifficulty}
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={clearSearch}
+                className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white text-sm font-medium rounded-full transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-red-500/25 transform hover:scale-105 flex items-center gap-2 cursor-pointer"
+              >
+                <IoMdClose size={16} />
+                Clear all filters
+              </button>
+            </div>
+          )}
+
+          {/* Results count */}
+          <div className="text-gray-600 dark:text-gray-400 text-sm mb-2">
+            Showing {filteredData.length} of {leaderboardData.length}{" "}
+            leaderboards
+          </div>
         </div>
       </motion.div>
+      {filteredData.length === 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="col-span-full text-center py-16"
+        >
+          <div className="max-w-md mx-auto">
+            <div className="text-6xl mb-6">🔍</div>
+            <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-3">
+              No Leaderboards Found
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              We couldn't find any leaderboards matching "{searchSubject}"
+              {selectedDifficulty !== "all" &&
+                ` with ${selectedDifficulty} difficulty`}
+              .
+            </p>
+            <div className="flex gap-4 justify-center">
+              <button
+                onClick={clearSearch}
+                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-blue-500/25 font-medium  cursor-pointer"
+              >
+                Clear Search
+              </button>
+              <button
+                onClick={() => {
+                  setSearchSubject("");
+                  setSelectedDifficulty("all");
+                }}
+                className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-300 font-medium cursor-pointer"
+              >
+                Show All Leaderboards
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Demo Data Warning */}
       {usingMockData && (
@@ -333,8 +439,8 @@ export default function Leaderboard() {
             </div>
 
             {/* Entries List */}
-            <div className="p-6">
-              <ul className="space-y-3">
+            <div className="p-6 flex-grow min-h-[300px]">
+              <ul className="space-y-3 h-full">
                 {board.entries.slice(0, 5).map((entry, i) => (
                   <motion.li
                     // key={entry.userId._id}
@@ -422,7 +528,7 @@ export default function Leaderboard() {
             </div>
 
             {/* Enhanced Footer */}
-            <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 mt-auto">
               <button
                 onClick={() => setModalData(board)}
                 className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-blue-500/25 font-medium cursor-pointer"
