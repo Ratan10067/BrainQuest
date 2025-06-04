@@ -13,6 +13,7 @@ import {
   CheckCircle,
   Github,
 } from "lucide-react";
+import { useGoogleLogin } from "@react-oauth/google";
 import { AuthContext } from "../context/UserContext";
 
 const API_BASE_URL = "http://localhost:4000/users";
@@ -29,10 +30,6 @@ const EmailSignupForm = memo(
     handleBackToSocial,
   }) => (
     <motion.div
-      // initial={{ opacity: 0, y: 20 }}
-      // animate={{ opacity: 1, y: 0 }}
-      // transition={{ duration: 0.5 }}
-      // className="space-y-6"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -53,9 +50,7 @@ const EmailSignupForm = memo(
         <p className="text-gray-300">Fill in your details to get started</p>
       </div>
 
-      {/* Sign Up Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Name Input */}
         <div className="relative group">
           <User
             className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
@@ -76,7 +71,6 @@ const EmailSignupForm = memo(
           />
         </div>
 
-        {/* Email Input */}
         <div className="relative group">
           <Mail
             className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
@@ -97,7 +91,6 @@ const EmailSignupForm = memo(
           />
         </div>
 
-        {/* Password Input */}
         <div className="relative group">
           <Lock
             className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
@@ -126,7 +119,6 @@ const EmailSignupForm = memo(
           </button>
         </div>
 
-        {/* Submit Button */}
         <motion.button
           type="submit"
           disabled={loading}
@@ -150,6 +142,7 @@ const EmailSignupForm = memo(
     </motion.div>
   )
 );
+
 const OtpInput = React.memo(
   ({ index, value, onChange, onKeyDown, inputRef }) => (
     <motion.div
@@ -181,6 +174,7 @@ const OtpInput = React.memo(
     </motion.div>
   )
 );
+
 function OtpVerificationForm({
   setShowOtpInput,
   setOtp,
@@ -200,6 +194,7 @@ function OtpVerificationForm({
     setOtp(["", "", "", "", "", ""]);
     setOtpError("");
   };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -277,49 +272,22 @@ function OtpVerificationForm({
     </motion.div>
   );
 }
+
 function SocialLoginOptions({
   setShowEmailForm,
   socialLoading,
   setSocialLoading,
   setModal,
+  handleGoogleSignup,
 }) {
   const navigate = useNavigate();
-  const handleGoogleSignup = async () => {
-    setSocialLoading((prev) => ({ ...prev, google: true }));
 
-    try {
-      // Simulate Google OAuth process
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // In real implementation, you would:
-      // window.location.href = `https://accounts.google.com/oauth/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&scope=email profile&response_type=code`;
-
-      setModal({
-        open: true,
-        success: true,
-        message: "Google signup successful! Redirecting...",
-      });
-
-      setTimeout(() => navigate("/quiz"), 2000);
-    } catch (error) {
-      setModal({
-        open: true,
-        success: false,
-        message: "Google signup failed. Please try again.",
-      });
-    } finally {
-      setSocialLoading((prev) => ({ ...prev, google: false }));
-    }
-  };
   const handleGithubSignup = async () => {
     setSocialLoading((prev) => ({ ...prev, github: true }));
 
     try {
       // Simulate GitHub OAuth process
       await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // In real implementation, you would:
-      // window.location.href = `https://github.com/login/oauth/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&scope=user:email`;
 
       setModal({
         open: true,
@@ -338,6 +306,7 @@ function SocialLoginOptions({
       setSocialLoading((prev) => ({ ...prev, github: false }));
     }
   };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -354,9 +323,7 @@ function SocialLoginOptions({
         </p>
       </div>
 
-      {/* Social Login Buttons */}
       <div className="space-y-4">
-        {/* Google Signup */}
         <motion.button
           onClick={handleGoogleSignup}
           disabled={socialLoading.google || socialLoading.github}
@@ -396,7 +363,6 @@ function SocialLoginOptions({
           )}
         </motion.button>
 
-        {/* GitHub Signup */}
         <motion.button
           onClick={handleGithubSignup}
           disabled={socialLoading.google || socialLoading.github}
@@ -420,7 +386,6 @@ function SocialLoginOptions({
         </motion.button>
       </div>
 
-      {/* Divider */}
       <div className="relative my-8">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-white/20"></div>
@@ -430,7 +395,6 @@ function SocialLoginOptions({
         </div>
       </div>
 
-      {/* Email Signup Button */}
       <motion.button
         onClick={() => setShowEmailForm(true)}
         whileHover={{ scale: 1.02 }}
@@ -443,7 +407,6 @@ function SocialLoginOptions({
         <span>Continue with Email</span>
       </motion.button>
 
-      {/* Sign In Link */}
       <div className="mt-6 text-center">
         <p className="text-gray-400">
           Already have an account?{" "}
@@ -458,11 +421,11 @@ function SocialLoginOptions({
     </motion.div>
   );
 }
+
 export default function UserSignUp() {
   const navigate = useNavigate();
   const { setIsAuthenticated } = useContext(AuthContext);
 
-  // Form States
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -486,17 +449,81 @@ export default function UserSignUp() {
     message: "",
   });
 
+  // Google OAuth Configuration
+  const googleLogin = useGoogleLogin({
+    onSuccess: handleGoogleSuccess,
+    onError: handleGoogleError,
+    flow: "auth-code", // Changed to auth-code for better security
+    scope: "email profile",
+  });
+
+  // Google OAuth Success Handler
+  async function handleGoogleSuccess(codeResponse) {
+    setSocialLoading((prev) => ({ ...prev, google: true }));
+
+    try {
+      // Send the authorization code to your backend
+      const response = await axios.post(`${API_BASE_URL}/google-auth`, {
+        code: codeResponse.code,
+      });
+
+      if (response.data.token) {
+        // Store authentication data
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("userId", response.data.user.id);
+        setIsAuthenticated(true);
+
+        setModal({
+          open: true,
+          success: true,
+          message: "Google signup successful! Redirecting...",
+        });
+
+        setTimeout(() => navigate("/quiz"), 2000);
+      }
+    } catch (error) {
+      console.error("Google OAuth Error:", error);
+      setModal({
+        open: true,
+        success: false,
+        message:
+          error.response?.data?.message ||
+          "Google signup failed. Please try again.",
+      });
+    } finally {
+      setSocialLoading((prev) => ({ ...prev, google: false }));
+    }
+  }
+
+  // Google OAuth Error Handler
+  function handleGoogleError(error) {
+    console.error("Google OAuth Error:", error);
+    setModal({
+      open: true,
+      success: false,
+      message: "Google signup was cancelled or failed. Please try again.",
+    });
+  }
+
+  // Trigger Google OAuth
+  const handleGoogleSignup = () => {
+    googleLogin();
+  };
+
   const isValidEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((f) => ({ ...f, [name]: value }));
   };
+
   const handleBackToSocial = () => {
     setShowEmailForm(false);
     setFormData({ name: "", email: "", password: "" });
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -635,22 +662,20 @@ export default function UserSignUp() {
   const closeModal = () => {
     setModal({ open: false, success: false, message: "" });
   };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1a1f37] to-[#2c3250] flex items-center justify-center p-4 md:p-8">
-      {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-yellow-400/20 to-transparent rounded-full blur-3xl transform rotate-12 opacity-20" />
         <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-orange-500/20 to-transparent rounded-full blur-3xl transform -rotate-12 opacity-20" />
       </div>
 
-      {/* Main Container */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="relative w-full max-w-4xl mx-auto bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden flex border border-white/20"
       >
-        {/* Left Panel - Illustration */}
         <div className="w-1/2 hidden lg:flex items-center justify-center p-12 relative">
           <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/10 to-orange-500/10 backdrop-blur-sm" />
           <motion.div
@@ -659,15 +684,17 @@ export default function UserSignUp() {
             transition={{ duration: 0.7, delay: 0.2 }}
             className="relative z-10"
           >
-            <img
-              src="/assets/signup-illustration.png"
-              alt="Sign Up Illustration"
-              className="w-full max-w-md transform transition-transform duration-700 hover:scale-105"
-            />
+            <div className="w-full max-w-md transform transition-transform duration-700 hover:scale-105 bg-gradient-to-br from-yellow-400/20 to-orange-500/20 rounded-3xl p-8 backdrop-blur-sm border border-white/10">
+              <h3 className="text-2xl font-bold text-white mb-4">
+                Welcome to BrainQuest!
+              </h3>
+              <p className="text-gray-300">
+                Join thousands of learners and start your journey today.
+              </p>
+            </div>
           </motion.div>
         </div>
 
-        {/* Right Panel - Form */}
         <div className="w-full lg:w-1/2 p-8 md:p-12">
           <AnimatePresence mode="wait">
             {showOtpInput ? (
@@ -688,6 +715,7 @@ export default function UserSignUp() {
               />
             ) : showEmailForm ? (
               <EmailSignupForm
+                key="email"
                 formData={formData}
                 handleChange={handleChange}
                 handleSubmit={handleSubmit}
@@ -704,13 +732,13 @@ export default function UserSignUp() {
                 socialLoading={socialLoading}
                 setSocialLoading={setSocialLoading}
                 setModal={setModal}
+                handleGoogleSignup={handleGoogleSignup}
               />
             )}
           </AnimatePresence>
         </div>
       </motion.div>
 
-      {/* Modal */}
       <AnimatePresence>
         {modal.open && (
           <motion.div

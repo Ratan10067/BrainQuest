@@ -316,3 +316,63 @@ module.exports.updateProfile = async (req, res, next) => {
   }
   return res.status(200).json({ user });
 };
+
+module.exports.googleLogin = async (req, res, next) => {
+  try {
+    const { code } = req.body; // Now expecting 'code' instead of 'accessToken'
+    console.log("Authorization Code received: ", code);
+
+    const { OAuth2Client } = require("google-auth-library");
+    const client = new OAuth2Client(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      process.env.GOOGLE_REDIRECT_URI // You'll need this
+    );
+
+    // Exchange authorization code for tokens
+    const { tokens } = await client.getToken(code);
+
+    // Verify the ID token
+    const ticket = await client.verifyIdToken({
+      idToken: tokens.id_token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { email, name, picture, sub: googleId } = payload;
+
+    // Check if user exists
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // Create new user
+      user = new User({
+        name,
+        email,
+        googleId,
+        avatar: picture,
+        isVerified: true,
+      });
+      await user.save();
+    }
+    console.log("yaha tk pauch gye hai");
+    // Generate JWT
+    const token = await user.generateAuthToken();
+
+    res.status(200).json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+      },
+    });
+  } catch (error) {
+    console.error("Google authentication error:", error);
+    res.status(400).json({
+      message: "Google authentication failed",
+      error: error.message,
+    });
+  }
+};

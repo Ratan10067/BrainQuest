@@ -9,6 +9,7 @@ const {
   updateProfile,
   sendOtp,
   verifyOtp,
+  googleLogin,
 } = require("../controllers/user.controller");
 const { authUser } = require("../middlewares/auth.middlewares");
 router.post(
@@ -38,4 +39,5 @@ router.post(
 router.get("/user-profile", authUser, getProfile);
 router.get("/user-logout", logout);
 router.post("/user-update", authUser, updateProfile);
+router.post("/google-auth", googleLogin);
 module.exports = router;
