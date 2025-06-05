@@ -4,8 +4,9 @@ import { useNavigate, NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Lock, Loader2, EyeIcon, EyeOff, ArrowLeft } from "lucide-react";
 import { AuthContext } from "../context/UserContext";
-
+import { useGoogleLogin } from "@react-oauth/google";
 export default function UserSignIn() {
+  const API_BASE_URL = "http://localhost:4000/users";
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -73,10 +74,14 @@ export default function UserSignIn() {
         setModal({
           open: true,
           success: true,
-          message: "Password reset link sent to your email!",
+          message: "Check your inbox! We've sent a password reset link.",
         });
-        setShowForgotPassword(false);
-        setForgotPasswordEmail("");
+        // Auto-close modal after 3 seconds
+        setTimeout(() => {
+          setModal({ open: false, success: false, message: "" });
+          setShowForgotPassword(false);
+          setForgotPasswordEmail("");
+        }, 3000);
       }
     } catch (error) {
       const msg =
@@ -87,10 +92,63 @@ export default function UserSignIn() {
       setForgotPasswordLoading(false);
     }
   };
+  const googleLogin = useGoogleLogin({
+    onSuccess: handleGoogleSuccess,
+    onError: handleGoogleError,
+    flow: "auth-code", // Changed to auth-code for better security
+    scope: "email profile",
+  });
+
+  // Google OAuth Success Handler
+  async function handleGoogleSuccess(codeResponse) {
+    setSocialLoading((prev) => ({ ...prev, google: true }));
+
+    try {
+      // Send the authorization code to your backend
+      const response = await axios.post(`${API_BASE_URL}/google-auth`, {
+        code: codeResponse.code,
+      });
+
+      if (response.data.token) {
+        // Store authentication data
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("userId", response.data.user.id);
+        setIsAuthenticated(true);
+
+        setModal({
+          open: true,
+          success: true,
+          message: "Google signup successful! Redirecting...",
+        });
+
+        setTimeout(() => navigate("/quiz"), 2000);
+      }
+    } catch (error) {
+      console.error("Google OAuth Error:", error);
+      setModal({
+        open: true,
+        success: false,
+        message:
+          error.response?.data?.message ||
+          "Google signup failed. Please try again.",
+      });
+    } finally {
+      setSocialLoading((prev) => ({ ...prev, google: false }));
+    }
+  }
+
+  // Google OAuth Error Handler
+  function handleGoogleError(error) {
+    console.error("Google OAuth Error:", error);
+    setModal({
+      open: true,
+      success: false,
+      message: "Google signup was cancelled or failed. Please try again.",
+    });
+  }
 
   const handleGoogleSignIn = () => {
-    // Redirect to Google OAuth endpoint
-    window.location.href = "http://localhost:4000/auth/google";
+    googleLogin();
   };
 
   const closeModal = () =>
@@ -376,31 +434,32 @@ export default function UserSignIn() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 flex items-center justify-center bg-black/60 
-                     backdrop-blur-sm z-50 p-4"
+            className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-md z-50 p-4"
           >
             <motion.div
               initial={{ scale: 0.95, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 20 }}
-              className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl w-full 
-                       max-w-md p-8 border border-white/20"
+              className="bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-2xl w-full max-w-md p-6 border border-green-600"
             >
-              <div className="text-6xl mb-4 flex justify-center">
-                {modal.success ? "🎉" : "😢"}
+              <div className="text-6xl mb-3 flex justify-center">
+                {modal.success ? "✉️" : "⚠️"}
               </div>
-              <h3 className="text-2xl font-bold mb-2 text-white text-center">
-                {modal.success ? "Success!" : "Oops!"}
+
+              <h3 className="text-2xl font-semibold mb-2 text-white text-center">
+                {modal.success ? "Email Sent!" : "Oops, Something Went Wrong"}
               </h3>
-              <p className="text-gray-300 text-center mb-6">{modal.message}</p>
+
+              <p className="text-gray-300 text-center mb-6 px-2">
+                {modal.message}
+              </p>
+
               {!modal.success && (
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
                   onClick={closeModal}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-yellow-400 
-                           to-orange-500 text-[#1a1f37] font-semibold hover:shadow-lg 
-                           hover:shadow-yellow-500/25 transition-all cursor-pointer"
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-green-500 to-green-700 text-white font-medium hover:shadow-lg hover:shadow-green-600/30 transition-all cursor-pointer"
                 >
                   Try Again
                 </motion.button>
