@@ -417,12 +417,77 @@ module.exports.forgotPassword = async (req, res, next) => {
   console.log("yaha tk to aagay ab kya", resetUrl);
 
   const message = `
-    <h1>Password Reset Request</h1>
-    <p>Click this link to reset your password:</p>
-    <a href="${resetUrl}" target="_blank">${resetUrl}</a>
-    <p><small>Link expires in 10 minutes</small></p>
-  `;
-  console.log(user.email);
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Reset Request</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f7f9fc;
+      }
+      .email-container {
+        max-width: 600px;
+        margin: 20px auto;
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      .email-header {
+        background: #4caf50;
+        color: white;
+        padding: 20px;
+        text-align: center;
+      }
+      .email-body {
+        padding: 20px;
+      }
+      .email-body p {
+        margin: 0 0 10px;
+        line-height: 1.5;
+        color: #333;
+      }
+      .email-body a {
+        color: #4caf50;
+        text-decoration: none;
+        font-weight: bold;
+      }
+      .email-footer {
+        text-align: center;
+        padding: 10px;
+        background: #f1f1f1;
+        font-size: 12px;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-container">
+      <div class="email-header">
+        <h1>BrainQuest</h1>
+      </div>
+      <div class="email-body">
+        <h2>Password Reset Request</h2>
+        <p>Hello,</p>
+        <p>You requested to reset your password. Click the link below to reset your password:</p>
+        <p>
+          <a href="${resetUrl}" target="_blank">${resetUrl}</a>
+        </p>
+        <p>Please note that this link will expire in 10 minutes.</p>
+        <p>If you did not request a password reset, please ignore this email.</p>
+      </div>
+      <div class="email-footer">
+        <p>&copy; ${new Date().getFullYear()} BrainQuest. All Rights Reserved.</p>
+      </div>
+    </div>
+  </body>
+</html>
+`;
   try {
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
@@ -493,8 +558,332 @@ module.exports.resetPassword = async (req, res, next) => {
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
-      subject: "Password Changed",
-      html: `<p>Your password has been successfully changed.</p>`,
+      subject: "Password Changed Successfully - BrainQuest",
+      html: `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Password Changed Successfully - BrainQuest</title>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                background-color: #f8f9fa;
+                margin: 0;
+                padding: 20px;
+            }
+    
+            .email-container {
+                max-width: 600px;
+                margin: 0 auto;
+                background: #ffffff;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+                border: 1px solid #e0e0e0;
+            }
+    
+            .header {
+                background: linear-gradient(135deg, #1a1f37 0%, #2c3250 100%);
+                padding: 40px 30px;
+                text-align: center;
+                position: relative;
+            }
+    
+            .header::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: radial-gradient(circle, rgba(255, 193, 7, 0.1) 0%, transparent 70%);
+                animation: pulse 6s ease-in-out infinite;
+            }
+    
+            @keyframes pulse {
+                0%, 100% { opacity: 0.3; transform: scale(1); }
+                50% { opacity: 0.6; transform: scale(1.02); }
+            }
+    
+            .logo {
+                position: relative;
+                z-index: 2;
+            }
+    
+            .logo h1 {
+                color: #ffc107;
+                font-size: 2.5rem;
+                font-weight: 800;
+                margin: 0 0 8px 0;
+                text-shadow: 0 2px 10px rgba(255, 193, 7, 0.3);
+            }
+    
+            .logo p {
+                color: rgba(255, 255, 255, 0.8);
+                font-size: 0.9rem;
+                margin: 0;
+                font-weight: 300;
+            }
+    
+            .content {
+                padding: 40px 30px;
+                background: #ffffff;
+            }
+    
+            .success-icon {
+                text-align: center;
+                margin-bottom: 30px;
+            }
+    
+            .success-icon .icon {
+                width: 80px;
+                height: 80px;
+                background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+                border-radius: 50%;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 20px;
+                box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+            }
+    
+            .success-icon .checkmark {
+                color: white;
+                font-size: 2.5rem;
+                font-weight: bold;
+            }
+    
+            .main-message {
+                text-align: center;
+                margin-bottom: 30px;
+            }
+    
+            .main-message h2 {
+                color: #1a1f37;
+                font-size: 1.8rem;
+                font-weight: 700;
+                margin-bottom: 15px;
+            }
+    
+            .main-message p {
+                color: #666;
+                font-size: 1.1rem;
+                line-height: 1.6;
+            }
+    
+            .details-box {
+                background: linear-gradient(135deg, rgba(255, 193, 7, 0.05) 0%, rgba(255, 152, 0, 0.05) 100%);
+                border: 1px solid rgba(255, 193, 7, 0.2);
+                border-radius: 12px;
+                padding: 25px;
+                margin: 30px 0;
+            }
+    
+            .detail-item {
+                display: flex;
+                align-items: center;
+                margin-bottom: 15px;
+                padding: 8px 0;
+            }
+    
+            .detail-item:last-child {
+                margin-bottom: 0;
+            }
+    
+            .detail-icon {
+                width: 20px;
+                height: 20px;
+                margin-right: 15px;
+                color: #ffc107;
+            }
+    
+            .detail-text {
+                color: #444;
+                font-size: 0.95rem;
+            }
+    
+            .detail-text strong {
+                color: #1a1f37;
+                font-weight: 600;
+            }
+    
+            .security-notice {
+                background: #fff3cd;
+                border: 1px solid #ffeaa7;
+                border-radius: 8px;
+                padding: 20px;
+                margin: 25px 0;
+            }
+    
+            .security-notice .warning-icon {
+                color: #856404;
+                font-size: 1.2rem;
+                margin-right: 10px;
+            }
+    
+            .security-notice h3 {
+                color: #856404;
+                font-size: 1.1rem;
+                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
+            }
+    
+            .security-notice p {
+                color: #856404;
+                font-size: 0.9rem;
+                margin: 0;
+                line-height: 1.5;
+            }
+    
+            .action-buttons {
+                text-align: center;
+                margin: 30px 0;
+            }
+    
+            .btn {
+                display: inline-block;
+                padding: 12px 30px;
+                background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+                color: #1a1f37;
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 0.95rem;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+            }
+    
+            .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+                text-decoration: none;
+                color: #1a1f37;
+            }
+    
+            .footer {
+                background: #f8f9fa;
+                padding: 30px;
+                text-align: center;
+                border-top: 1px solid #e9ecef;
+            }
+    
+            .footer p {
+                color: #6c757d;
+                font-size: 0.85rem;
+                margin: 5px 0;
+            }
+    
+            .footer .support-link {
+                color: #ffc107;
+                text-decoration: none;
+                font-weight: 500;
+            }
+    
+            .footer .support-link:hover {
+                text-decoration: underline;
+            }
+    
+            @media (max-width: 600px) {
+                .email-container {
+                    margin: 10px;
+                    border-radius: 12px;
+                }
+                
+                .header {
+                    padding: 30px 20px;
+                }
+                
+                .content {
+                    padding: 30px 20px;
+                }
+                
+                .logo h1 {
+                    font-size: 2rem;
+                }
+                
+                .main-message h2 {
+                    font-size: 1.5rem;
+                }
+                
+                .details-box {
+                    padding: 20px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="email-container">
+            <div class="header">
+                <div class="logo">
+                    <h1>BrainQuest</h1>
+                    <p>Learn • Challenge • Excel</p>
+                </div>
+            </div>
+    
+            <div class="content">
+                <div class="success-icon">
+                    <div class="icon">
+                        <span class="checkmark">✓</span>
+                    </div>
+                </div>
+    
+                <div class="main-message">
+                    <h2>Password Changed Successfully!</h2>
+                    <p>Your account password has been updated securely. You can now use your new password to sign in to your BrainQuest account.</p>
+                </div>
+    
+                <div class="details-box">
+                    <div class="detail-item">
+                        <svg class="detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a4 4 0 118 0v4m-4 8a4 4 0 11-8 0V11a4 4 0 018 0v4z"></path>
+                        </svg>
+                        <div class="detail-text">
+                            <strong>Account:</strong> Your BrainQuest learning account
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <svg class="detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div class="detail-text">
+                            <strong>Date & Time:</strong> ${new Date().toLocaleString()}
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <svg class="detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div class="detail-text">
+                            <strong>Status:</strong> Password updated successfully
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="security-notice">
+                    <h3>
+                        <span class="warning-icon">⚠️</span>
+                        Didn't make this change?
+                    </h3>
+                    <p>If you didn't request this password change, please contact our support team immediately. Your account security is our top priority, and we'll help you secure your account right away.</p>
+                </div>
+    
+                <div class="action-buttons">
+                    <a href="http://localhost:3000/signin" class="btn">Sign In to BrainQuest</a>
+                </div>
+            </div>
+    
+            <div class="footer">
+                <p><strong>BrainQuest</strong> - Your Learning Companion</p>
+                <p>Need help? Contact us at <a href="mailto:support@brainquest.com" class="support-link">support@brainquest.com</a></p>
+                <p>This email was sent to confirm your password change. Please do not reply to this email.</p>
+            </div>
+        </div>
+    </body>
+    </html>`,
     });
   } catch (err) {
     // Email fail shouldn't block the reset
