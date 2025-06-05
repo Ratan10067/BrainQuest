@@ -25,7 +25,10 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      // Password is only required for local authentication
+      required: function () {
+        return this.authMethod === "email";
+      },
     },
     avatar: {
       type: String, // URL or base64-encoded string for the avatar image
@@ -88,6 +91,19 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
+    authMethod: {
+      type: String,
+      enum: ["email", "google", "github"],
+      required: true,
+      default: "email",
+    },
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true, // Allows multiple null values
+    },
+    resetPasswordToken: String,
+    resetPasswordExpire: Date,
   },
   { timestamps: true }
 );

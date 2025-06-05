@@ -14,6 +14,7 @@ import Result from "./components/Result";
 import ContactUs from "./components/ContactUs";
 import Premium from "./components/Premium";
 import NotFoundPage from "./components/NotFoundPage";
+import ResetPassword from "./components/ResetPassword";
 export default function App() {
   return (
     <BrowserRouter>
@@ -32,6 +33,10 @@ export default function App() {
           <Route path="/results/:quizId" element={<Result />} />
           <Route path="/Contact-us" element={<ContactUs />} />
           <Route path="/premium" element={<Premium />} />
+          <Route
+            path="/reset-password/:resetToken"
+            element={<ResetPassword />}
+          />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </AuthProvider>

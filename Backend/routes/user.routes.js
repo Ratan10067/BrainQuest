@@ -10,6 +10,8 @@ const {
   sendOtp,
   verifyOtp,
   googleLogin,
+  forgotPassword,
+  resetPassword,
 } = require("../controllers/user.controller");
 const { authUser } = require("../middlewares/auth.middlewares");
 router.post(
@@ -40,4 +42,6 @@ router.get("/user-profile", authUser, getProfile);
 router.get("/user-logout", logout);
 router.post("/user-update", authUser, updateProfile);
 router.post("/google-auth", googleLogin);
+router.post("/forgot-password", forgotPassword);
+router.put("/reset-passwrod", resetPassword);
 module.exports = router;

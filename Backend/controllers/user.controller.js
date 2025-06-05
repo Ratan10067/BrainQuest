@@ -2,6 +2,7 @@ const User = require("../models/user.model");
 const { validationResult } = require("express-validator");
 const otpGenerator = require("otp-generator");
 const nodemailer = require("nodemailer");
+const crypto = require("crypto");
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -227,6 +228,7 @@ module.exports.verifyOtp = async (req, res, next) => {
     user.name = name;
     user.password = hashPassword;
     user.isVerified = true;
+    user.authMethod = "email";
     await user.clearOTP(); // Clear OTP after successful verification
 
     // Generate token
@@ -319,14 +321,13 @@ module.exports.updateProfile = async (req, res, next) => {
 
 module.exports.googleLogin = async (req, res, next) => {
   try {
-    const { code } = req.body; // Now expecting 'code' instead of 'accessToken'
-    console.log("Authorization Code received: ", code);
+    const { code } = req.body;
 
     const { OAuth2Client } = require("google-auth-library");
     const client = new OAuth2Client(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      process.env.GOOGLE_REDIRECT_URI // You'll need this
+      process.env.GOOGLE_REDIRECT_URI
     );
 
     // Exchange authorization code for tokens
@@ -342,20 +343,35 @@ module.exports.googleLogin = async (req, res, next) => {
     const { email, name, picture, sub: googleId } = payload;
 
     // Check if user exists
-    let user = await User.findOne({ email });
+    let user = await User.findOne({
+      $or: [{ email }, { googleId }],
+    });
 
     if (!user) {
-      // Create new user
+      // Create new user without password
       user = new User({
         name,
         email,
         googleId,
         avatar: picture,
         isVerified: true,
+        authMethod: "google",
       });
       await user.save();
+    } else {
+      // User exists - update Google credentials if needed
+      if (!user.googleId) {
+        user.googleId = googleId;
+        user.authMethod = "google";
+        await user.save();
+      }
+      // Update profile picture if empty
+      if (!user.avatar) {
+        user.avatar = picture;
+        await user.save();
+      }
     }
-    console.log("yaha tk pauch gye hai");
+
     // Generate JWT
     const token = await user.generateAuthToken();
 
@@ -366,6 +382,7 @@ module.exports.googleLogin = async (req, res, next) => {
         name: user.name,
         email: user.email,
         avatar: user.avatar,
+        authMethod: user.authMethod,
       },
     });
   } catch (error) {
@@ -375,4 +392,88 @@ module.exports.googleLogin = async (req, res, next) => {
       error: error.message,
     });
   }
+};
+
+module.exports.forgotPassword = async (req, res, next) => {
+  const { email } = req.body;
+  console.log("forgot password me aaya hu", email);
+  // 1. Find user
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  // 2. Generate reset token (expires in 10 mins)
+  const resetToken = crypto.randomBytes(20).toString("hex");
+  user.resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+  user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 mins
+  await user.save();
+  // 3. Send email
+  const resetUrl = `${req.protocol}://localhost:5173/reset-password/${resetToken}`;
+  console.log("yaha tk to aagay ab kya", resetUrl);
+
+  const message = `
+    <h1>Password Reset Request</h1>
+    <p>Click this link to reset your password:</p>
+    <a href="${resetUrl}" target="_blank">${resetUrl}</a>
+    <p><small>Link expires in 10 minutes</small></p>
+  `;
+  console.log(user.email);
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Password Reset Request",
+      html: message,
+    });
+
+    res.json({ message: "Reset link sent to email" });
+  } catch (err) {
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+    res.status(500).json({ message: "Email could not be sent" });
+  }
+};
+
+module.exports.resetPassword = async (req, res, next) => {
+  const { password } = req.body;
+  console.log(password, req.params);
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+  console.log("hashedToken : ", hashedToken);
+  // 2. Find user with valid token
+  const user = await User.findOne({
+    resetPasswordToken: hashedToken,
+    resetPasswordExpire: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return res.status(400).json({
+      message: "Invalid or expired token",
+    });
+  }
+  const hashedPassword = user.hashPassword(password);
+  user.password = hashedPassword;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+  await user.save();
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      email: user.email,
+      subject: "Password Changed",
+      html: `<p>Your password has been successfully changed.</p>`,
+    });
+  } catch (err) {
+    // Email fail shouldn't block the reset
+    console.error("Confirmation email failed:", err);
+  }
+  res.status(200).json({
+    message: "Password updated successfully",
+  });
 };
