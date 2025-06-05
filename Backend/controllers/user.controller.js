@@ -411,7 +411,9 @@ module.exports.forgotPassword = async (req, res, next) => {
   user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 mins
   await user.save();
   // 3. Send email
-  const resetUrl = `${req.protocol}://localhost:5173/reset-password/${resetToken}`;
+  const resetUrl = `${req.protocol}://${req.get(
+    "host"
+  )}/users/reset-password/${resetToken}`;
   console.log("yaha tk to aagay ab kya", resetUrl);
 
   const message = `
@@ -438,9 +440,32 @@ module.exports.forgotPassword = async (req, res, next) => {
   }
 };
 
+module.exports.getResetPassword = async (req, res, next) => {
+  const { token } = req.params;
+  try {
+    // Hash the token to match the one stored in the database
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    // Find the user with the matching token and check if it is still valid
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpire: { $gt: Date.now() }, // Ensure token has not expired
+    });
+
+    if (!user) {
+      return res.status(400).send("Invalid or expired token");
+    }
+
+    // Render the EJS file and pass the token to the template
+    return res.render("resetPassword", { token });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("An error occurred while processing your request.");
+  }
+};
+
 module.exports.resetPassword = async (req, res, next) => {
   const { password } = req.body;
-  console.log(password, req.params);
+  console.log(password, req.params.token);
   const hashedToken = crypto
     .createHash("sha256")
     .update(req.params.token)
@@ -457,15 +482,17 @@ module.exports.resetPassword = async (req, res, next) => {
       message: "Invalid or expired token",
     });
   }
-  const hashedPassword = user.hashPassword(password);
+  const hashedPassword = await User.hashPassword(password);
   user.password = hashedPassword;
   user.resetPasswordToken = undefined;
   user.resetPasswordExpire = undefined;
   await user.save();
+  const email = user.email;
+  console.log(user.email);
   try {
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
-      email: user.email,
+      to: email,
       subject: "Password Changed",
       html: `<p>Your password has been successfully changed.</p>`,
     });

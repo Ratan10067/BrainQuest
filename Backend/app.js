@@ -14,8 +14,9 @@ const path = require("path");
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
+app.set("views", path.join(__dirname, "views")); // Adjust path if necessary
 app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
+console.log("Views Directory:", path.join(__dirname, "views"));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
