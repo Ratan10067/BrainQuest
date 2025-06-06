@@ -101,23 +101,7 @@ module.exports.sendOtp = async (req, res, next) => {
       });
     }
 
-    // Set OTP in database
     await user.setOTP(otp);
-
-    // Send email
-    // await transporter.sendMail({
-    //   from: process.env.EMAIL_USER,
-    //   to: email,
-    //   subject: "Verify your email for BrainQuest",
-    //   html: `
-    //     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-    //       <h2>Welcome to BrainQuest!</h2>
-    //       <p>Your verification code is:</p>
-    //       <h1 style="font-size: 36px; letter-spacing: 5px; color: #f59e0b;">${otp}</h1>
-    //       <p>This code will expire in 5 minutes.</p>
-    //     </div>
-    //   `,
-    // });
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
