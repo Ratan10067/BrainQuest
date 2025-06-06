@@ -13,6 +13,7 @@ const {
   forgotPassword,
   getResetPassword,
   resetPassword,
+  deleteUser
 } = require("../controllers/user.controller");
 const { authUser } = require("../middlewares/auth.middlewares");
 router.post(
@@ -46,4 +47,5 @@ router.post("/google-auth", googleLogin);
 router.post("/forgot-password", forgotPassword);
 router.get("/reset-password/:token", getResetPassword);
 router.post("/reset-password/:token", resetPassword);
+router.delete("/delete-account", authUser, deleteUser);
 module.exports = router;

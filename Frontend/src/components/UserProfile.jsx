@@ -14,29 +14,56 @@ import {
   Mail,
   Phone,
   MapPin,
+  Shield,
+  Calendar,
+  Briefcase,
+  Github,
+  Linkedin,
+  Twitter,
+  Facebook,
+  Link as LinkIcon,
+  Key,
+  UserCheck,
+  ExternalLink,
+  Globe,
+  Book,
+  CircleAlert,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Settings from "./Settings";
 import { AuthContext } from "../context/UserContext";
 import SessionExpiredModal from "./SessionExpiredModal";
+
 export default function UserProfile() {
   const navigate = useNavigate();
   const [editMode, setEditMode] = useState(false);
   const avatarInput = useRef();
   const [activeView, setActiveView] = useState("profile");
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const {
     isAuthenticated,
     setIsAuthenticated,
     sessionExpired,
     setSessionExpired,
   } = useContext(AuthContext);
+  const [message, setMessage] = useState("");
   const [profile, setProfile] = useState({
     name: "John Doe",
     email: "john@example.com",
     phone: "Not provided",
     location: "Not provided",
     avatar: "./assets/default.jpg",
+    gender: "Not specified",
+    birthday: "Not provided",
+    summary: "Tell us about yourself (interests, experience, etc.)",
+    website: "Your blog, portfolio, etc.",
+    github: "",
+    linkedin: "",
+    twitter: "",
+    workExperience: "Add a workplace",
+    education: "Add your education",
+    skills: [],
   });
 
   const [notification, setNotification] = useState({
@@ -53,7 +80,7 @@ export default function UserProfile() {
 
   const handleViewSwitch = (view) => {
     setActiveView(view);
-    setEditMode(false); // Reset edit mode when switching views
+    setEditMode(false);
   };
 
   useEffect(() => {
@@ -77,6 +104,18 @@ export default function UserProfile() {
             avatar: user.user.avatar || "./assets/default.jpg",
             phone: user.user.phone || "Not provided",
             location: user.user.location || "Not provided",
+            gender: user.user.gender || "Not specified",
+            birthday: user.user.birthday || "Not provided",
+            summary:
+              user.user.summary ||
+              "Tell us about yourself (interests, experience, etc.)",
+            website: user.user.website || "Your blog, portfolio, etc.",
+            github: user.user.github || "",
+            linkedin: user.user.linkedin || "",
+            twitter: user.user.twitter || "",
+            workExperience: user.user.workExperience || "Add a workplace",
+            education: user.user.education || "Add your education",
+            skills: user.user.skills || [],
           }));
         }
       } catch (error) {
@@ -85,7 +124,6 @@ export default function UserProfile() {
             "Authentication failed - token might be invalid or expired"
           );
           setSessionExpired(true);
-          // Optionally redirect to login or refresh token
         }
         console.error("Error fetching user profile:", error);
         setError({
@@ -168,11 +206,57 @@ export default function UserProfile() {
       });
     }
   };
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(
+        "http://localhost:4000/users/forgot-password",
+        { email: profile.email }
+      );
+      if (response.status === 200) {
+        setMessage("Check your inbox! We've sent a password reset link.");
+        setTimeout(() => {
+          setMessage("");
+        }, 3000);
+      }
+    } catch (error) {
+      const msg =
+        error.response?.data?.message ||
+        "Failed to send reset email. Please try again.";
+      setMessage(msg);
+    }
+  };
+  const handleDeleteClick = async (e) => {
+    setShowDeleteConfirmation(true);
+  };
+  const handleConfirmDelete = async (e) => {
+    setShowDeleteConfirmation(false);
+    try {
+      const response = await axios.delete(
+        "http://localhost:4000/users/delete-account",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("userId");
+        setIsAuthenticated(false);
+        navigate("/");
+      }
+    } catch (error) {
+      console.log("error comes while deleting profile : ", error);
+    }
+  };
 
+  const handleCancelDelete = () => {
+    setShowDeleteConfirmation(false);
+  };
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
-      // Remove email from the update payload
       const { email, ...updateData } = profile;
 
       const response = await axios.post(
@@ -251,6 +335,22 @@ export default function UserProfile() {
               />
             </button>
             <button
+              onClick={() => handleViewSwitch("account")}
+              className={`w-full flex items-center justify-start space-x-3 px-6 py-4 text-white hover:bg-white/10 rounded-2xl transition-all duration-300 group cursor-pointer ${
+                activeView === "account" ? "bg-white/10" : ""
+              }`}
+            >
+              <Shield
+                size={20}
+                className="text-green-400 group-hover:scale-110 transition-transform"
+              />
+              <span>Account</span>
+              <ChevronRight
+                className="ml-auto opacity-50 group-hover:translate-x-1 transition-transform"
+                size={20}
+              />
+            </button>
+            <button
               onClick={() => handleViewSwitch("settings")}
               className={`w-full flex items-center justify-start space-x-3 px-6 py-4 text-white hover:bg-white/10 rounded-2xl transition-all duration-300 group cursor-pointer ${
                 activeView === "settings" ? "bg-white/10" : ""
@@ -269,7 +369,7 @@ export default function UserProfile() {
             <button className="w-full flex items-center justify-start space-x-3 px-6 py-4 text-white hover:bg-white/10 rounded-2xl transition-all duration-300 group cursor-pointer">
               <LanguageIcon
                 size={20}
-                className="text-green-400 group-hover:scale-110 transition-transform"
+                className="text-yellow-400 group-hover:scale-110 transition-transform"
               />
               <span>Language</span>
               <ChevronRight
@@ -296,7 +396,7 @@ export default function UserProfile() {
             <>
               <div className="flex items-center justify-between mb-8">
                 <h1 className="text-3xl font-bold text-white">
-                  {editMode ? "Edit Profile" : "My Profile"}
+                  {editMode ? "Edit Profile" : "Basic Info"}
                 </h1>
                 <button
                   onClick={() => setEditMode((m) => !m)}
@@ -310,7 +410,7 @@ export default function UserProfile() {
                   ) : (
                     <>
                       <EditIcon size={20} />
-                      <span>Edit Profile</span>
+                      <span>Edit</span>
                     </>
                   )}
                 </button>
@@ -318,48 +418,147 @@ export default function UserProfile() {
 
               {!editMode ? (
                 <div className="space-y-6">
-                  {[
-                    {
-                      icon: <UserIcon size={20} />,
-                      label: "Name",
-                      value: profile.name,
-                    },
-                    {
-                      icon: <Mail size={20} />,
-                      label: "Email",
-                      value: profile.email,
-                      isEmail: true,
-                    },
-                    {
-                      icon: <Phone size={20} />,
-                      label: "Phone",
-                      value: profile.phone,
-                    },
-                    {
-                      icon: <MapPin size={20} />,
-                      label: "Location",
-                      value: profile.location,
-                    },
-                  ].map((item, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center space-x-4 p-6 rounded-2xl bg-white/5 hover:bg-white/10 transition-colors duration-300"
-                    >
-                      <div className="text-blue-400">{item.icon}</div>
+                  {/* Basic Information */}
+                  <div className="space-y-4">
+                    {[
+                      {
+                        icon: <UserIcon size={20} />,
+                        label: "Name",
+                        value: profile.name,
+                      },
+                      {
+                        icon: <UserCheck size={20} />,
+                        label: "Gender",
+                        value: profile.gender,
+                      },
+                      {
+                        icon: <MapPin size={20} />,
+                        label: "Location",
+                        value: profile.location,
+                      },
+                      {
+                        icon: <Calendar size={20} />,
+                        label: "Birthday",
+                        value: profile.birthday,
+                      },
+                      {
+                        icon: <Mail size={20} />,
+                        label: "Email",
+                        value: profile.email,
+                        isEmail: true,
+                      },
+                      {
+                        icon: <Phone size={20} />,
+                        label: "Phone",
+                        value: profile.phone,
+                      },
+                      {
+                        icon: <EditIcon size={20} />,
+                        label: "Summary",
+                        value: profile.summary,
+                        isMultiline: true,
+                      },
+                      {
+                        icon: <Globe size={20} />,
+                        label: "Website",
+                        value: profile.website,
+                      },
+                      {
+                        icon: <Github size={20} />,
+                        label: "Github",
+                        value: profile.github || "Not provided",
+                      },
+                      {
+                        icon: <Linkedin size={20} />,
+                        label: "LinkedIn",
+                        value: profile.linkedin || "Not provided",
+                      },
+                      {
+                        icon: <Twitter size={20} />,
+                        label: "Twitter",
+                        value: profile.twitter || "Not provided",
+                      },
+                    ].map((item, index) => (
+                      <div
+                        key={index}
+                        className="flex items-start space-x-4 p-6 rounded-2xl bg-white/5 hover:bg-white/10 transition-colors duration-300"
+                      >
+                        <div className="text-blue-400 mt-1">{item.icon}</div>
+                        <div className="flex-1">
+                          <p className="text-gray-400 text-sm">{item.label}</p>
+                          <p
+                            className={`text-white font-medium ${
+                              item.isEmail
+                                ? "select-none hover:blur-none transition-all duration-300"
+                                : ""
+                            } ${item.isMultiline ? "whitespace-pre-wrap" : ""}`}
+                          >
+                            {item.value}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Experience Section */}
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-white">
+                      Experience
+                    </h3>
+                    <div className="flex items-start space-x-4 p-6 rounded-2xl bg-white/5 hover:bg-white/10 transition-colors duration-300">
+                      <div className="text-blue-400 mt-1">
+                        <Briefcase size={20} />
+                      </div>
                       <div className="flex-1">
-                        <p className="text-gray-400 text-sm">{item.label}</p>
-                        <p
-                          className={`text-white font-medium ${
-                            item.isEmail
-                              ? "select-none  hover:blur-none transition-all duration-300"
-                              : ""
-                          }`}
-                        >
-                          {item.value}
+                        <p className="text-gray-400 text-sm">Work</p>
+                        <p className="text-white font-medium">
+                          {profile.workExperience}
                         </p>
                       </div>
                     </div>
-                  ))}
+                    <div className="flex items-start space-x-4 p-6 rounded-2xl bg-white/5 hover:bg-white/10 transition-colors duration-300">
+                      <div className="text-blue-400 mt-1">
+                        <Book size={20} />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-gray-400 text-sm">Education</p>
+                        <p className="text-white font-medium">
+                          {profile.education}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Skills Section */}
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-white">Skills</h3>
+                    <div className="flex items-start space-x-4 p-6 rounded-2xl bg-white/5 hover:bg-white/10 transition-colors duration-300">
+                      <div className="text-blue-400 mt-1">
+                        <UserCheck size={20} />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-gray-400 text-sm">
+                          Technical Skills
+                        </p>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {profile.skills.length > 0 ? (
+                            profile.skills.map((skill, idx) => (
+                              <span
+                                key={idx}
+                                className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm"
+                              >
+                                {skill}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-gray-400">
+                              No skills added
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <form onSubmit={handleUpdateProfile} className="space-y-6">
@@ -370,6 +569,29 @@ export default function UserProfile() {
                         value: profile.name,
                         key: "name",
                         icon: <UserIcon size={20} />,
+                        placeholder: "Enter your name",
+                      },
+                      {
+                        label: "Gender",
+                        value: profile.gender,
+                        key: "gender",
+                        icon: <UserCheck size={20} />,
+                        placeholder: "Select your gender",
+                      },
+                      {
+                        label: "Location",
+                        value: profile.location,
+                        key: "location",
+                        icon: <MapPin size={20} />,
+                        placeholder: "Enter your location",
+                      },
+                      {
+                        label: "Birthday",
+                        value: profile.birthday,
+                        key: "birthday",
+                        icon: <Calendar size={20} />,
+                        type: "date",
+                        placeholder: "Select your birthday",
                       },
                       {
                         label: "Email",
@@ -378,18 +600,21 @@ export default function UserProfile() {
                         icon: <Mail size={20} />,
                         disabled: true,
                         tooltip: "Email cannot be changed",
+                        placeholder: "Your email address",
                       },
                       {
                         label: "Phone",
                         value: profile.phone,
                         key: "phone",
                         icon: <Phone size={20} />,
+                        placeholder: "Enter your phone number",
                       },
                       {
-                        label: "Location",
-                        value: profile.location,
-                        key: "location",
-                        icon: <MapPin size={20} />,
+                        label: "Website",
+                        value: profile.website,
+                        key: "website",
+                        icon: <Globe size={20} />,
+                        placeholder: "Enter your website URL",
                       },
                     ].map((field) => (
                       <div key={field.key} className="relative group">
@@ -401,8 +626,11 @@ export default function UserProfile() {
                             {field.icon}
                           </div>
                           <input
-                            type={field.key === "email" ? "email" : "text"}
-                            value={field.value}
+                            type={
+                              field.type ||
+                              (field.key === "email" ? "email" : "text")
+                            }
+                            value={field.value || ""}
                             onChange={(e) =>
                               !field.disabled &&
                               setProfile((p) => ({
@@ -415,8 +643,12 @@ export default function UserProfile() {
                               field.disabled
                                 ? "cursor-not-allowed opacity-60"
                                 : ""
+                            } ${
+                              !field.value
+                                ? "text-gray-400 italic"
+                                : "text-white"
                             }`}
-                            placeholder={`Enter your ${field.label.toLowerCase()}`}
+                            placeholder={field.placeholder}
                           />
                           {field.disabled && (
                             <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300 -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-sm rounded whitespace-nowrap">
@@ -427,6 +659,86 @@ export default function UserProfile() {
                       </div>
                     ))}
                   </div>
+
+                  {/* Social Accounts Section in Edit Mode */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {[
+                      {
+                        label: "GitHub",
+                        value: profile.github,
+                        key: "github",
+                        icon: <Github size={20} />,
+                        placeholder: "https://github.com/username",
+                      },
+                      {
+                        label: "LinkedIn",
+                        value: profile.linkedin,
+                        key: "linkedin",
+                        icon: <Linkedin size={20} />,
+                        placeholder: "https://linkedin.com/in/username",
+                      },
+                      {
+                        label: "Twitter",
+                        value: profile.twitter,
+                        key: "twitter",
+                        icon: <Twitter size={20} />,
+                        placeholder: "https://twitter.com/username",
+                      },
+                    ].map((field) => (
+                      <div key={field.key} className="relative">
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          {field.label}
+                        </label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-blue-400">
+                            {field.icon}
+                          </div>
+                          <input
+                            type="text"
+                            value={field.value || ""}
+                            onChange={(e) =>
+                              setProfile((p) => ({
+                                ...p,
+                                [field.key]: e.target.value,
+                              }))
+                            }
+                            className={`w-full bg-white/5 border border-white/10 rounded-xl px-10 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${
+                              !field.value
+                                ? "text-gray-400 italic"
+                                : "text-white"
+                            }`}
+                            placeholder={field.placeholder}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Summary field - full width */}
+                  <div className="relative group">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Summary
+                    </label>
+                    <div className="relative">
+                      <textarea
+                        value={profile.summary || ""}
+                        onChange={(e) =>
+                          setProfile((p) => ({
+                            ...p,
+                            summary: e.target.value,
+                          }))
+                        }
+                        rows={4}
+                        className={`w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 resize-none ${
+                          !profile.summary
+                            ? "text-gray-400 italic"
+                            : "text-white"
+                        }`}
+                        placeholder="Tell us about yourself..."
+                      />
+                    </div>
+                  </div>
+
                   <button
                     type="submit"
                     className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl py-4 px-6 font-semibold cursor-pointer hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#1a1f37]"
@@ -435,6 +747,114 @@ export default function UserProfile() {
                   </button>
                 </form>
               )}
+            </>
+          ) : activeView === "account" ? (
+            <>
+              <div className="flex items-center justify-between mb-8">
+                <h1 className="text-3xl font-bold text-white">
+                  Account Information
+                </h1>
+              </div>
+
+              <div className="space-y-8">
+                {/* Account Details */}
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-4 p-6 rounded-2xl bg-white/5">
+                    <div className="text-blue-400 mt-1">
+                      <UserIcon size={20} />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-gray-400 text-sm">Username</p>
+                      <p className="text-white font-medium">{profile.name}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-4 p-6 rounded-2xl bg-white/5">
+                    <div className="text-blue-400 mt-1">
+                      <Mail size={20} />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-gray-400 text-sm">Email</p>
+                      <div className="flex items-center space-x-2">
+                        <p className="text-white font-medium">
+                          {profile.email}
+                        </p>
+                        <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs">
+                          Primary
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-4 p-6 rounded-2xl bg-white/5">
+                    <div className="text-blue-400 mt-1">
+                      <Key size={20} />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-gray-400 text-sm">Password</p>
+                      <button
+                        onClick={handleChangePassword}
+                        className="text-blue-400 hover:text-blue-300 transition-colors text-sm cursor-pointer"
+                      >
+                        Change Password
+                      </button>
+                      {message && (
+                        <p
+                          className={`px-4 py-3 rounded-lg mb-4 text-center font-medium ${
+                            message.type === "error"
+                              ? "bg-red-500/20 text-red-300 border border-red-500/50"
+                              : "bg-green-500/20 text-green-300 border border-green-500/50"
+                          } transition-all duration-300 animate-fadeIn`}
+                        >
+                          {message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Delete Account */}
+                <div className="pt-8 border-t border-white/10">
+                  <button
+                    onClick={handleDeleteClick}
+                    className="px-6 py-3 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors cursor-pointer"
+                  >
+                    Delete Account
+                  </button>
+                </div>
+                {showDeleteConfirmation && (
+                  <div className="absolute inset-0 z-10   rounded-xl flex items-center justify-center">
+                    <div className="bg-white rounded-xl p-8 w-96 shadow-2xl border border-gray-100">
+                      <div className="flex flex-col items-center text-center">
+                        <div className="inline-flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-red-100 mb-4">
+                          <CircleAlert className="h-6 w-6 text-red-600" />
+                        </div>
+                        <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                          Delete Account
+                        </h2>
+                        <p className="text-gray-600 mb-8">
+                          This will permanently delete all your data. This
+                          action cannot be undone.
+                        </p>
+                        <div className="flex space-x-4">
+                          <button
+                            className="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200 cursor-pointer"
+                            onClick={handleCancelDelete}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            className="px-6 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 cursor-pointer"
+                            onClick={handleConfirmDelete}
+                          >
+                            Yes, Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </>
           ) : (
             <Settings />
@@ -459,19 +879,11 @@ export default function UserProfile() {
               }`}
             >
               {notification.type === "success" ? (
-                <CheckCircle className="w-6 h-6 text-white" />
+                <CheckCircle size={24} className="text-white" />
               ) : (
-                <AlertCircle className="w-6 h-6 text-white" />
+                <AlertCircle size={24} className="text-white" />
               )}
               <p className="text-white font-medium">{notification.message}</p>
-              <button
-                onClick={() =>
-                  setNotification({ show: false, type: "", message: "" })
-                }
-                className="text-white/80 hover:text-white cursor-pointer transition-colors"
-              >
-                <X size={20} />
-              </button>
             </div>
           </motion.div>
         )}
@@ -484,69 +896,94 @@ export default function UserProfile() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50"
           >
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-gradient-to-br from-red-500/10 to-red-600/10 backdrop-blur-xl rounded-2xl p-6 w-full max-w-lg border border-red-500/20 shadow-2xl"
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              className="bg-[#1a1f37] rounded-2xl p-6 max-w-md w-full border border-white/10"
             >
-              <div className="flex items-start justify-between mb-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-red-500/20 rounded-full">
-                    <AlertCircle className="w-6 h-6 text-red-500" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-white mb-1">
-                      {error.message}
-                    </h3>
-                    <p className="text-red-200/70">{error.details}</p>
-                  </div>
+              <div className="flex items-start space-x-3">
+                <AlertCircle size={24} className="text-red-400 mt-1" />
+                <div>
+                  <h3 className="text-xl font-bold text-white">
+                    {error.message}
+                  </h3>
+                  <p className="text-gray-300 mt-2">{error.details}</p>
                 </div>
+              </div>
+              <div className="flex justify-end mt-6 space-x-3">
                 <button
                   onClick={() =>
                     setError({ show: false, message: "", details: "" })
                   }
-                  className="text-white/60 hover:text-white cursor-pointer transition-colors"
+                  className="px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
                 >
-                  <X size={20} />
+                  Dismiss
                 </button>
-              </div>
-              <div className="space-y-4">
-                <div className="h-1.5 w-full bg-red-500/20 rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: "100%" }}
-                    animate={{ width: "0%" }}
-                    transition={{ duration: 5 }}
-                    className="h-full bg-red-500"
-                    onAnimationComplete={() =>
-                      setError({ show: false, message: "", details: "" })
-                    }
-                  />
-                </div>
-                <div className="flex justify-end gap-3">
-                  <button
-                    onClick={() => window.location.reload()}
-                    className="px-4 py-2 rounded-lg bg-red-500 cursor-pointer text-white hover:bg-red-600 transition-colors"
-                  >
-                    Retry
-                  </button>
-                  <button
-                    onClick={() =>
-                      setError({ show: false, message: "", details: "" })
-                    }
-                    className="px-4 py-2 cursor-pointer rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors"
-                  >
-                    Dismiss
-                  </button>
-                </div>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-      {sessionExpired && <SessionExpiredModal />}
+
+      {/* Session Expired Modal */}
+      {sessionExpired && (
+        <SessionExpiredModal
+          isOpen={sessionExpired}
+          onClose={() => {
+            setSessionExpired(false);
+            localStorage.removeItem("token");
+            localStorage.removeItem("userId");
+            setIsAuthenticated(false);
+            navigate("/signin");
+          }}
+        />
+      )}
+    </div>
+  );
+}
+function WarningModal({ onConfirm, onCancel }) {
+  return (
+    <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl p-8 w-96 shadow-2xl border border-gray-100">
+        <div className="flex flex-col items-center text-center">
+          <div className="inline-flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-red-100 mb-4">
+            <svg
+              className="h-6 w-6 text-red-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+              />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Warning!</h2>
+          <p className="text-gray-600 mb-8">
+            Leaving or refreshing this page will submit your quiz automatically.
+            Are you sure?
+          </p>
+          <div className="flex space-x-4">
+            <button
+              className="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200 cursor-pointer"
+              onClick={onCancel}
+            >
+              Cancel
+            </button>
+            <button
+              className="px-6 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 cursor-pointer"
+              onClick={onConfirm}
+            >
+              Yes, Delete My Account
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

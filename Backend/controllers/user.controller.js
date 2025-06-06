@@ -1,8 +1,13 @@
 const User = require("../models/user.model");
+const Result = require("../models/result.model");
+const Quiz = require("../models/quiz.model");
+const LeaderBoard = require("../models/leaderboard.model");
 const { validationResult } = require("express-validator");
 const otpGenerator = require("otp-generator");
 const nodemailer = require("nodemailer");
+
 const crypto = require("crypto");
+const Query = require("../models/query.model");
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -299,7 +304,20 @@ module.exports.updateProfile = async (req, res, next) => {
     return res.status(400).json({ errors: errors.array() });
   }
   console.log(req.body);
-  const { name, email, phone, location, avatar } = req.body;
+  const {
+    name,
+    email,
+    phone,
+    location,
+    avatar,
+    gender,
+    birthday,
+    github,
+    twitter,
+    linkedin,
+    summary,
+    skills,
+  } = req.body;
   console.log("update profile me yaha aa rha ha", req.user._id);
   const user = await User.findByIdAndUpdate(
     req.user._id,
@@ -309,6 +327,13 @@ module.exports.updateProfile = async (req, res, next) => {
       phone,
       location,
       avatar,
+      birthday,
+      github,
+      linkedin,
+      summary,
+      skills,
+      twitter,
+      gender,
     },
     { new: true }
   );
@@ -892,4 +917,33 @@ module.exports.resetPassword = async (req, res, next) => {
   res.status(200).json({
     message: "Password updated successfully",
   });
+};
+
+module.exports.deleteUser = async (req, res, next) => {
+  console.log("delete krne aaya hu", req.user._id);
+  try {
+    const userId = req.user.id;
+    if (!userId) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    await User.findByIdAndDelete(userId);
+    await Quiz.deleteMany({ userId: userId });
+    await Result.deleteMany({ userId: userId });
+    await Query.deleteMany({ userId: userId });
+    await LeaderBoard.deleteMany({ userId: userId });
+    res.status(200).json({
+      success: true,
+      message: "Account deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting account:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error deleting account",
+      error: error.message,
+    });
+  }
 };

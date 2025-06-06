@@ -13,6 +13,27 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    gender: {
+      type: String,
+    },
+    summary: {
+      type: String,
+      default: "Tell us about yourself (interests, experience, etc.)",
+    },
+    github: {
+      type: String,
+    },
+    linkedin: {
+      type: String,
+    },
+    twitter: {
+      type: String,
+    },
+    experience: {
+      work: [{ type: String }],
+      education: [{ type: String }],
+    },
+    skills: [{ type: String }],
     phone: {
       type: String,
       required: true,
@@ -30,6 +51,7 @@ const userSchema = new mongoose.Schema(
         return this.authMethod === "email";
       },
     },
+    birthday: { type: Date },
     avatar: {
       type: String, // URL or base64-encoded string for the avatar image
       default: "default-avatar.png", // Default image if user hasn't uploaded one
