@@ -13,6 +13,7 @@ import {
 import { IoMdRefresh } from "react-icons/io";
 // Enhanced error message handler
 const getErrorMessage = (error) => {
+  console.error("Error details:", error);
   if (error.response) {
     const status = error.response.status;
     switch (status) {

@@ -10,6 +10,7 @@ export function AuthProvider({ children }) {
   const [pastQuizzes, setPastQuizzes] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false);
+  const [serverError, setServerError] = useState(null);
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -45,6 +46,8 @@ export function AuthProvider({ children }) {
         setPastQuizzes,
         sessionExpired,
         setSessionExpired,
+        serverError,
+        setServerError,
       }}
     >
       {children}
