@@ -157,7 +157,6 @@ module.exports.startQuiz = async (req, res) => {
   }
 };
 
-
 module.exports.submitQuiz = async (req, res) => {
   try {
     const { userId, quizId, answers, endTime } = req.body;
