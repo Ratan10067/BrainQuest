@@ -524,6 +524,11 @@ export default function Leaderboard() {
                     </div>
                   </motion.li>
                 ))}
+                {[...Array(Math.max(0, 5 - board.entries.length))].map(
+                  (_, i) => (
+                    <li key={`empty-${i}`} className="h-[77px]" /> 
+                  )
+                )}
               </ul>
             </div>
 

@@ -563,10 +563,10 @@ export default function QuizSection() {
                   initial={{ scale: 0.95, y: 20 }}
                   animate={{ scale: 1, y: 0 }}
                   exit={{ scale: 0.95, y: 20 }}
-                  className="bg-white/10 backdrop-blur-xl rounded-3xl w-full max-w-6xl 
-                       border border-white/20 overflow-hidden max-h-[90vh] overflow-y-auto"
+                  className="bg-[#2c3250]/95 backdrop-blur-xl rounded-3xl w-full max-w-6xl 
+             border border-white/20 overflow-hidden max-h-[90vh]"
                 >
-                  <div className="p-6 border-b border-white/10 sticky top-0 bg-white/10 backdrop-blur-xl">
+                  <div className="p-6 sticky top-0 z-20 bg-[#2c3250]/95 backdrop-blur-xl border-b border-white/10">
                     <div className="flex justify-between items-center">
                       <h2 className="text-2xl font-bold text-white">
                         Choose Your Challenge
@@ -644,7 +644,7 @@ export default function QuizSection() {
                     )}
 
                     {/* PYQ Categories */}
-                    {selectedQuizType === "pyq" && (
+                    {/* {selectedQuizType === "pyq" && (
                       <div className="space-y-6">
                         {pyqCategories.map((category) => (
                           <motion.div
@@ -684,8 +684,64 @@ export default function QuizSection() {
                           </motion.div>
                         ))}
                       </div>
+                    )} */}
+                    {selectedQuizType === "pyq" && (
+                      <div className="p-6 space-y-6 overflow-y-auto max-h-[60vh] custom-scrollbar">
+                        {pyqCategories.map((category) => (
+                          <motion.div
+                            key={category.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-[#1a1f37]/50 rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all"
+                          >
+                            <div className="flex items-center gap-3 mb-6">
+                              <div className="p-3 rounded-xl bg-white/10">
+                                {category.icon}
+                              </div>
+                              <h3 className="text-xl font-bold text-white">
+                                {category.title}
+                              </h3>
+                            </div>
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                              {category.subjects.map((subject) => (
+                                <motion.button
+                                  key={subject.id}
+                                  whileHover={{ scale: 1.03, y: -2 }}
+                                  whileTap={{ scale: 0.97 }}
+                                  onClick={() => setSelectedSubject(subject.id)}
+                                  className={`p-4 rounded-xl transition-all duration-300 group relative ${
+                                    selectedSubject === subject.id
+                                      ? "bg-gradient-to-br from-yellow-400/20 to-orange-500/20 border-2 border-yellow-400/50"
+                                      : "bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30"
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <div
+                                      className={`p-2.5 rounded-lg transition-all duration-300 ${
+                                        selectedSubject === subject.id
+                                          ? "bg-yellow-400/20"
+                                          : "bg-white/10 group-hover:bg-white/15"
+                                      }`}
+                                    >
+                                      {subject.icon}
+                                    </div>
+                                    <span
+                                      className={`font-medium ${
+                                        selectedSubject === subject.id
+                                          ? "text-yellow-400"
+                                          : "text-white group-hover:text-yellow-400/80"
+                                      }`}
+                                    >
+                                      {subject.name}
+                                    </span>
+                                  </div>
+                                </motion.button>
+                              ))}
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
                     )}
-
                     {/* Difficulty Selection */}
                     <div className="flex flex-wrap justify-center gap-4">
                       {["Easy", "Medium", "Hard"].map((level) => (

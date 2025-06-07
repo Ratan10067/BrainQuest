@@ -12,119 +12,38 @@ import {
   CheckCircle2,
   XCircle,
   HelpCircle,
+  Download,
+  ArrowLeft,
+  TrendingUp,
+  Calendar,
+  BookOpen,
 } from "lucide-react";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-function StatCard({ title, value, bgColor, icon }) {
+function StatCard({ title, value, bgColor, icon, gradient, subtitle }) {
   return (
     <div
-      className={`${bgColor} rounded-xl shadow-lg p-6 text-white transform transition-all duration-300 hover:scale-105 hover:shadow-xl`}
+      className={`${
+        gradient || bgColor
+      } rounded-2xl shadow-xl p-6 text-white transform transition-all duration-500 hover:scale-105 hover:shadow-2xl border border-white/10 backdrop-blur-sm`}
     >
       <div className="flex items-center justify-between mb-4">
-        <div className="bg-white/20 p-3 rounded-lg">{icon}</div>
+        <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm border border-white/10">
+          {icon}
+        </div>
+        <div className="text-right">
+          <div className="w-2 h-2 bg-white/30 rounded-full animate-pulse"></div>
+        </div>
       </div>
-      <h3 className="text-lg font-semibold opacity-90">{title}</h3>
-      <p className="text-4xl font-bold mt-2">{value}</p>
+      <h3 className="text-lg font-semibold opacity-90 mb-1">{title}</h3>
+      {subtitle && <p className="text-sm opacity-70 mb-2">{subtitle}</p>}
+      <p className="text-4xl font-bold bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
+        {value}
+      </p>
     </div>
   );
 }
-
-// function QuestionCard({
-//   question,
-//   userResponse,
-//   correctOption,
-//   isCorrect,
-//   index,
-// }) {
-//   return (
-//     <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden">
-//       <div
-//         className={`p-6 ${
-//           isCorrect
-//             ? "bg-[#2e384c]"
-//             : userResponse
-//             ? "bg-[#2e384c]"
-//             : "bg-white/5"
-//         }`}
-//       >
-//         <div className="flex items-center justify-between mb-4">
-//           <h3 className="text-lg font-semibold ">
-//             Question {index + 1}
-//           </h3>
-//           <span
-//             className={`px-4 py-1.5 rounded-full text-sm font-medium ${
-//               isCorrect
-//                 ? "bg-green-400/10 text-[#61b387]"
-//                 : userResponse
-//                 ? "bg-red-400/10 text-red-400"
-//                 : "bg-gray-400/10 text-gray-400"
-//             }`}
-//           >
-//             {isCorrect
-//               ? "✓ Correct"
-//               : userResponse
-//               ? "✗ Incorrect"
-//               : "Not Attempted"}
-//           </span>
-//         </div>
-
-//         <p className="text-gray-300 font-medium mb-4">{question.text}</p>
-
-//         <div className="space-y-3">
-//           {question.options.map((option, i) => {
-//             const optionLetter = String.fromCharCode(65 + i);
-//             const isCorrectOption = optionLetter === correctOption;
-//             const isSelectedOption = userResponse?.number === optionLetter;
-
-//             return (
-//               <div
-//                 key={i}
-//                 className={`p-4 rounded-lg border ${
-//                   isCorrectOption
-//                     ? "bg-green-400/10 border-green-600"
-//                     : isSelectedOption && !isCorrect
-//                     ? "bg-red-400/10 border-red-400/50"
-//                     : "bg-white/5 border-white/10"
-//                 }`}
-//               >
-//                 <div className="flex items-center justify-between">
-//                   <div className="flex items-center space-x-3">
-//                     <span
-//                       className={`w-8 h-8 flex items-center justify-center rounded-full ${
-//                         isCorrectOption
-//                           ? "bg-green-600 text-green-700"
-//                           : isSelectedOption && !isCorrect
-//                           ? "bg-red-300 text-red-400"
-//                           : "bg-white/10 text-white"
-//                       }`}
-//                     >
-//                       {optionLetter}
-//                     </span>
-//                     <span className="text-gray-300">{option}</span>
-//                   </div>
-//                   {(isSelectedOption || isCorrectOption) && (
-//                     <span
-//                       className={`text-sm font-medium ${
-//                         isCorrectOption ? "text-green-400" : "text-red-400"
-//                       }`}
-//                     >
-//                       {isCorrectOption
-//                         ? isSelectedOption
-//                           ? "Correct Answer ✓"
-//                           : "Correct Answer"
-//                         : "Your Answer ✗"}
-//                     </span>
-//                   )}
-//                 </div>
-//               </div>
-//             );
-//           })}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
 
 function QuestionCard({
   question,
@@ -134,118 +53,131 @@ function QuestionCard({
   index,
 }) {
   return (
-    <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden">
-      <div className="p-6 bg-[#2e384c]">
-        {" "}
-        {/* Fixed background color */}
+    <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-2xl border border-slate-700/50 overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 hover:border-slate-600/50">
+      <div className="p-8">
         {/* Question Header */}
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-white">
-            Question {index + 1}
-          </h3>
-          <span
-            className={`px-4 py-1.5 rounded-full text-sm font-medium ${
-              isCorrect
-                ? "bg-green-500/20 text-green-400"
-                : userResponse
-                ? "bg-red-500/20 text-red-400"
-                : "bg-gray-400/10 text-gray-400"
-            }`}
-          >
-            {isCorrect
-              ? "✓ Correct"
-              : userResponse
-              ? "✗ Incorrect"
-              : "Not Attempted"}
-          </span>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-3">
+            <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white w-10 h-10 rounded-xl flex items-center justify-center font-bold text-lg shadow-lg">
+              {index + 1}
+            </div>
+            <h3 className="text-xl font-bold text-white">
+              Question {index + 1}
+            </h3>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span
+              className={`px-4 py-2 rounded-xl text-sm font-semibold flex items-center space-x-2 border backdrop-blur-sm ${
+                isCorrect
+                  ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
+                  : userResponse
+                  ? "bg-red-500/20 text-red-300 border-red-500/30"
+                  : "bg-slate-500/20 text-slate-300 border-slate-500/30"
+              }`}
+            >
+              {isCorrect ? (
+                <>
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Correct</span>
+                </>
+              ) : userResponse ? (
+                <>
+                  <XCircle className="w-4 h-4" />
+                  <span>Incorrect</span>
+                </>
+              ) : (
+                <>
+                  <HelpCircle className="w-4 h-4" />
+                  <span>Not Attempted</span>
+                </>
+              )}
+            </span>
+          </div>
         </div>
+
         {/* Question Text */}
-        <p className="text-gray-300 font-medium mb-4">{question.text}</p>
+        <div className="bg-slate-800/30 rounded-xl p-6 mb-6 border border-slate-700/30">
+          <p className="text-slate-200 text-lg leading-relaxed font-medium">
+            {question.text}
+          </p>
+        </div>
+
         {/* Options */}
-        <div className="space-y-3">
+        <div className="space-y-4">
           {question.options.map((option, i) => {
             const optionLetter = String.fromCharCode(65 + i);
             const isCorrectOption = optionLetter === correctOption;
             const isSelectedOption = userResponse?.number === optionLetter;
-            const isWrongAnswer = isSelectedOption && !isCorrect;
+            const isWrongSelection = isSelectedOption && !isCorrect;
 
             return (
               <div
                 key={i}
-                className={`p-4 rounded-lg border ${
+                className={`relative p-5 rounded-xl border-2 transition-all duration-300 ${
                   isCorrectOption
-                    ? "bg-green-500/20 border-green-500"
-                    : isWrongAnswer
-                    ? "bg-red-500/20 border-red-500" // This will show red for wrong answers
-                    : "bg-white/5 border-white/10"
+                    ? "bg-emerald-500/10 border-emerald-500/50 shadow-emerald-500/20 shadow-lg"
+                    : isWrongSelection
+                    ? "bg-red-500/10 border-red-500/50 shadow-red-500/20 shadow-lg"
+                    : "bg-slate-800/30 border-slate-700/30 hover:border-slate-600/50"
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <span
-                      className={`w-8 h-8 flex items-center justify-center rounded-full ${
+                  <div className="flex items-center space-x-4">
+                    <div
+                      className={`w-12 h-12 flex items-center justify-center rounded-xl font-bold text-lg border-2 ${
                         isCorrectOption
-                          ? "bg-green-500/30 text-green-400"
-                          : isWrongAnswer
-                          ? "bg-red-500/30 text-red-400" // Red indicator for wrong answer
-                          : "bg-white/10 text-white"
+                          ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-300"
+                          : isWrongSelection
+                          ? "bg-red-500/20 border-red-500/50 text-red-300"
+                          : "bg-slate-700/50 border-slate-600/50 text-slate-300"
                       }`}
                     >
                       {optionLetter}
-                    </span>
+                    </div>
                     <span
-                      className={`text-base ${
+                      className={`text-lg font-medium ${
                         isCorrectOption
-                          ? "text-green-400"
-                          : isWrongAnswer
-                          ? "text-red-400" // Red text for wrong answer
-                          : "text-gray-300"
+                          ? "text-emerald-200"
+                          : isWrongSelection
+                          ? "text-red-200"
+                          : "text-slate-200"
                       }`}
                     >
                       {option}
                     </span>
                   </div>
-                  {/* Labels for correct/wrong answers */}
-                  {(isSelectedOption || isCorrectOption) && (
-                    <span
-                      className={`text-sm font-medium flex items-center space-x-2 ${
-                        isCorrectOption ? "text-green-400" : "text-red-400"
-                      }`}
-                    >
-                      {isCorrectOption ? (
-                        <>
-                          <span>Correct Answer</span>
-                          <svg
-                            className="w-5 h-5"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </>
-                      ) : (
-                        <>
-                          <span>Your Answer</span>
-                          <svg
-                            className="w-5 h-5"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </>
-                      )}
-                    </span>
-                  )}
+
+                  {/* Status Indicators */}
+                  <div className="flex items-center space-x-3">
+                    {isCorrectOption && (
+                      <div className="flex items-center space-x-2 bg-emerald-500/20 px-3 py-1.5 rounded-lg border border-emerald-500/30">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                        <span className="text-sm font-semibold text-emerald-300">
+                          Correct Answer
+                        </span>
+                      </div>
+                    )}
+                    {isWrongSelection && (
+                      <div className="flex items-center space-x-2 bg-red-500/20 px-3 py-1.5 rounded-lg border border-red-500/30">
+                        <XCircle className="w-4 h-4 text-red-400" />
+                        <span className="text-sm font-semibold text-red-300">
+                          Your Answer
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
+
+                {/* Subtle animation for correct/wrong answers */}
+                {(isCorrectOption || isWrongSelection) && (
+                  <div className="absolute inset-0 rounded-xl opacity-20 animate-ping-slow pointer-events-none">
+                    <div
+                      className={`w-full h-full rounded-xl ${
+                        isCorrectOption ? "bg-emerald-500" : "bg-red-500"
+                      }`}
+                    ></div>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -254,6 +186,7 @@ function QuestionCard({
     </div>
   );
 }
+
 export default function Result() {
   const { quizId } = useParams();
   const navigate = useNavigate();
@@ -285,70 +218,56 @@ export default function Result() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+        <div className="text-center">
+          <div className="relative">
+            <div className="animate-spin rounded-full h-20 w-20 border-4 border-blue-500/30 border-t-blue-500 mx-auto mb-4"></div>
+            <div className="absolute inset-0 rounded-full h-20 w-20 border-4 border-purple-500/20 border-t-purple-500 animate-spin-reverse mx-auto"></div>
+          </div>
+          <p className="text-white/80 text-lg font-medium">
+            Loading your results...
+          </p>
+        </div>
       </div>
     );
   }
+
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-        <div className="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-lg mx-4 transform hover:scale-105 transition-all duration-300">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-red-900/30 to-slate-900 p-4">
+        <div className="bg-slate-800/50 backdrop-blur-xl p-8 rounded-3xl shadow-2xl text-center max-w-lg mx-4 transform hover:scale-105 transition-all duration-300 border border-red-500/20">
           <div className="mb-6">
-            <div className="bg-red-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-              <svg
-                className="w-8 h-8 text-red-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                />
-              </svg>
+            <div className="bg-red-500/20 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 border border-red-500/30">
+              <XCircle className="w-10 h-10 text-red-400" />
             </div>
-            <h2 className="text-3xl font-bold text-red-600 mb-2">
-              Oops! Something went wrong
+            <h2 className="text-3xl font-bold text-red-400 mb-2">
+              Something went wrong
             </h2>
-            <p className="text-gray-600 mb-6">{error}</p>
+            <p className="text-slate-300 mb-6">{error}</p>
           </div>
           <button
             onClick={() => navigate("/quiz")}
-            className="px-8 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center mx-auto space-x-2"
+            className="px-8 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center mx-auto space-x-2 font-semibold"
           >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
+            <ArrowLeft className="w-5 h-5" />
             <span>Back to Quiz Section</span>
           </button>
         </div>
       </div>
     );
   }
+
   if (!result || !result.quiz) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="bg-white p-8 rounded-lg shadow-lg text-center">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-4">
+        <div className="bg-slate-800/50 backdrop-blur-xl p-8 rounded-3xl shadow-2xl text-center border border-slate-700/50">
+          <h2 className="text-2xl font-bold text-slate-300 mb-4">
             No Data Found
           </h2>
-          <p className="text-gray-700">Could not find quiz results</p>
+          <p className="text-slate-400 mb-6">Could not find quiz results</p>
           <button
             onClick={() => navigate("/quiz")}
-            className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 font-semibold"
           >
             Back to Quiz Section
           </button>
@@ -359,29 +278,29 @@ export default function Result() {
 
   const { quiz, timeTaken } = result;
   const correctAnswers = quiz.questions.filter((q) => q.isCorrect).length;
+  const incorrectAnswers = quiz.questions.filter(
+    (q) => !q.isCorrect && q.userResponse
+  ).length;
+  const skippedAnswers = quiz.questions.filter((q) => !q.userResponse).length;
   const accuracy = ((correctAnswers / quiz.totalQuestions) * 100).toFixed(2);
 
   const chartData = {
     labels: ["Correct", "Incorrect", "Not Attempted"],
     datasets: [
       {
-        data: [
-          correctAnswers,
-          quiz.questions.filter((q) => !q.isCorrect && q.userResponse).length,
-          quiz.questions.filter((q) => !q.userResponse).length,
-        ],
+        data: [correctAnswers, incorrectAnswers, skippedAnswers],
         backgroundColor: [
-          "rgba(74, 222, 128, 0.9)",
-          "rgba(248, 113, 113, 0.9)",
-          "rgba(209, 213, 219, 0.9)",
+          "rgba(16, 185, 129, 0.8)",
+          "rgba(239, 68, 68, 0.8)",
+          "rgba(148, 163, 184, 0.8)",
         ],
         borderColor: [
-          "rgba(34, 197, 94, 1)",
+          "rgba(16, 185, 129, 1)",
           "rgba(239, 68, 68, 1)",
-          "rgba(156, 163, 175, 1)",
+          "rgba(148, 163, 184, 1)",
         ],
-        borderWidth: 2,
-        hoverOffset: 4,
+        borderWidth: 3,
+        hoverOffset: 8,
       },
     ],
   };
@@ -391,9 +310,10 @@ export default function Result() {
       legend: {
         position: "bottom",
         labels: {
-          padding: 20,
-          font: { size: 14, weight: "bold" },
+          padding: 25,
+          font: { size: 14, weight: "600" },
           usePointStyle: true,
+          pointStyle: "circle",
           generateLabels: (chart) => {
             const datasets = chart.data.datasets;
             return datasets[0].data.map((value, index) => ({
@@ -408,330 +328,201 @@ export default function Result() {
         },
       },
     },
-    cutout: "70%",
+    cutout: "65%",
     animation: {
       animateScale: true,
       animateRotate: true,
       duration: 2000,
+      easing: "easeInOutQuart",
     },
     responsive: true,
     maintainAspectRatio: true,
   };
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900/20 to-slate-900 py-8 px-4">
+      <div className="max-w-7xl mx-auto">
         {/* Header Section */}
-        {/* <div className="bg-white rounded-xl shadow-lg p-8 mb-6 transform hover:shadow-xl transition-all duration-300">
+        <div className="bg-gradient-to-r from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-3xl shadow-2xl p-8 mb-8 border border-slate-700/50">
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-bold text-gray-800">Quiz Result</h1>
-            <div className="px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-              {quiz.Title}
+            <div className="flex items-center space-x-4">
+              <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-3 rounded-2xl">
+                <BookOpen className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold text-white mb-2">
+                  {result.quiz.Title}
+                </h1>
+                <p className="text-slate-300 text-lg">
+                  Quiz Results & Performance Analysis
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="px-6 py-3 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-300 rounded-2xl text-lg font-semibold border border-yellow-500/30 backdrop-blur-sm">
+                {result.quiz.subject}
+              </div>
+              <div className="px-4 py-2 bg-slate-700/50 text-slate-300 rounded-xl text-sm font-medium border border-slate-600/50">
+                {result.quiz.difficulty}
+              </div>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-gray-600">
-            <div className="flex items-center">
-              <svg
-                className="w-5 h-5 mr-2 text-blue-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <span>Completed: {new Date(quiz.endTime).toLocaleString()}</span>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-slate-300">
+            <div className="flex items-center space-x-3 bg-slate-800/30 p-4 rounded-xl border border-slate-700/30">
+              <Calendar className="w-6 h-6 text-blue-400" />
+              <div>
+                <p className="text-sm text-slate-400">Completed</p>
+                <p className="font-semibold">
+                  {new Date(result.quiz.endTime).toLocaleString()}
+                </p>
+              </div>
             </div>
-            <div className="flex items-center">
-              <svg
-                className="w-5 h-5 mr-2 text-purple-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <span>Duration: {timeTaken}</span>
+            <div className="flex items-center space-x-3 bg-slate-800/30 p-4 rounded-xl border border-slate-700/30">
+              <Timer className="w-6 h-6 text-green-400" />
+              <div>
+                <p className="text-sm text-slate-400">Duration</p>
+                <p className="font-semibold">{result.timeStats.timeTaken}</p>
+              </div>
             </div>
-            <div className="flex items-center">
-              <svg
-                className="w-5 h-5 mr-2 text-green-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <span>Final Score: {quiz.score} points</span>
-            </div>
-          </div>
-        </div> */}
-        <div className="bg-white/10 backdrop-blur-xl rounded-xl shadow-lg p-8 mb-6 border border-white/10">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-bold ">{result.quiz.Title}</h1>
-            <div className="px-4 py-2 bg-yellow-400/10 text-yellow-700 rounded-full text-sm font-medium">
-              {result.quiz.subject} - {result.quiz.difficulty}
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-gray-300">
-            <div className="flex items-center">
-              <Clock className="w-5 h-5 mr-2 text-yellow-400" />
-              <span>
-                Completed: {new Date(result.quiz.endTime).toLocaleString()}
-              </span>
-            </div>
-            <div className="flex items-center">
-              <Timer className="w-5 h-5 mr-2 text-yellow-400" />
-              <span>Duration: {result.timeStats.timeTaken}</span>
-            </div>
-            <div className="flex items-center">
-              <Target className="w-5 h-5 mr-2 text-yellow-400" />
-              <span>Final Score: {result.score} points</span>
+            <div className="flex items-center space-x-3 bg-slate-800/30 p-4 rounded-xl border border-slate-700/30">
+              <TrendingUp className="w-6 h-6 text-purple-400" />
+              <div>
+                <p className="text-sm text-slate-400">Final Score</p>
+                <p className="font-semibold">{result.score} points</p>
+              </div>
             </div>
           </div>
         </div>
-        {/* Stats Grid */}
-        {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          <StatCard
-            title="Total Questions"
-            value={quiz.totalQuestions}
-            bgColor="bg-gradient-to-r from-blue-500 to-blue-600"
-            icon={
-              <svg
-                className="w-6 h-6 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-            }
-          />
-          <StatCard
-            title="Correct Answers"
-            value={correctAnswers}
-            bgColor="bg-gradient-to-r from-green-500 to-green-600"
-            icon={
-              <svg
-                className="w-6 h-6 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-            }
-          />
-          <StatCard
-            title="Accuracy"
-            value={`${accuracy}%`}
-            bgColor="bg-gradient-to-r from-purple-500 to-purple-600"
-            icon={
-              <svg
-                className="w-6 h-6 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                />
-              </svg>
-            }
-          />
-          <StatCard
-            title="Total Score"
-            value={quiz.score}
-            bgColor="bg-gradient-to-r from-yellow-500 to-yellow-600"
-            icon={
-              <svg
-                className="w-6 h-6 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
-                />
-              </svg>
-            }
-          />
-        </div> */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+
+        {/* Enhanced Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
             title="Total Questions"
             value={result.quiz.totalQuestions}
-            bgColor="bg-[#2c3250]"
-            icon={<Award className="w-6 h-6 text-yellow-400" />}
+            gradient="bg-gradient-to-br from-blue-600 to-blue-800"
+            icon={<BookOpen className="w-7 h-7" />}
+            subtitle="Questions in quiz"
           />
           <StatCard
             title="Correct Answers"
             value={result.statistics.correctAnswers}
-            bgColor="bg-[#2c3250]"
-            icon={<CheckCircle2 className="w-6 h-6 text-green-400" />}
+            gradient="bg-gradient-to-br from-emerald-600 to-emerald-800"
+            icon={<CheckCircle2 className="w-7 h-7" />}
+            subtitle="Well done!"
           />
           <StatCard
-            title="Accuracy"
+            title="Accuracy Rate"
             value={`${result.statistics.accuracy}%`}
-            bgColor="bg-[#2c3250]"
-            icon={<Target className="w-6 h-6 text-yellow-400" />}
+            gradient="bg-gradient-to-br from-purple-600 to-purple-800"
+            icon={<Target className="w-7 h-7" />}
+            subtitle="Success percentage"
           />
           <StatCard
             title="Total Score"
             value={result.score}
-            bgColor="bg-[#2c3250]"
-            icon={<Award className="w-6 h-6 text-yellow-400" />}
+            gradient="bg-gradient-to-br from-amber-600 to-amber-800"
+            icon={<Award className="w-7 h-7" />}
+            subtitle="Points earned"
           />
         </div>
+
         {/* Chart and Questions Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="bg-white rounded-xl shadow-lg p-8 lg:col-span-1 transform hover:shadow-2xl transition-all duration-300 h-10%">
-            <h2 className="text-2xl font-bold mb-6 text-gray-800 flex items-center">
-              <svg
-                className="w-6 h-6 mr-2 text-blue-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                />
-              </svg>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Enhanced Chart Section */}
+          <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-3xl shadow-2xl p-8 lg:col-span-1 border border-slate-700/50">
+            <h2 className="text-2xl font-bold mb-8 text-white flex items-center">
+              <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-xl mr-3">
+                <TrendingUp className="w-6 h-6" />
+              </div>
               Performance Overview
             </h2>
 
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-gray-600">
+            {/* Accuracy Progress Bar */}
+            <div className="mb-8 p-6 bg-slate-800/30 rounded-2xl border border-slate-700/30">
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-lg font-semibold text-slate-200">
                   Accuracy Rate
                 </span>
-                <span className="text-sm font-bold text-blue-600">
+                <span className="text-2xl font-bold text-blue-400">
                   {accuracy}%
                 </span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
                 <div
-                  className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-500"
+                  className="bg-gradient-to-r from-blue-500 via-purple-500 to-blue-600 h-3 rounded-full transition-all duration-1000 ease-out shadow-lg"
                   style={{ width: `${accuracy}%` }}
                 ></div>
               </div>
+              <p className="text-sm text-slate-400 mt-2">
+                {accuracy >= 80
+                  ? "Excellent performance!"
+                  : accuracy >= 60
+                  ? "Good job!"
+                  : "Keep practicing!"}
+              </p>
             </div>
 
-            <div className="relative">
-              <div className="w-full max-w-[300px] mx-auto">
-                <Doughnut
-                  data={chartData}
-                  options={{
-                    ...chartOptions,
-                    plugins: {
-                      ...chartOptions.plugins,
-                      legend: {
-                        position: "bottom",
-                        labels: {
-                          padding: 20,
-                          font: { size: 14 },
-                          usePointStyle: true,
-                          boxWidth: 8,
-                        },
-                      },
-                    },
-                  }}
-                />
+            {/* Enhanced Doughnut Chart */}
+            <div className="relative mb-8">
+              <div className="w-full max-w-[280px] mx-auto">
+                <Doughnut data={chartData} options={chartOptions} />
               </div>
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-                <p className="text-4xl font-bold text-gray-800">
+                <p className="text-4xl font-bold text-white mb-1">
                   {correctAnswers}
                 </p>
-                <p className="text-sm text-gray-600">Correct</p>
+                <p className="text-sm text-slate-400">Correct</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 mt-6">
+            {/* Enhanced Stats Grid */}
+            <div className="grid grid-cols-3 gap-4">
               {[
                 {
                   label: "Correct",
                   value: correctAnswers,
-                  color: "text-green-500",
+                  color: "text-emerald-400",
+                  bg: "bg-emerald-500/10",
+                  border: "border-emerald-500/30",
                 },
                 {
                   label: "Incorrect",
-                  value: quiz.questions.filter(
-                    (q) => !q.isCorrect && q.userResponse
-                  ).length,
-                  color: "text-red-500",
+                  value: incorrectAnswers,
+                  color: "text-red-400",
+                  bg: "bg-red-500/10",
+                  border: "border-red-500/30",
                 },
                 {
                   label: "Skipped",
-                  value: quiz.questions.filter((q) => !q.userResponse).length,
-                  color: "text-gray-500",
+                  value: skippedAnswers,
+                  color: "text-slate-400",
+                  bg: "bg-slate-500/10",
+                  border: "border-slate-500/30",
                 },
               ].map((stat, index) => (
-                <div key={index} className="text-center">
-                  <p className={`text-2xl font-bold ${stat.color}`}>
+                <div
+                  key={index}
+                  className={`text-center p-4 rounded-xl border ${stat.bg} ${stat.border} backdrop-blur-sm`}
+                >
+                  <p className={`text-3xl font-bold ${stat.color} mb-1`}>
                     {stat.value}
                   </p>
-                  <p className="text-xs text-gray-600 mt-1">{stat.label}</p>
+                  <p className="text-sm text-slate-400">{stat.label}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* <div className="bg-white rounded-xl shadow-lg p-6 lg:col-span-2">
-            <h2 className="text-xl font-semibold mb-6 flex items-center">
-              <ClipboardCheck className="w-6 h-6 mr-2 text-blue-500" />
-              Question Details
+          {/* Enhanced Questions Section */}
+          <div className="bg-gradient-to-br from-slate-800/30 to-slate-900/30 backdrop-blur-xl rounded-3xl shadow-2xl p-8 lg:col-span-2 border border-slate-700/50">
+            <h2 className="text-2xl font-bold mb-8 text-white flex items-center">
+              <div className="bg-gradient-to-r from-emerald-500 to-blue-600 p-2 rounded-xl mr-3">
+                <ClipboardCheck className="w-6 h-6" />
+              </div>
+              Detailed Question Analysis
             </h2>
-            <div className="space-y-6">
-              {result.quiz.questions.map((q, idx) => (
-                <QuestionCard
-                  key={idx}
-                  question={q.questionId}
-                  userResponse={q.userResponse}
-                  correctOption={q.questionId.correctOption}
-                  index={idx}
-                />
-              ))}
-            </div>
-          </div>
-        </div> */}
-          <div className="bg-white/10 backdrop-blur-xl rounded-xl shadow-lg p-6 lg:col-span-2 border border-white/10">
-            <h2 className="text-xl font-semibold mb-6  flex items-center">
-              <ClipboardCheck className="w-6 h-6 mr-2 text-yellow-400" />
-              Question Details
-            </h2>
-            <div className="space-y-6">
+            <div className="space-y-8">
               {result.quiz.questions.map((q, idx) => (
                 <QuestionCard
                   key={idx}
@@ -746,19 +537,21 @@ export default function Result() {
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex justify-center mt-8 space-x-4">
+        {/* Enhanced Action Buttons */}
+        <div className="flex justify-center mt-12 space-x-6">
           <button
             onClick={() => navigate("/quiz")}
-            className="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer"
+            className="px-10 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-xl hover:shadow-2xl cursor-pointer flex items-center space-x-3 font-semibold text-lg border border-blue-500/30"
           >
-            Back to Quiz Section
+            <ArrowLeft className="w-6 h-6" />
+            <span>Back to Quiz Section</span>
           </button>
           <button
             onClick={() => window.print()}
-            className="px-8 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-lg hover:from-gray-700 hover:to-gray-800 transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer"
+            className="px-10 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-2xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 shadow-xl hover:shadow-2xl cursor-pointer flex items-center space-x-3 font-semibold text-lg border border-emerald-500/30"
           >
-            Download Result
+            <Download className="w-6 h-6" />
+            <span>Download Result</span>
           </button>
         </div>
       </div>
