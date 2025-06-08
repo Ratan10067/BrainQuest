@@ -957,18 +957,53 @@ module.exports.submitFeedback = async (req, res, next) => {
 
 module.exports.getPastFeedback = async (req, res, next) => {
   try {
-    const feedbacks = await Feedback.find().populate({
-      path: "userId",
-      model: "User",
-      select: "name email avatar",
-    });
+    // Get all feedbacks with populated user information
+    const feedbacks = await Feedback.find()
+      .populate({
+        path: "userId",
+        model: "User",
+        select: "name email avatar", // Select only needed fields
+      })
+      .sort({ createdAt: -1 }); // Sort by newest first
+
+    // If no feedbacks found
+    if (!feedbacks || feedbacks.length === 0) {
+      return res.status(200).json({
+        message: "No feedback found",
+        feedbacks: [],
+      });
+    }
+
+    // Map through feedbacks to ensure proper user information
+    const formattedFeedbacks = feedbacks.map((feedback) => ({
+      _id: feedback._id,
+      rating: feedback.rating,
+      comment: feedback.comment,
+      likes: feedback.likes,
+      createdAt: feedback.createdAt,
+      user: feedback.userId
+        ? {
+            _id: feedback.userId._id,
+            name: feedback.userId.name || "Anonymous",
+            email: feedback.userId.email,
+            avatar: feedback.userId.avatar || null,
+          }
+        : {
+            name: "Anonymous",
+            email: null,
+            avatar: null,
+          },
+    }));
 
     return res.status(200).json({
       message: "Feedback retrieved successfully",
-      feedbacks,
+      feedbacks: formattedFeedbacks,
     });
   } catch (error) {
     console.error("Error retrieving feedback:", error);
-    return res.status(500).json({ message: "Failed to retrieve feedback" });
+    return res.status(500).json({
+      message: "Failed to retrieve feedback",
+      error: error.message,
+    });
   }
 };
