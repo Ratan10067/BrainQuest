@@ -11,6 +11,8 @@ import {
   ChevronDown,
   Crown,
   Star,
+  MessageCircle,
+  Mail
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AuthContext } from "../context/UserContext";
@@ -39,7 +41,8 @@ export default function Navbar() {
     { path: "/", label: "Home", icon: <Home size={18} /> },
     { path: "/quiz", label: "Quiz", icon: <Brain size={18} /> },
     { path: "/leaderboard", label: "Leaderboard", icon: <Trophy size={18} /> },
-    { path: "/Contact-us", label: "Contact Us", icon: <User size={18} /> },
+    { path: "/Contact-us", label: "Contact Us", icon: <Mail size={18} /> },
+    { path: "/feedback", label: "Feedback", icon: <MessageCircle size={18} /> },
   ];
 
   useEffect(() => {

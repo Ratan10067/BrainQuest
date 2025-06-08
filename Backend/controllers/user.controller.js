@@ -5,7 +5,7 @@ const LeaderBoard = require("../models/leaderboard.model");
 const { validationResult } = require("express-validator");
 const otpGenerator = require("otp-generator");
 const nodemailer = require("nodemailer");
-
+const Feedback = require("../models/feedback.model");
 const crypto = require("crypto");
 const Query = require("../models/query.model");
 const transporter = nodemailer.createTransport({
@@ -929,5 +929,28 @@ module.exports.deleteUser = async (req, res, next) => {
       message: "Error deleting account",
       error: error.message,
     });
+  }
+};
+
+module.exports.submitFeedback = async (req, res, next) => {
+  console.log("submitFeedback me yaha aa rha ha", req.body);
+  const { rating, comment, likes } = req.body;
+  const userId = req.user._id;
+
+  if (!comment || comment.trim() === "") {
+    return res.status(400).json({ message: "Feedback cannot be empty" });
+  }
+
+  try {
+    const feedback = { userId, rating, comment, likes };
+    const newFeedback = await Feedback.create(feedback);
+    console.log("Feedback submitted successfully:", newFeedback);
+    return res.status(201).json({
+      message: "Feedback submitted successfully",
+      feedback: newFeedback,
+    });
+  } catch (error) {
+    console.error("Error submitting feedback:", error);
+    return res.status(500).json({ message: "Failed to submit feedback" });
   }
 };

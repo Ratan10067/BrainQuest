@@ -15,6 +15,7 @@ import ContactUs from "./components/ContactUs";
 import Premium from "./components/Premium";
 import NotFoundPage from "./components/NotFoundPage";
 import ResetPassword from "./components/ResetPassword";
+import Feedback from "./components/Feedback";
 export default function App() {
   return (
     <BrowserRouter>
@@ -37,6 +38,7 @@ export default function App() {
             path="/reset-password/:resetToken"
             element={<ResetPassword />}
           />
+          <Route path="/feedback" element={<Feedback />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </AuthProvider>
