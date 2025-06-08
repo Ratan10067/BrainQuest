@@ -83,21 +83,6 @@ export default function NotFoundPage() {
           </p>
         </div>
 
-        {/* Search Bar */}
-        <div className="mb-8 w-full max-w-md">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Search for something..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleSearch(e)}
-              className="w-full pl-12 pr-4 py-3 bg-gray-100 backdrop-blur-md border border-gray-200 rounded-xl text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300"
-            />
-          </div>
-        </div>
-
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-4 mb-8 justify-center">
           <button
@@ -152,8 +137,8 @@ export default function NotFoundPage() {
             Still can't find what you're looking for?
           </p>
           <button
-            // onClick={navigate("/contact-us")}
-            className="flex items-center gap-2 text-purple-600 hover:text-purple-700 transition-colors duration-200 mx-auto"
+            onClick={() => navigate("/contact-us")}
+            className="flex items-center gap-2 text-purple-600 hover:text-purple-700 transition-colors duration-200 mx-auto cursor-pointer"
           >
             <ExternalLink className="w-4 h-4" />
             Contact Support

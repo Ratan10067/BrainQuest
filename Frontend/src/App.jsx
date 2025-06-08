@@ -16,6 +16,7 @@ import Premium from "./components/Premium";
 import NotFoundPage from "./components/NotFoundPage";
 import ResetPassword from "./components/ResetPassword";
 import Feedback from "./components/Feedback";
+import ChatBot from "./components/ChatBot";
 export default function App() {
   return (
     <BrowserRouter>
@@ -23,6 +24,7 @@ export default function App() {
         {" "}
         {/* ← Wrap here */}
         <Navbar />
+        <ChatBot />
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/signup" element={<UserSignUp />} />
