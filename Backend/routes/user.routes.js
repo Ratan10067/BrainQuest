@@ -15,8 +15,10 @@ const {
   resetPassword,
   deleteUser,
   submitFeedback,
+  getPastFeedback
 } = require("../controllers/user.controller");
 const { authUser } = require("../middlewares/auth.middlewares");
+const { get } = require("mongoose");
 router.post(
   "/user-register",
   [
@@ -50,4 +52,5 @@ router.get("/reset-password/:token", getResetPassword);
 router.post("/reset-password/:token", resetPassword);
 router.delete("/delete-account", authUser, deleteUser);
 router.post("/feedback", authUser, submitFeedback);
+router.get("/past-feedback", authUser, getPastFeedback);
 module.exports = router;

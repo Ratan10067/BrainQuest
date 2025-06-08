@@ -954,3 +954,21 @@ module.exports.submitFeedback = async (req, res, next) => {
     return res.status(500).json({ message: "Failed to submit feedback" });
   }
 };
+
+module.exports.getPastFeedback = async (req, res, next) => {
+  try {
+    const feedbacks = await Feedback.find().populate({
+      path: "userId",
+      model: "User",
+      select: "name email avatar",
+    });
+
+    return res.status(200).json({
+      message: "Feedback retrieved successfully",
+      feedbacks,
+    });
+  } catch (error) {
+    console.error("Error retrieving feedback:", error);
+    return res.status(500).json({ message: "Failed to retrieve feedback" });
+  }
+};
