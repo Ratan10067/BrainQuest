@@ -382,16 +382,16 @@ export default function QuizSection() {
         <div className="min-h-screen bg-gradient-to-br from-[#1a1f37] to-[#2c3250] p-8">
           {/* Header Section */}
           <div className="max-w-7xl mx-auto">
-            <div className="flex justify-between items-center mb-12">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-8 sm:mb-12">
               <div>
-                <h1 className="text-4xl font-bold text-white mb-2">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">
                   Quiz Dashboard
                 </h1>
-                <p className="text-gray-300">
+                <p className="text-sm sm:text-base text-gray-300">
                   Challenge yourself with programming quizzes and PYQ
                 </p>
               </div>
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -400,9 +400,9 @@ export default function QuizSection() {
                     setSelectedQuizType("programming");
                     setIsModalOpen(true);
                   }}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 
-                       text-white font-semibold rounded-xl flex items-center gap-2 
-                       hover:shadow-lg hover:shadow-blue-500/25 transition-all cursor-pointer"
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-purple-600 
+               text-white font-semibold rounded-xl flex items-center justify-center gap-2 
+               hover:shadow-lg hover:shadow-blue-500/25 transition-all text-sm sm:text-base cursor-pointer"
                 >
                   <Brain className="w-5 h-5" />
                   Programming Quiz
@@ -415,9 +415,9 @@ export default function QuizSection() {
                     setSelectedQuizType("pyq");
                     setIsModalOpen(true);
                   }}
-                  className="px-6 py-3 bg-gradient-to-r from-yellow-400 to-orange-500 
-                       text-white font-semibold rounded-xl flex items-center gap-2 
-                       hover:shadow-lg hover:shadow-yellow-500/25 transition-all cursor-pointer"
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-yellow-400 to-orange-500 
+               text-white font-semibold rounded-xl flex items-center justify-center gap-2 
+               hover:shadow-lg hover:shadow-yellow-500/25 transition-all text-sm sm:text-base cursor-pointer"
                 >
                   <GraduationCap className="w-5 h-5" />
                   PYQ Practice
@@ -460,7 +460,7 @@ export default function QuizSection() {
                     className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 
                        overflow-hidden hover:shadow-xl transition-all duration-300"
                   >
-                    <div className="p-6">
+                    <div className="p-6 sm:p-6">
                       <div className="flex items-start justify-between mb-4">
                         <h3 className="text-xl font-semibold text-white">
                           {quiz.Title}
@@ -557,18 +557,18 @@ export default function QuizSection() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 
-                     flex items-center justify-center p-4"
+           flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
               >
                 <motion.div
                   initial={{ scale: 0.95, y: 20 }}
                   animate={{ scale: 1, y: 0 }}
                   exit={{ scale: 0.95, y: 20 }}
-                  className="bg-[#2c3250]/95 backdrop-blur-xl rounded-3xl w-full max-w-6xl 
-             border border-white/20 overflow-hidden max-h-[90vh]"
+                  className="bg-[#2c3250]/95 backdrop-blur-xl rounded-xl sm:rounded-3xl w-full max-w-[95%] sm:max-w-6xl 
+             border border-white/20 overflow-hidden my-4 sm:my-8"
                 >
-                  <div className="p-6 sticky top-0 z-20 bg-[#2c3250]/95 backdrop-blur-xl border-b border-white/10">
+                  <div className="p-4 sm:p-6 sticky top-0 z-20 bg-[#2c3250]/95 backdrop-blur-xl border-b border-white/10">
                     <div className="flex justify-between items-center">
-                      <h2 className="text-2xl font-bold text-white">
+                      <h2 className="text-xl sm:text-2xl font-bold text-white">
                         Choose Your Challenge
                       </h2>
                       <button
@@ -644,49 +644,8 @@ export default function QuizSection() {
                     )}
 
                     {/* PYQ Categories */}
-                    {/* {selectedQuizType === "pyq" && (
-                      <div className="space-y-6">
-                        {pyqCategories.map((category) => (
-                          <motion.div
-                            key={category.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="bg-white/5 rounded-2xl p-6 border border-white/10"
-                          >
-                            <div className="flex items-center gap-3 mb-4">
-                              {category.icon}
-                              <h3 className="text-xl font-bold text-white">
-                                {category.title}
-                              </h3>
-                            </div>
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                              {category.subjects.map((subject) => (
-                                <motion.button
-                                  key={subject.id}
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
-                                  onClick={() => setSelectedSubject(subject.id)}
-                                  className={`p-3 rounded-lg border transition-all cursor-pointer text-center ${
-                                    selectedSubject === subject.id
-                                      ? "border-yellow-400/50 bg-yellow-400/10 text-yellow-400"
-                                      : "border-white/10 hover:border-white/20 text-white"
-                                  }`}
-                                >
-                                  <div className="flex flex-col items-center gap-2">
-                                    {subject.icon}
-                                    <span className="text-sm font-medium">
-                                      {subject.name}
-                                    </span>
-                                  </div>
-                                </motion.button>
-                              ))}
-                            </div>
-                          </motion.div>
-                        ))}
-                      </div>
-                    )} */}
                     {selectedQuizType === "pyq" && (
-                      <div className="p-6 space-y-6 overflow-y-auto max-h-[60vh] custom-scrollbar">
+                      <div className="space-y-4 sm:space-y-6 max-h-[60vh] overflow-y-auto">
                         {pyqCategories.map((category) => (
                           <motion.div
                             key={category.id}

@@ -261,14 +261,14 @@ export default function Leaderboard() {
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8, type: "spring" }}
-        className="text-center mb-12"
+        className="text-center mb-8 sm:mb-12 px-4 sm:px-6"
       >
-        <div className="flex items-center justify-center gap-4 mb-6">
-          <HiOutlineSparkles className="text-yellow-500 text-3xl animate-pulse" />
-          <h1 className="text-6xl font-bold bg-gradient-to-r from-gray-800 via-blue-600 to-indigo-600 dark:from-white dark:via-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
+        <div className="flex items-center justify-center gap-2 sm:gap-4 mb-4 sm:mb-6">
+          <HiOutlineSparkles className="text-yellow-500 text-2xl sm:text-3xl animate-pulse" />
+          <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold bg-gradient-to-r from-gray-800 via-blue-600 to-indigo-600 dark:from-white dark:via-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
             Leaderboards
           </h1>
-          <HiOutlineSparkles className="text-yellow-500 text-3xl animate-pulse" />
+          <HiOutlineSparkles className="text-yellow-500 text-2xl sm:text-3xl animate-pulse" />
         </div>
 
         {/* Difficulty Filter */}
@@ -398,7 +398,7 @@ export default function Leaderboard() {
       )}
 
       {/* Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-7xl mx-auto px-4 sm:px-6">
         {filteredData.map((board, idx) => (
           <motion.div
             key={board._id}
@@ -526,7 +526,7 @@ export default function Leaderboard() {
                 ))}
                 {[...Array(Math.max(0, 5 - board.entries.length))].map(
                   (_, i) => (
-                    <li key={`empty-${i}`} className="h-[77px]" /> 
+                    <li key={`empty-${i}`} className="h-[77px]" />
                   )
                 )}
               </ul>

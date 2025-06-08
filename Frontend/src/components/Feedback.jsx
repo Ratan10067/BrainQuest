@@ -45,7 +45,6 @@ export default function Feedback() {
         const currentUserId = localStorage.getItem("userId");
         const allFeedbacks = response.data.feedbacks;
         console.log(allFeedbacks[0].user._id);
-        // Find current user's review
         const currentUserReview = allFeedbacks.find(
           (feedback) => feedback.user?._id === currentUserId
         );
@@ -222,10 +221,14 @@ export default function Feedback() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900/20 to-slate-900 py-4 sm:py-6 lg:py-8 px-3 sm:px-4 lg:px-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] py-6 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto space-y-8">
         {/* Header Section */}
-        <motion.div className="bg-gradient-to-r from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6 lg:mb-8 border border-slate-700/50">
+        <motion.div
+          className="bg-gradient-to-br from-slate-800/50 via-slate-800/30 to-slate-900/50 
+                 backdrop-blur-xl rounded-2xl shadow-xl border border-slate-700/30 
+                 p-6 lg:p-8"
+        >
           <div className="flex flex-col gap-3 sm:gap-4 lg:gap-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
               <motion.div
