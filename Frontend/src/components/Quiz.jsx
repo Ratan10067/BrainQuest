@@ -90,6 +90,21 @@ export default function QuizSection() {
       title: "Test Your Physics Knowledge",
       icon: <Trophy className="w-8 h-8 text-green-500" />,
       description: "Challenge your understanding of physics concepts",
+      subject: "Physics",
+    },
+    {
+      id: 5,
+      title: "Test Your Mathematics Skills",
+      icon: <GraduationCap className="w-8 h-8 text-red-500" />,
+      description: "Sharpen your math skills with challenging problems",
+      subject: "Mathematics",
+    },
+    {
+      id: 6,
+      title: "Test Your Chemistry Knowledge",
+      icon: <FileText className="w-8 h-8 text-orange-500" />,
+      description: "Explore the world of chemistry through quizzes",
+      subject: "Chemistry",
     },
   ];
 
@@ -267,6 +282,7 @@ export default function QuizSection() {
   };
 
   const handleStart = async () => {
+    console.log("jwink", selectedSubject);
     if (
       selectedQuizType === "programming" &&
       selectedQuiz &&
@@ -276,7 +292,7 @@ export default function QuizSection() {
         const response = await axios.get(`http://localhost:4000/quiz/start`, {
           params: {
             quizId: selectedQuiz,
-            subject: "mathematics",
+            subject: selectedSubject,
             difficulty: selectedDifficulty,
             title: titleOfTheQuiz,
             timerEnabled: timerEnabled,
@@ -631,6 +647,7 @@ export default function QuizSection() {
                             onClick={() => {
                               setSelectedQuiz(quiz.id);
                               setTitleOfTheQuiz(quiz.title);
+                              setSelectedSubject(quiz.subject);
                             }}
                             className={`p-6 rounded-xl border transition-all cursor-pointer ${
                               selectedQuiz === quiz.id
