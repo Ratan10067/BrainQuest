@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import SuccessModal from "./SuccessModal";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Star,
@@ -13,12 +14,56 @@ import {
   MessageSquare,
   X,
   Send,
+  Clock,
+  Award,
+  Sparkles,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
-import axios, { all } from "axios";
-
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 export default function Feedback() {
-  const [allReviews, setAllReviews] = useState([]);
-  const [userReview, setUserReview] = useState(null);
+  const [allReviews, setAllReviews] = useState([
+    {
+      _id: "1",
+      user: { name: "John Doe", _id: "user1" },
+      rating: 5,
+      comment:
+        "Absolutely amazing experience! The service exceeded all my expectations. The team was professional, responsive, and delivered exactly what was promised. I would definitely recommend this to anyone looking for quality service.",
+      createdAt: new Date().toISOString(),
+      likes: 12,
+    },
+    {
+      _id: "2",
+      user: { name: "Sarah Johnson", _id: "user2" },
+      rating: 4,
+      comment:
+        "Very good overall. There were a few minor issues but nothing major. The support team was helpful in resolving them quickly.",
+      createdAt: new Date(Date.now() - 86400000).toISOString(),
+      likes: 8,
+    },
+    {
+      _id: "3",
+      user: { name: "Mike Chen", _id: "user3" },
+      rating: 3,
+      comment:
+        "Average experience. It does what it's supposed to do but could use some improvements in the user interface.",
+      createdAt: new Date(Date.now() - 172800000).toISOString(),
+      likes: 3,
+    },
+  ]);
+
+  const [userReview, setUserReview] = useState({
+    _id: "user-review",
+    user: { name: "Current User", _id: "current-user" },
+    rating: 4,
+    comment:
+      "This is my personal review of the service. I've been using it for a while now and I'm quite satisfied with the results. There's always room for improvement, but overall it's been a positive experience.",
+    createdAt: new Date(Date.now() - 259200000).toISOString(),
+    likes: 5,
+  });
+
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [newReview, setNewReview] = useState({
     rating: 0,
@@ -28,7 +73,23 @@ export default function Feedback() {
   const [filter, setFilter] = useState("all");
   const [hoveredRating, setHoveredRating] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [currentPage, setCurrentPage] = useState(0);
+  const reviewsPerPage = 3;
+  const [userReviews, setUserReviews] = useState([]);
+  const [currentUserReviewIndex, setCurrentUserReviewIndex] = useState(0);
 
+  // Add these functions
+  const nextUserReview = () => {
+    setCurrentUserReviewIndex((prev) => (prev + 1) % userReviews.length);
+  };
+
+  const prevUserReview = () => {
+    setCurrentUserReviewIndex((prev) =>
+      prev === 0 ? userReviews.length - 1 : prev - 1
+    );
+  };
   const fetchReviews = async () => {
     setLoading(true);
     try {
@@ -44,21 +105,22 @@ export default function Feedback() {
       if (response.status === 200) {
         const currentUserId = localStorage.getItem("userId");
         const allFeedbacks = response.data.feedbacks;
-        console.log(allFeedbacks[0].user._id);
-        const currentUserReview = allFeedbacks.find(
+
+        // Get all reviews by current user
+        const currentUserReviews = allFeedbacks.filter(
           (feedback) => feedback.user?._id === currentUserId
         );
-        console.log(allFeedbacks[0]._id);
-        console.log(currentUserReview);
-        // Set all reviews except the user's own review
+
+        // Set user's reviews
+        setUserReviews(currentUserReviews);
+        setUserReview(currentUserReviews[currentUserReviewIndex]);
+
+        // Set other reviews
         setAllReviews(
           allFeedbacks.filter(
-            (feedback) => feedback.userId?._id !== currentUserId
+            (feedback) => feedback.user?._id !== currentUserId
           )
         );
-
-        // Set user's review if exists
-        setUserReview(currentUserReview || null);
       }
     } catch (error) {
       console.error("Error fetching reviews:", error);
@@ -96,10 +158,16 @@ export default function Feedback() {
       );
 
       if (response.status === (isEditing ? 200 : 201)) {
-        await fetchReviews(); // Refresh all reviews
+        await fetchReviews();
         setShowReviewModal(false);
         setNewReview({ rating: 0, comment: "" });
         setIsEditing(false);
+        setSuccessMessage(
+          isEditing
+            ? "Review updated successfully!"
+            : "Review submitted successfully!"
+        );
+        setShowSuccess(true);
       }
     } catch (error) {
       console.error("Error submitting review:", error);
@@ -203,11 +271,26 @@ export default function Feedback() {
     return texts[rating] || "";
   };
 
+  const getRatingColor = (rating) => {
+    const colors = {
+      1: "from-red-500 to-red-600",
+      2: "from-orange-500 to-orange-600",
+      3: "from-yellow-500 to-yellow-600",
+      4: "from-blue-500 to-blue-600",
+      5: "from-green-500 to-green-600",
+    };
+    return colors[rating] || "from-gray-500 to-gray-600";
+  };
+
   const filteredReviews = allReviews.filter((review) => {
     if (filter === "all") return true;
     return review.rating === parseInt(filter);
   });
-
+  const totalPages = Math.ceil(filteredReviews.length / reviewsPerPage);
+  const paginatedReviews = filteredReviews.slice(
+    currentPage * reviewsPerPage,
+    (currentPage + 1) * reviewsPerPage
+  );
   const modalVariants = {
     hidden: { opacity: 0, scale: 0.8, y: 50 },
     visible: { opacity: 1, scale: 1, y: 0 },
@@ -220,10 +303,20 @@ export default function Feedback() {
     exit: { opacity: 0 },
   };
 
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+    hover: {
+      y: -8,
+      scale: 1.02,
+      boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
+    },
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] py-6 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header Section */}
+        {/* Enhanced Header Section */}
         <motion.div
           className="bg-gradient-to-br from-slate-800/50 via-slate-800/30 to-slate-900/50 
                  backdrop-blur-xl rounded-2xl shadow-xl border border-slate-700/30 
@@ -265,166 +358,328 @@ export default function Feedback() {
             </div>
           </div>
         </motion.div>
-
-        {/* User's Review (if exists) */}
-        {userReview && (
+        {/* Enhanced User's Review Card */}
+        {userReviews.length > 0 && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+            whileHover="hover"
             transition={{ delay: 0.1 }}
-            className="bg-gradient-to-br from-blue-800/30 to-purple-800/30 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-xl p-4 sm:p-6 lg:p-8 border border-blue-500/30 mb-4 sm:mb-6 lg:mb-8"
+            className="relative bg-gradient-to-br from-blue-800/40 via-purple-800/40 to-pink-800/40 
+             backdrop-blur-xl rounded-3xl shadow-2xl border border-blue-500/40 
+             p-8 overflow-hidden group"
           >
-            <div className="flex justify-between items-start">
-              <h3 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6 flex items-center">
-                <User className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-400" />
-                Your Review
-              </h3>
-              <div className="flex gap-2">
+            {/* Background decoration */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-400/20 to-transparent rounded-full blur-2xl" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-400/20 to-transparent rounded-full blur-2xl" />
+
+            {/* Navigation arrows if multiple reviews exist */}
+            {userReviews.length > 1 && (
+              <>
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleEditReview}
-                  className="p-2 bg-emerald-600/50 hover:bg-emerald-600 rounded-lg"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={prevUserReview}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 bg-slate-800/80 
+                   hover:bg-slate-700/80 rounded-full text-white shadow-lg"
                 >
-                  <Edit3 className="w-4 h-4 text-white" />
+                  <ChevronLeft className="w-5 h-5" />
                 </motion.button>
+
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleDeleteReview}
-                  className="p-2 bg-red-600/50 hover:bg-red-600 rounded-lg"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={nextUserReview}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 bg-slate-800/80 
+                   hover:bg-slate-700/80 rounded-full text-white shadow-lg"
                 >
-                  <Trash2 className="w-4 h-4 text-white" />
+                  <ChevronRight className="w-5 h-5" />
                 </motion.button>
-              </div>
+
+                <div className="absolute top-4 left-4 bg-slate-800/60 px-3 py-1 rounded-full">
+                  <span className="text-slate-300 text-sm">
+                    {currentUserReviewIndex + 1} / {userReviews.length}
+                  </span>
+                </div>
+              </>
+            )}
+
+            {/* Crown badge */}
+            <div className="absolute top-4 right-4">
+              <motion.div
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                className="bg-gradient-to-r from-yellow-500 to-orange-500 p-2 rounded-xl shadow-lg"
+              >
+                <Award className="w-5 h-5 text-white" />
+              </motion.div>
             </div>
-            <div className="space-y-3 sm:space-y-4">
-              <div className="flex items-center space-x-2">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`w-4 h-4 sm:w-5 sm:h-5 ${
-                      i < userReview.rating
-                        ? "text-amber-400 fill-amber-400"
-                        : "text-slate-600"
-                    }`}
-                  />
-                ))}
-                <span className="text-slate-300 ml-2 font-semibold text-sm sm:text-base">
-                  {getRatingText(userReview.rating)}
-                </span>
-              </div>
-              <p className="text-slate-300 leading-relaxed text-sm sm:text-base">
-                {userReview.comment}
-              </p>
-              <div className="flex items-center text-slate-400 text-xs sm:text-sm">
-                <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" />
-                {new Date(userReview.createdAt).toLocaleDateString()}
-              </div>
-            </div>
+
+            {/* Review Content */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentUserReviewIndex}
+                initial={{ opacity: 0, x: 100 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -100 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                className="relative space-y-6"
+              >
+                {/* ... Rest of your existing user review content, but using userReviews[currentUserReviewIndex] instead of userReview ... */}
+                <div className="flex justify-between items-start">
+                  <div className="flex items-center gap-4">
+                    <motion.div
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      className="bg-gradient-to-r from-blue-500 to-purple-600 p-3 rounded-2xl shadow-lg"
+                    >
+                      <User className="w-6 h-6 text-white" />
+                    </motion.div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-white mb-1">
+                        Your Review
+                      </h3>
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center space-x-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-5 h-5 ${
+                                i < userReviews[currentUserReviewIndex].rating
+                                  ? "text-amber-400 fill-amber-400"
+                                  : "text-slate-600"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span
+                          className={`px-3 py-1 bg-gradient-to-r ${getRatingColor(
+                            userReviews[currentUserReviewIndex].rating
+                          )} text-white text-sm font-semibold rounded-full`}
+                        >
+                          {getRatingText(
+                            userReviews[currentUserReviewIndex].rating
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <motion.button
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() =>
+                        handleEditReview(userReviews[currentUserReviewIndex])
+                      }
+                      className="p-3 bg-emerald-600/60 hover:bg-emerald-600 rounded-xl backdrop-blur-sm transition-all duration-200 group"
+                    >
+                      <Edit3 className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() =>
+                        handleDeleteReview(
+                          userReviews[currentUserReviewIndex]._id
+                        )
+                      }
+                      className="p-3 bg-red-600/60 hover:bg-red-600 rounded-xl backdrop-blur-sm transition-all duration-200 group"
+                    >
+                      <Trash2 className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
+                    </motion.button>
+                  </div>
+                </div>
+
+                <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50">
+                  <p className="text-slate-200 leading-relaxed text-lg">
+                    {userReviews[currentUserReviewIndex].comment}
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between text-slate-400">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    <span className="text-sm">
+                      {new Date(
+                        userReviews[currentUserReviewIndex].createdAt
+                      ).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <Heart className="w-4 h-4 text-red-400" />
+                      <span className="text-sm">
+                        {userReviews[currentUserReviewIndex].likes} likes
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Eye className="w-4 h-4 text-blue-400" />
+                      <span className="text-sm">Personal</span>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </motion.div>
         )}
 
-        {/* Filter Section */}
-        <motion.div className="bg-gradient-to-r from-slate-800/30 to-slate-900/30 backdrop-blur-xl rounded-lg sm:rounded-xl lg:rounded-2xl p-3 sm:p-4 lg:p-6 mb-4 sm:mb-6 lg:mb-8 border border-slate-700/50">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-            <div className="flex items-center space-x-2">
-              <Filter className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400" />
-              <span className="text-slate-300 font-semibold text-sm sm:text-base">
+        {/* Then continue with your existing Filter section */}
+        {/* Enhanced Filter Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-gradient-to-r from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50"
+        >
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="flex items-center space-x-3">
+              <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-xl">
+                <Filter className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-slate-300 font-semibold text-lg">
                 Filter by rating:
               </span>
             </div>
-            <div className="grid grid-cols-3 xs:grid-cols-6 sm:flex gap-2 w-full sm:w-auto">
+            <div className="flex gap-3 flex-wrap">
               {["all", "5", "4", "3", "2", "1"].map((rating) => (
                 <motion.button
                   key={rating}
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setFilter(rating)}
-                  className={`px-2.5 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-md sm:rounded-lg lg:rounded-xl font-medium transition-all text-xs sm:text-sm ${
+                  className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
                     filter === rating
-                      ? "bg-blue-600 text-white shadow-lg"
-                      : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50"
+                      ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg scale-105"
+                      : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 border border-slate-600/50"
                   }`}
                 >
-                  {rating === "all" ? "All" : `${rating} ★`}
+                  {rating === "all" ? "All Reviews" : `${rating} ★`}
                 </motion.button>
               ))}
             </div>
           </div>
         </motion.div>
-
-        {/* All Reviews Section */}
-        <div className="mb-8">
-          <h3 className="text-xl font-bold text-white mb-4 sm:mb-6 flex items-center">
-            <MessageSquare className="w-5 h-5 mr-2 text-purple-400" />
-            Community Reviews
-          </h3>
+        {/* Enhanced Community Reviews Section */}
+        <div className="space-y-6">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+            className="flex items-center gap-4"
+          >
+            <div className="bg-gradient-to-r from-purple-500 to-pink-600 p-3 rounded-2xl">
+              <MessageSquare className="w-6 h-6 text-white" />
+            </div>
+            <h3 className="text-3xl font-bold text-white">Community Reviews</h3>
+            <div className="bg-slate-700/50 px-3 py-1 rounded-full">
+              <span className="text-slate-300 text-sm font-medium">
+                {filteredReviews.length} reviews
+              </span>
+            </div>
+          </motion.div>
 
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
               {[...Array(3)].map((_, i) => (
                 <div
                   key={i}
-                  className="bg-slate-800/30 animate-pulse rounded-xl sm:rounded-2xl lg:rounded-3xl h-48 sm:h-56 lg:h-64 border border-slate-700/50"
+                  className="bg-slate-800/30 animate-pulse rounded-3xl h-80 border border-slate-700/50"
                 />
               ))}
             </div>
           ) : filteredReviews.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-              <AnimatePresence>
-                {filteredReviews.map((review) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+              <AnimatePresence mode="popLayout">
+                {filteredReviews.map((review, index) => (
                   <motion.div
                     key={review._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    whileHover={{ y: -5, scale: 1.02 }}
-                    className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl border border-slate-700/50 p-4 sm:p-6 lg:p-8 hover:shadow-2xl hover:border-slate-600/50 transition-all duration-300"
+                    variants={cardVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    whileHover="hover"
+                    transition={{ delay: index * 0.1 }}
+                    className="relative bg-gradient-to-br from-slate-800/60 via-slate-800/40 to-slate-900/60 
+                           backdrop-blur-xl rounded-3xl border border-slate-700/50 p-8 
+                           hover:border-slate-600/50 transition-all duration-500 group overflow-hidden"
                   >
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center space-x-3">
-                        <motion.div
-                          whileHover={{ scale: 1.1, rotate: 5 }}
-                          className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-xl"
-                        >
-                          <User className="w-5 h-5 text-white" />
-                        </motion.div>
-                        <div>
-                          <h3 className="text-lg font-bold text-white">
-                            {review.user?.name || "Anonymous"}
-                          </h3>
-                          <div className="flex items-center gap-2 mt-1">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`w-4 h-4 ${
-                                  i < review.rating
-                                    ? "text-amber-400 fill-amber-400"
-                                    : "text-slate-600"
-                                }`}
-                              />
-                            ))}
+                    {/* Background decoration */}
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                    <div className="space-y-6">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center space-x-4">
+                          <motion.div
+                            whileHover={{ scale: 1.1, rotate: 5 }}
+                            className={`bg-gradient-to-r ${getRatingColor(
+                              review.rating
+                            )} p-3 rounded-2xl shadow-lg`}
+                          >
+                            <User className="w-6 h-6 text-white" />
+                          </motion.div>
+                          <div>
+                            <h3 className="text-xl font-bold text-white mb-1">
+                              {review.user?.name || "Anonymous"}
+                            </h3>
+                            <div className="flex items-center gap-2">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`w-4 h-4 ${
+                                    i < review.rating
+                                      ? "text-amber-400 fill-amber-400"
+                                      : "text-slate-600"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                          <span
+                            className={`px-3 py-1 bg-gradient-to-r ${getRatingColor(
+                              review.rating
+                            )} text-white text-xs font-semibold rounded-full`}
+                          >
+                            {getRatingText(review.rating)}
+                          </span>
+                          <div className="flex items-center gap-1 text-slate-400 text-xs">
+                            <Clock className="w-3 h-3" />
+                            {new Date(review.createdAt).toLocaleDateString()}
                           </div>
                         </div>
                       </div>
-                      <span className="text-sm text-slate-400">
-                        {new Date(review.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <div className="bg-slate-800/30 rounded-lg p-4 mb-4">
-                      <p className="text-slate-200">{review.comment}</p>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => handleLikeReview(review._id)}
-                        className="text-slate-400 hover:text-red-400 transition-colors flex items-center gap-2"
-                      >
-                        <Heart className="w-4 h-4" />
-                        <span>{review.likes || 0}</span>
-                      </motion.button>
+
+                      <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-5 border border-slate-700/30">
+                        <p className="text-slate-200 leading-relaxed">
+                          {review.comment}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2">
+                        <motion.button
+                          whileHover={{ scale: 1.05, y: -2 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleLikeReview(review._id)}
+                          className="flex items-center gap-2 text-slate-400 hover:text-red-400 transition-colors duration-200 group"
+                        >
+                          <div className="p-2 bg-red-500/10 group-hover:bg-red-500/20 rounded-xl transition-colors duration-200">
+                            <Heart className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                          </div>
+                          <span className="font-medium">
+                            {review.likes || 0}
+                          </span>
+                        </motion.button>
+
+                        <div className="flex items-center gap-2 text-slate-500 text-sm">
+                          <MessageCircle className="w-4 h-4" />
+                          <span>Review</span>
+                        </div>
+                      </div>
                     </div>
                   </motion.div>
                 ))}
@@ -434,24 +689,25 @@ export default function Feedback() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center py-8 sm:py-12 lg:py-16"
+              className="text-center py-16"
             >
-              <div className="bg-slate-800/30 rounded-xl sm:rounded-2xl lg:rounded-3xl p-6 sm:p-8 lg:p-12 border border-slate-700/50">
-                <MessageCircle className="w-12 h-12 sm:w-16 sm:h-16 text-slate-500 mx-auto mb-3 sm:mb-4" />
-                <h3 className="text-xl sm:text-2xl font-bold text-slate-300 mb-2">
+              <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-3xl p-12 border border-slate-700/50">
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <MessageCircle className="w-10 h-10 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-slate-300 mb-3">
                   No Reviews Found
                 </h3>
-                <p className="text-slate-400 text-sm sm:text-base">
+                <p className="text-slate-400 text-lg max-w-md mx-auto">
                   {filter === "all"
                     ? "No reviews yet. Be the first to share your experience!"
-                    : `No ${filter}-star reviews yet.`}
+                    : `No ${filter}-star reviews yet. Try a different filter.`}
                 </p>
               </div>
             </motion.div>
           )}
         </div>
-
-        {/* Review Modal */}
+        {/* Enhanced Review Modal */}
         <AnimatePresence>
           {showReviewModal && (
             <motion.div
@@ -459,7 +715,7 @@ export default function Feedback() {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4"
+              className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4"
               onClick={() => {
                 setShowReviewModal(false);
                 setIsEditing(false);
@@ -471,52 +727,60 @@ export default function Feedback() {
                 initial="hidden"
                 animate="visible"
                 exit="exit"
-                className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl w-full max-w-2xl border border-slate-700/50 overflow-hidden shadow-2xl"
+                className="bg-gradient-to-br from-slate-800/95 via-slate-800/90 to-slate-900/95 backdrop-blur-xl 
+                       rounded-3xl w-full max-w-2xl border border-slate-700/50 overflow-hidden shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
               >
                 <form onSubmit={handleSubmitReview}>
-                  <div className="p-4 sm:p-6 lg:p-8 border-b border-slate-700/50">
+                  <div className="p-8 border-b border-slate-700/50 bg-gradient-to-r from-slate-800/50 to-slate-900/50">
                     <div className="flex items-center justify-between">
-                      <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">
-                        {isEditing ? "Edit Your Review" : "Write a Review"}
-                      </h2>
-                      <button
+                      <div className="flex items-center gap-4">
+                        <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-3 rounded-2xl">
+                          <MessageCircle className="w-6 h-6 text-white" />
+                        </div>
+                        <h2 className="text-3xl font-bold text-white">
+                          {isEditing ? "Edit Your Review" : "Write a Review"}
+                        </h2>
+                      </div>
+                      <motion.button
+                        whileHover={{ scale: 1.1, rotate: 90 }}
+                        whileTap={{ scale: 0.9 }}
                         type="button"
                         onClick={() => {
                           setShowReviewModal(false);
                           setIsEditing(false);
                           setNewReview({ rating: 0, comment: "" });
                         }}
-                        className="p-1.5 text-slate-400 hover:text-white rounded-lg"
+                        className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-700/50 transition-all duration-200"
                       >
-                        <X className="w-5 h-5 sm:w-6 sm:h-6" />
-                      </button>
+                        <X className="w-6 h-6" />
+                      </motion.button>
                     </div>
                   </div>
 
-                  <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
+                  <div className="p-8 space-y-8">
                     <div>
-                      <label className="block text-slate-300 text-base sm:text-lg font-semibold mb-4 sm:mb-6">
+                      <label className="block text-slate-300 text-xl font-semibold mb-6">
                         How would you rate your experience?
                       </label>
-                      <div className="flex justify-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                      <div className="flex justify-center gap-4 mb-6">
                         {[...Array(5)].map((_, i) => (
                           <motion.button
                             key={i}
                             type="button"
-                            whileHover={{ scale: 1.2, y: -5 }}
+                            whileHover={{ scale: 1.3, y: -8 }}
                             whileTap={{ scale: 0.9 }}
                             onClick={() =>
                               setNewReview({ ...newReview, rating: i + 1 })
                             }
                             onMouseEnter={() => setHoveredRating(i + 1)}
                             onMouseLeave={() => setHoveredRating(0)}
-                            className="focus:outline-none"
+                            className="focus:outline-none transition-all duration-200"
                           >
                             <Star
-                              className={`w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 ${
+                              className={`w-16 h-16 ${
                                 i < (hoveredRating || newReview.rating)
-                                  ? "text-amber-400 fill-amber-400"
+                                  ? "text-amber-400 fill-amber-400 drop-shadow-lg"
                                   : "text-slate-600"
                               }`}
                             />
@@ -524,14 +788,24 @@ export default function Feedback() {
                         ))}
                       </div>
                       {newReview.rating > 0 && (
-                        <p className="text-center text-slate-400 text-lg sm:text-xl font-medium">
-                          {getRatingText(newReview.rating)}
-                        </p>
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-center"
+                        >
+                          <span
+                            className={`px-6 py-2 bg-gradient-to-r ${getRatingColor(
+                              newReview.rating
+                            )} text-white text-xl font-bold rounded-full`}
+                          >
+                            {getRatingText(newReview.rating)}
+                          </span>
+                        </motion.div>
                       )}
                     </div>
 
                     <div>
-                      <label className="block text-slate-300 text-base sm:text-lg font-semibold mb-3 sm:mb-4">
+                      <label className="block text-slate-300 text-xl font-semibold mb-4">
                         Share your thoughts
                       </label>
                       <textarea
@@ -542,17 +816,20 @@ export default function Feedback() {
                             comment: e.target.value,
                           })
                         }
-                        className="w-full bg-slate-800/50 border border-slate-700/50 rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-4 text-white text-sm sm:text-base focus:outline-none focus:border-blue-500/50 resize-none"
-                        rows={4}
-                        placeholder="Tell us about your experience..."
+                        className="w-full bg-slate-800/60 border border-slate-600/50 rounded-2xl px-6 py-4 
+                               text-white text-lg focus:outline-none focus:border-blue-500/50 
+                               focus:ring-2 focus:ring-blue-500/20 resize-none backdrop-blur-sm
+                               placeholder-slate-400"
+                        rows={5}
+                        placeholder="Tell us about your experience... What did you like? What could be improved?"
                         required
                       />
                     </div>
                   </div>
 
-                  <div className="p-4 sm:p-6 border-t border-slate-700/50 flex justify-end gap-3 sm:gap-4 bg-slate-900/30">
+                  <div className="p-8 border-t border-slate-700/50 flex justify-end gap-4 bg-slate-900/30">
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
+                      whileHover={{ scale: 1.05, y: -2 }}
                       whileTap={{ scale: 0.95 }}
                       type="button"
                       onClick={() => {
@@ -560,15 +837,20 @@ export default function Feedback() {
                         setIsEditing(false);
                         setNewReview({ rating: 0, comment: "" });
                       }}
-                      className="px-6 sm:px-8 py-2.5 sm:py-3 text-slate-300 font-semibold rounded-lg sm:rounded-xl border border-slate-700/50"
+                      className="px-8 py-3 text-slate-300 font-semibold rounded-xl border border-slate-600/50 
+                             hover:bg-slate-700/50 transition-all duration-200"
                     >
                       Cancel
                     </motion.button>
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
+                      whileHover={{ scale: 1.05, y: -2 }}
                       whileTap={{ scale: 0.95 }}
                       type="submit"
-                      disabled={!newReview.rating || !newReview.comment.trim()}
+                      disabled={
+                        !newReview.rating ||
+                        !newReview.comment.trim() ||
+                        loading
+                      }
                       className="px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg sm:rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isEditing ? "Update Review" : "Submit Review"}
@@ -580,6 +862,14 @@ export default function Feedback() {
           )}
         </AnimatePresence>
       </div>
+      <AnimatePresence>
+        {showSuccess && (
+          <SuccessModal
+            message={successMessage}
+            onClose={() => setShowSuccess(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
