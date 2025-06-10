@@ -37,6 +37,7 @@ app.use("/quiz", quizRoutes);
 app.use("/contact", contactRoutes);
 app.get("/leaderboard", getLeaderboard);
 app.use("/profile", profileRoutes);
+
 app.listen(PORT, () => {
   console.log(`Server is Listening at Port ${PORT}`);
 });

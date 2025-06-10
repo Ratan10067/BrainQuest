@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Star,
   MessageCircle,
-  ThumbsUp,
   Calendar,
   User,
   Edit3,
@@ -13,16 +12,11 @@ import {
   Heart,
   MessageSquare,
   X,
-  Send,
   Clock,
-  Award,
-  Sparkles,
-  Eye,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 export default function Feedback() {
   const [allReviews, setAllReviews] = useState([
     {
@@ -405,16 +399,6 @@ export default function Feedback() {
               </>
             )}
 
-            {/* Crown badge */}
-            <div className="absolute top-4 right-4">
-              <motion.div
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                className="bg-gradient-to-r from-yellow-500 to-orange-500 p-2 rounded-xl shadow-lg"
-              >
-                <Award className="w-5 h-5 text-white" />
-              </motion.div>
-            </div>
-
             {/* Review Content */}
             <AnimatePresence mode="wait">
               <motion.div
@@ -516,18 +500,12 @@ export default function Feedback() {
                         {userReviews[currentUserReviewIndex].likes} likes
                       </span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Eye className="w-4 h-4 text-blue-400" />
-                      <span className="text-sm">Personal</span>
-                    </div>
                   </div>
                 </div>
               </motion.div>
             </AnimatePresence>
           </motion.div>
         )}
-
-        {/* Then continue with your existing Filter section */}
         {/* Enhanced Filter Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

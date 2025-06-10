@@ -69,18 +69,27 @@ export default function QuizSection() {
       title: "Test Your Python Language",
       icon: <Brain className="w-8 h-8 text-blue-500" />,
       description: "Master Python fundamentals and advanced concepts",
+      subject: "Python",
     },
     {
       id: 2,
       title: "Test Your C++ Language",
       icon: <Target className="w-8 h-8 text-purple-500" />,
       description: "Challenge yourself with C++ programming",
+      subject: "C++",
     },
     {
       id: 3,
       title: "Test Your JavaScript Skills",
       icon: <Sparkles className="w-8 h-8 text-yellow-500" />,
       description: "Enhance your JavaScript expertise",
+      subject: "JavaScript",
+    },
+    {
+      id: 4,
+      title: "Test Your Physics Knowledge",
+      icon: <Trophy className="w-8 h-8 text-green-500" />,
+      description: "Challenge your understanding of physics concepts",
     },
   ];
 
@@ -267,7 +276,7 @@ export default function QuizSection() {
         const response = await axios.get(`http://localhost:4000/quiz/start`, {
           params: {
             quizId: selectedQuiz,
-            subject: "Python",
+            subject: "mathematics",
             difficulty: selectedDifficulty,
             title: titleOfTheQuiz,
             timerEnabled: timerEnabled,

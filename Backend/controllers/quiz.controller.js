@@ -6,20 +6,43 @@ const fs = require("fs");
 const path = require("path");
 const User = require("../models/user.model");
 const LeaderBoard = require("../models/leaderboard.model");
-// Initialize OpenAI client
+const { GoogleGenAI } = require("@google/genai");
+const { text } = require("stream/consumers");
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-
 module.exports.insertQuestion = async (req, res) => {
   const { difficulty, subject } = req.query;
-
+  console.log(
+    "Inserting question with difficulty:",
+    difficulty,
+    "and subject:",
+    subject
+  );
   if (!difficulty || !subject) {
     return res
       .status(400)
       .json({ error: "Difficulty and subject are required." });
   }
-
+  const response = await ai.models.generateContent({
+    model: "gemini-2.0-flash",
+    contents:
+      "I want the question in type of JSON format like this this is only an example give me 20 question of subject which i send :\n\n" +
+      JSON.stringify({
+        question: "What is the output of `len([1, 2, 3] * 2)`?",
+        options: {
+          A: "3",
+          B: "6",
+          C: "Error",
+          D: "2",
+        },
+        correct: "B",
+        difficulty: "easy",
+      }) +
+      subject,
+  });
+  console.log(response.text);
   //   try {
   //     const prompt = `Generate a ${difficulty} level quiz question for the subject ${subject}.
   //       Provide four options (A, B, C, D) and specify the correct option. Format the response as:
@@ -106,15 +129,129 @@ module.exports.insertQuestion = async (req, res) => {
     // 4. Bulk insert
     const inserted = await Question.insertMany(docs);
 
-    res
-      .status(201)
-      .json({ message: `Seeded ${inserted.length} Python questions.` });
+    res.status(201).json({
+      message: `Seeded ${inserted.length} Python questions.${response.text}`,
+    });
   } catch (err) {
     console.error("Error seeding Python questions:", err);
     res.status(500).json({ error: "Failed to seed Python questions." });
   }
 };
+const cleanAIResponse = (text) => {
+  // Remove markdown code block indicators and any leading/trailing whitespace
+  return text
+    .replace(/```json\n?/g, "")
+    .replace(/```\n?/g, "")
+    .trim();
+};
 
+const insertingQuestionFromAi = async (difficulty, subject) => {
+  console.log(
+    "Inserting question with difficulty:",
+    difficulty,
+    "and subject:",
+    subject
+  );
+
+  if (!difficulty || !subject) {
+    throw new Error("Difficulty and subject are required.");
+  }
+
+  // Check if questions already exist
+  const isAlreadyPresent = await Question.findOne({
+    subject: subject,
+    difficulty: difficulty.charAt(0).toUpperCase() + difficulty.slice(1),
+  });
+
+  if (isAlreadyPresent) {
+    return "Already Present";
+  }
+  console.log("Generating questions from AI...humiulolooo");
+  // Improved prompt for better question generation
+  const prompt = `Generate 20 multiple choice questions for ${subject} with ${difficulty} difficulty level. Return ONLY valid JSON without any markdown formatting or additional text. Use this exact structure:
+{
+  "questions": [
+    {
+      "question": "Clear and concise question text",
+      "options": {
+        "A": "First option",
+        "B": "Second option",
+        "C": "Third option",
+        "D": "Fourth option"
+      },
+      "correct": "A/B/C/D",
+      "difficulty": "${difficulty}"
+    }
+  ]
+}`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: prompt,
+    });
+
+    // Clean and parse the AI response
+    const cleanedResponse = cleanAIResponse(response.text);
+    console.log("Cleaned response:", cleanedResponse);
+
+    let questionData;
+    try {
+      questionData = JSON.parse(cleanedResponse);
+    } catch (parseError) {
+      console.error("Failed to parse AI response:", cleanedResponse);
+      throw new Error(`JSON parse error: ${parseError.message}`);
+    }
+
+    if (!questionData.questions || !Array.isArray(questionData.questions)) {
+      throw new Error("Invalid response format from AI");
+    }
+
+    // Transform and validate questions
+    const questions = questionData.questions
+      .filter(
+        (q) =>
+          q.question &&
+          q.options &&
+          q.options.A &&
+          q.options.B &&
+          q.options.C &&
+          q.options.D &&
+          q.correct
+      )
+      .map((q) => ({
+        text: q.question.trim(),
+        options: [q.options.A, q.options.B, q.options.C, q.options.D],
+        correctOption: q.correct,
+        subject: subject,
+        difficulty:
+          difficulty.charAt(0).toUpperCase() +
+          difficulty.slice(1).toLowerCase(),
+      }));
+
+    if (questions.length === 0) {
+      throw new Error("No valid questions generated");
+    }
+
+    // Bulk insert questions
+    const inserted = await Question.insertMany(questions);
+    console.log(`Successfully inserted ${inserted.length} questions`);
+
+    return {
+      success: true,
+      message: "Questions added successfully.",
+      count: inserted.length,
+      questions: inserted,
+    };
+  } catch (error) {
+    console.error("Error in insertingQuestionFromAi:", error);
+    return {
+      success: false,
+      error: error.message,
+      details: error.stack,
+    };
+  }
+};
 module.exports.startQuiz = async (req, res) => {
   const { subject, difficulty, title } = req.query;
   const userId = req.user._id;
@@ -125,6 +262,8 @@ module.exports.startQuiz = async (req, res) => {
   }
   console.log("Starting quiz for user:", userId);
   console.log("Subject:", subject, "Difficulty:", difficulty);
+  const aiResult = await insertingQuestionFromAi(difficulty, subject);
+  console.log("AI Question Generation Result:", aiResult);
   try {
     const query = {};
     if (subject) query.subject = subject;
@@ -146,7 +285,7 @@ module.exports.startQuiz = async (req, res) => {
       startTime: new Date(),
       Title: title,
     });
-    res.status(200).json({
+    return res.status(200).json({
       questions,
       quizId: quiz._id,
       message: "Quiz started successfully.",

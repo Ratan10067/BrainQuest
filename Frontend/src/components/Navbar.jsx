@@ -12,7 +12,7 @@ import {
   Crown,
   Star,
   MessageCircle,
-  Mail
+  Mail,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AuthContext } from "../context/UserContext";
@@ -84,13 +84,13 @@ export default function Navbar() {
           </NavLink>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-4 lg:space-x-8 overflow-x-auto scrollbar-hide">
             {navItems.map((item) => (
               <NavLink
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
-                  `flex items-center space-x-2 text-sm font-medium transition-colors ${
+                  `flex items-center space-x-1 lg:space-x-2 text-sm font-medium transition-colors whitespace-nowrap ${
                     isActive
                       ? "text-yellow-400"
                       : "text-gray-300 hover:text-white"
@@ -98,13 +98,13 @@ export default function Navbar() {
                 }
               >
                 {item.icon}
-                <span>{item.label}</span>
+                <span className="text-xs lg:text-sm">{item.label}</span>
               </NavLink>
             ))}
           </div>
 
           {/* Premium & Auth Section */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
             {/* Premium Button/Dropdown */}
             <div className="relative" ref={premiumDropdownRef}>
               {isAuthenticated ? (
@@ -113,8 +113,8 @@ export default function Navbar() {
                   to="/premium"
                   className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-gradient-to-r from-yellow-400 to-orange-500 text-[#1a1f37] font-medium hover:from-yellow-500 hover:to-orange-600 transition-all duration-300 transform hover:scale-105"
                 >
-                  <Crown size={18} />
-                  <span>Go Premium</span>
+                  <Crown size={16} className="lg:w-[18px] lg:h-[18px]" />
+                  <span className="whitespace-nowrap">Go Premium</span>
                 </NavLink>
               ) : (
                 // Premium Dropdown for Non-Authenticated Users
@@ -184,14 +184,17 @@ export default function Navbar() {
               <div className="relative" ref={dropDownRef}>
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center space-x-2 text-white px-4 py-2 rounded-xl bg-[#2c3250] hover:bg-[#2c3250]/80 transition-colors cursor-pointer"
+                  className="flex items-center space-x-1 lg:space-x-2 text-white px-3 lg:px-4 py-2 rounded-xl bg-[#2c3250] hover:bg-[#2c3250]/80 transition-colors cursor-pointer"
                 >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center">
-                    <User size={18} className="text-[#1a1f37]" />
+                  <div className="w-7 h-7 lg:w-8 lg:h-8 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center">
+                    <User
+                      size={16}
+                      className="lg:w-[18px] lg:h-[18px] text-[#1a1f37]"
+                    />
                   </div>
                   <ChevronDown
-                    size={16}
-                    className={`transform transition-transform ${
+                    size={14}
+                    className={`transform transition-transform lg:w-4 lg:h-4 ${
                       profileDropdownOpen ? "rotate-180" : ""
                     }`}
                   />
