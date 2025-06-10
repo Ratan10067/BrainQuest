@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Bot, User } from "lucide-react";
-
+import axios from "axios";
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
@@ -45,16 +45,33 @@ const ChatBot = () => {
     setIsTyping(true);
 
     // Simulate bot response
-    setTimeout(() => {
-      const botMessage = {
-        id: Date.now() + 1,
-        text: "Thanks for your message! This is a demo response. You can integrate your actual chatbot logic here.",
-        sender: "bot",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, botMessage]);
+    try {
+      const response = await axios.post(
+        "http://localhost:4000/chatbot/generate",
+        {
+          message: inputText,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      if (response.data.success) {
+        const botMessage = {
+          id: Date.now() + 1,
+          text: response.data.message,
+          sender: "bot",
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, botMessage]);
+        setIsTyping(false);
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
       setIsTyping(false);
-    }, 1500);
+      return;
+    }
   };
 
   const handleKeyPress = (e) => {
