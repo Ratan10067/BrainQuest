@@ -13,6 +13,8 @@ import {
   Star,
   MessageCircle,
   Mail,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AuthContext } from "../context/UserContext";
@@ -20,13 +22,13 @@ import { AuthContext } from "../context/UserContext";
 export default function Navbar() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-  const { isAuthenticated, setIsAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, setIsAuthenticated, darkMode, setDarkMode } =
+    useContext(AuthContext);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [premiumDropdownOpen, setPremiumDropdownOpen] = useState(false);
   const [userName, setUserName] = useState("");
   const dropDownRef = useRef(null);
   const premiumDropdownRef = useRef(null);
-
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
@@ -236,6 +238,18 @@ export default function Navbar() {
                 </AnimatePresence>
               </div>
             )}
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setDarkMode(!darkMode)}
+              className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all cursor-pointer"
+            >
+              {darkMode ? (
+                <Sun className="w-5 h-5 text-yellow-400" />
+              ) : (
+                <Moon className="w-5 h-5 text-blue-400" />
+              )}
+            </motion.button>
           </div>
 
           {/* Mobile Menu Button */}
