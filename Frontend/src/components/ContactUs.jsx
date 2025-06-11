@@ -19,6 +19,7 @@ import {
 import axios from "axios";
 import SessionExpiredModal from "./SessionExpiredModal";
 import { AuthContext } from "../context/UserContext";
+import ChatBot from "./ChatBot";
 export default function ContactUs() {
   const [formData, setFormData] = useState({
     name: "",
@@ -584,6 +585,7 @@ export default function ContactUs() {
         </div>
       </div>
       {sessionExpired && <SessionExpiredModal />}
+      <ChatBot />
     </div>
   );
 }

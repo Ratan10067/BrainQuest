@@ -13,6 +13,7 @@ import {
   Award,
   Users,
 } from "lucide-react";
+import ChatBot from "./ChatBot";
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -245,6 +246,7 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+      <ChatBot />
     </div>
   );
 }

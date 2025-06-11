@@ -17,6 +17,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import axios from "axios";
+import ChatBot from "./ChatBot";
 export default function Feedback() {
   const [allReviews, setAllReviews] = useState([
     {
@@ -848,6 +849,7 @@ export default function Feedback() {
           />
         )}
       </AnimatePresence>
+      <ChatBot />
     </div>
   );
 }

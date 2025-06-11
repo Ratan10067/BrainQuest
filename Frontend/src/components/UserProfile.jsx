@@ -34,6 +34,7 @@ import axios from "axios";
 import Settings from "./Settings";
 import { AuthContext } from "../context/UserContext";
 import SessionExpiredModal from "./SessionExpiredModal";
+import ChatBot from "./ChatBot";
 
 export default function UserProfile() {
   const navigate = useNavigate();
@@ -940,6 +941,7 @@ export default function UserProfile() {
           }}
         />
       )}
+      <ChatBot />
     </div>
   );
 }

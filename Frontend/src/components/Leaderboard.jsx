@@ -16,6 +16,7 @@ import { HiOutlineSparkles } from "react-icons/hi";
 import axios from "axios";
 import UserProfileModal from "./UserProfileModal";
 import ErrorState from "./ErrorState";
+import ChatBot from "./ChatBot";
 
 // Mock data with complete user information
 const mockLeaderboardData = [
@@ -664,6 +665,7 @@ export default function Leaderboard() {
           />
         )}
       </AnimatePresence>
+      <ChatBot />
     </div>
   );
 }

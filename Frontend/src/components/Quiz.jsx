@@ -65,6 +65,7 @@ import {
 } from "lucide-react";
 import SessionExpiredModal from "./SessionExpiredModal";
 import ErrorState from "./ErrorState";
+import ChatBot from "./ChatBot";
 
 export default function QuizSection() {
   const navigate = useNavigate();
@@ -581,6 +582,43 @@ export default function QuizSection() {
         }
       } catch (error) {
         console.error("Error starting PYQ quiz:", error);
+        setIsStartingQuiz(false);
+      }
+    } else if (
+      selectedQuizType === "academic" &&
+      selectedQuiz &&
+      selectedSubject
+    ) {
+      console.log("yaha aaye toh hai pr selectedQuiz", selectedQuiz);
+      try {
+        const response = await axios.get(`http://localhost:4000/quiz/start`, {
+          params: {
+            quizId: selectedQuiz,
+            subject: selectedSubject,
+            difficulty: selectedDifficulty,
+            title: titleOfTheQuiz,
+            timerEnabled: timerEnabled,
+          },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        if (response.status === 200) {
+          setQuestions(response.data.questions);
+          navigate(`/quiz-started/${response.data.quizId}`, {
+            state: {
+              quizId: selectedQuiz,
+              difficulty: selectedDifficulty,
+              timerEnabled: timerEnabled,
+              quizType: "academic",
+            },
+          });
+          setIsModalOpen(false);
+          setIsStartingQuiz(false);
+        }
+      } catch (error) {
+        console.error("Error starting academic quiz:", error);
         setIsStartingQuiz(false);
       }
     }
@@ -1438,6 +1476,7 @@ export default function QuizSection() {
 
       {/* Session Expired Modal */}
       {sessionExpired && <SessionExpiredModal />}
+      <ChatBot />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Lock, Loader2, EyeIcon, EyeOff, ArrowLeft } from "lucide-react";
 import { AuthContext } from "../context/UserContext";
 import { useGoogleLogin } from "@react-oauth/google";
+import ChatBot from "./ChatBot";
 export default function UserSignIn() {
   const API_BASE_URL = "http://localhost:4000/users";
   const navigate = useNavigate();
@@ -468,6 +469,7 @@ export default function UserSignIn() {
           </motion.div>
         )}
       </AnimatePresence>
+      <ChatBot />
     </div>
   );
 }

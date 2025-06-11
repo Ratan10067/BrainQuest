@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useGoogleLogin } from "@react-oauth/google";
 import { AuthContext } from "../context/UserContext";
+import ChatBot from "./ChatBot";
 
 const API_BASE_URL = "http://localhost:4000/users";
 
@@ -776,6 +777,7 @@ export default function UserSignUp() {
           </motion.div>
         )}
       </AnimatePresence>
+      <ChatBot />
     </div>
   );
 }

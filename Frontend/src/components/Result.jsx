@@ -18,6 +18,7 @@ import {
   Calendar,
   BookOpen,
 } from "lucide-react";
+import ChatBot from "./ChatBot";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -555,6 +556,7 @@ export default function Result() {
           </button>
         </div>
       </div>
+      <ChatBot />
     </div>
   );
 }
