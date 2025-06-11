@@ -75,7 +75,7 @@ export default function QuizSection() {
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [currentView, setCurrentView] = useState("main"); // main, category, subjects, quiz-setup
-  const [timerEnabled, setTimerEnabled] = useState(true);
+
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [searchFilter, setSearchFilter] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState("");
@@ -89,6 +89,8 @@ export default function QuizSection() {
     setSessionExpired,
     serverError,
     setServerError,
+    timerEnabled,
+    setTimerEnabled,
   } = useContext(AuthContext);
   const [titleOfTheQuiz, setTitleOfTheQuiz] = useState("");
   const [pastQuizzes, setPastQuizzes] = useState([]);
@@ -700,7 +702,7 @@ export default function QuizSection() {
           onClick={handleProgrammingSelect}
           className="w-full p-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl
                      text-white font-semibold text-lg flex items-center justify-between
-                     hover:shadow-lg hover:shadow-blue-500/25 transition-all"
+                     hover:shadow-lg hover:shadow-blue-500/25 transition-all cursor-pointer"
         >
           <div className="flex items-center gap-4">
             <Brain className="w-8 h-8" />

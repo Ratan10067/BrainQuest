@@ -1,4 +1,3 @@
-// src/components/QuizStarted.jsx
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/UserContext";
@@ -61,14 +60,20 @@ function WarningModal({ onConfirm, onCancel }) {
 }
 export default function QuizStarted() {
   const navigate = useNavigate();
-  const { questions, setPastQuizzes, pastQuizzes } = useContext(AuthContext);
+  const {
+    questions,
+    setPastQuizzes,
+    pastQuizzes,
+    timerEnabled,
+    setTimerEnabled,
+  } = useContext(AuthContext);
   const total = questions.length || 0;
   const [submitting, setSubmitting] = useState(false);
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState(null);
   const [status, setStatus] = useState([]);
   const [answers, setAnswers] = useState([]);
-  const [timeLeft, setTimeLeft] = useState(1 * 60);
+  const [timeLeft, setTimeLeft] = useState(0.5 * 60);
   const [showNavModal, setShowNavModal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -123,6 +128,7 @@ export default function QuizStarted() {
 
   // — Timer countdown —
   useEffect(() => {
+    if (!timerEnabled) return;
     if (timeLeft <= 0) {
       setShowSubmitModal(true); // Show the modal
       return;
@@ -318,13 +324,15 @@ export default function QuizStarted() {
             <h2 className="text-2xl font-bold text-white">
               Question {current + 1} of {total}
             </h2>
-            <div className="flex items-center gap-2 bg-[#2c3250] px-4 py-2 rounded-xl border border-white/10">
-              <Clock className="text-yellow-400" size={20} />
-              <span className="font-mono text-white">
-                {Math.floor(timeLeft / 60)}:
-                {String(timeLeft % 60).padStart(2, "0")}
-              </span>
-            </div>
+            {timerEnabled && (
+              <div className="flex items-center gap-2 bg-[#2c3250] px-4 py-2 rounded-xl border border-white/10">
+                <Clock className="text-yellow-400" size={20} />
+                <span className="font-mono text-white">
+                  {Math.floor(timeLeft / 60)}:
+                  {String(timeLeft % 60).padStart(2, "0")}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Score Info */}

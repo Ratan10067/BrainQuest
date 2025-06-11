@@ -11,6 +11,7 @@ export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false);
   const [serverError, setServerError] = useState(null);
+  const [timerEnabled, setTimerEnabled] = useState(true);
   const [darkMode, setDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem("theme");
     return (
@@ -67,6 +68,8 @@ export function AuthProvider({ children }) {
         setServerError,
         darkMode,
         setDarkMode,
+        timerEnabled,
+        setTimerEnabled,
       }}
     >
       {children}
