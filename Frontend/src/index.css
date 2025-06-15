@@ -78,4 +78,7 @@
 /* Add smooth transitions for theme changes */
 * {
   transition: background-color 0.3s ease, border-color 0.3s ease;
+  font-family: "Savate", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
 }

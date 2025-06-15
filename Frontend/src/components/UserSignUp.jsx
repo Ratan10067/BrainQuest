@@ -29,6 +29,7 @@ const EmailSignupForm = memo(
     loading,
     onBack,
     handleBackToSocial,
+    otpSent,
   }) => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -50,7 +51,21 @@ const EmailSignupForm = memo(
         </h2>
         <p className="text-gray-300">Fill in your details to get started</p>
       </div>
-
+      {otpSent && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 rounded-xl bg-gradient-to-r from-green-500/10 to-emerald-500/10 
+                   border border-green-500/20 backdrop-blur-sm"
+        >
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-green-400" />
+            <p className="text-green-400">
+              OTP sent successfully! Please check your email.
+            </p>
+          </div>
+        </motion.div>
+      )}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="relative group">
           <User
@@ -449,7 +464,7 @@ export default function UserSignUp() {
     success: false,
     message: "",
   });
-
+  const [otpSent, setOtpSent] = useState(false);
   // Google OAuth Configuration
   const googleLogin = useGoogleLogin({
     onSuccess: handleGoogleSuccess,
@@ -525,20 +540,54 @@ export default function UserSignUp() {
     setFormData({ name: "", email: "", password: "" });
   };
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+  //   setOtpError("");
+
+  //   if (!isValidEmail(formData.email)) {
+  //     setModal({
+  //       open: true,
+  //       success: false,
+  //       message: "Please enter a valid email address.",
+  //     });
+  //     setLoading(false);
+  //     return;
+  //   }
+
+  //   try {
+  //     const response = await axios.post(`${API_BASE_URL}/send-otp`, {
+  //       email: formData.email,
+  //       name: formData.name,
+  //     });
+
+  //     if (response.status === 200) {
+  //       setModal({
+  //         open: true,
+  //         success: true,
+  //         message: "OTP has been sent to your email!",
+  //         action: () => {
+  //           setShowOtpInput(true);
+  //           setModal({ open: false, success: false, message: "" });
+  //         },
+  //         actionText: "Enter OTP",
+  //       });
+  //     }
+  //   } catch (error) {
+  //     setModal({
+  //       open: true,
+  //       success: false,
+  //       message: error.response?.data?.message || "Failed to send OTP",
+  //     });
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setOtpError("");
-
-    if (!isValidEmail(formData.email)) {
-      setModal({
-        open: true,
-        success: false,
-        message: "Please enter a valid email address.",
-      });
-      setLoading(false);
-      return;
-    }
 
     try {
       const response = await axios.post(`${API_BASE_URL}/send-otp`, {
@@ -547,28 +596,21 @@ export default function UserSignUp() {
       });
 
       if (response.status === 200) {
-        setModal({
-          open: true,
-          success: true,
-          message: "OTP has been sent to your email!",
-          action: () => {
-            setShowOtpInput(true);
-            setModal({ open: false, success: false, message: "" });
-          },
-          actionText: "Enter OTP",
-        });
+        setOtpSent(true);
+        setShowOtpInput(true);
+        // Focus first OTP input after a short delay
+        setTimeout(() => {
+          if (otpInputs.current[0]) {
+            otpInputs.current[0].focus();
+          }
+        }, 300);
       }
     } catch (error) {
-      setModal({
-        open: true,
-        success: false,
-        message: error.response?.data?.message || "Failed to send OTP",
-      });
+      setOtpError(error.response?.data?.message || "Failed to send OTP");
     } finally {
       setLoading(false);
     }
   };
-
   const handleOtpChange = (index, value) => {
     const char = value.slice(-1);
 
@@ -725,6 +767,7 @@ export default function UserSignUp() {
                 loading={loading}
                 onBack={() => setShowEmailForm(false)}
                 handleBackToSocial={handleBackToSocial}
+                otpSent={otpSent}
               />
             ) : (
               <SocialLoginOptions

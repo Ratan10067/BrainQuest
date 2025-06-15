@@ -48,7 +48,8 @@ export default function UserSignIn() {
         setModal({
           open: true,
           success: true,
-          message: "Welcome back! Redirecting to quiz section.",
+          message: "Welcome back! Redirecting to quiz section...",
+          icon: "🎉", // Changed from email icon to celebration
         });
         setIsAuthenticated(true);
         setTimeout(() => navigate("/quiz"), 2000);
@@ -444,12 +445,9 @@ export default function UserSignIn() {
               className="bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-2xl w-full max-w-md p-6 border border-green-600"
             >
               <div className="text-6xl mb-3 flex justify-center">
-                {modal.success ? "✉️" : "⚠️"}
+                {modal.success ? "🎉" : "⚠️"}
               </div>
 
-              <h3 className="text-2xl font-semibold mb-2 text-white text-center">
-                {modal.success ? "Email Sent!" : "Oops, Something Went Wrong"}
-              </h3>
 
               <p className="text-gray-300 text-center mb-6 px-2">
                 {modal.message}
