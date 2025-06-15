@@ -37,12 +37,11 @@ export default function HomePage() {
   }, []);
 
   const handleCheckUserSigIn = () => {
-    // Removed localStorage usage as per requirements
-    const user = false; // Replace with your auth logic
-    if (user) {
-      console.log("Navigate to quiz");
+    const token = localStorage.getItem("token");
+    if (token) {
+      window.location.href = "/quiz";
     } else {
-      console.log("Navigate to signup");
+      window.location.href = "/signup";
     }
   };
 

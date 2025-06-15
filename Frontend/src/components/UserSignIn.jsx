@@ -2,7 +2,19 @@ import React, { useState, useContext } from "react";
 import axios from "axios";
 import { useNavigate, NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Lock, Loader2, EyeIcon, EyeOff, ArrowLeft } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  Loader2,
+  EyeIcon,
+  EyeOff,
+  ArrowLeft,
+  Book,
+  Sparkles,
+  Brain,
+  Star,
+  Atom,
+} from "lucide-react";
 import { AuthContext } from "../context/UserContext";
 import { useGoogleLogin } from "@react-oauth/google";
 import ChatBot from "./ChatBot";
@@ -171,23 +183,132 @@ export default function UserSignIn() {
         transition={{ duration: 0.5 }}
         className="relative w-full max-w-4xl mx-auto bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden flex border border-white/20"
       >
-        {/* Left Panel - 3D Illustration */}
-        <div className="w-1/2 hidden lg:flex items-center justify-center p-12 relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/10 to-orange-500/10 backdrop-blur-sm" />
-          <motion.div
-            initial={{ scale: 0.8, rotateY: -20 }}
-            animate={{ scale: 1, rotateY: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="relative z-10"
-          >
-            <img
-              src="/assets/signIn.png"
-              alt="Sign In Illustration"
-              className="w-full max-w-md transform transition-transform duration-700 hover:scale-105"
-            />
-          </motion.div>
-        </div>
+        {/* Left Panel - Interactive Animation */}
+        <div className="w-1/2 hidden lg:flex items-center justify-center p-12 relative bg-gradient-to-br from-[#1a1f37]/50 to-[#2c3250]/50">
+          {/* Background particles */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute w-full h-full">
+              {[...Array(20)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-2 h-2 bg-yellow-400/20 rounded-full"
+                  animate={{
+                    x: [0, Math.random() * 400 - 200],
+                    y: [0, Math.random() * 400 - 200],
+                    scale: [1, Math.random() * 0.5 + 0.5],
+                    opacity: [0.2, 0.5, 0.2],
+                  }}
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                  }}
+                />
+              ))}
+            </div>
+          </div>
 
+          {/* Central animated element */}
+          <div className="relative z-10">
+            <motion.div
+              animate={{ rotateY: 360 }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              className="relative w-72 h-72" // Increased size for better spacing
+            >
+              {/* Orbital rings with gradient */}
+              <motion.div
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background:
+                    "linear-gradient(45deg, rgba(234, 179, 8, 0.2), rgba(234, 88, 12, 0.2))",
+                  border: "4px solid transparent",
+                  backgroundClip: "padding-box",
+                }}
+                // animate={{ rotate: 360 }}
+                // transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+              />
+              <motion.div
+                className="absolute inset-12 rounded-full"
+                style={{
+                  background:
+                    "linear-gradient(-45deg, rgba(234, 179, 8, 0.15), rgba(234, 88, 12, 0.15))",
+                  border: "4px solid transparent",
+                  backgroundClip: "padding-box",
+                }}
+                />
+
+              {/* Central brain icon with enhanced gradient */}
+              <motion.div
+                className="absolute inset-0 flex items-center justify-center"
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <div className="bg-gradient-to-br from-yellow-400 via-orange-500 to-orange-600 p-8 rounded-full shadow-lg shadow-orange-500/30">
+                  <Brain className="w-12 h-12 text-white" />
+                </div>
+              </motion.div>
+
+              {/* Orbiting icons with calculated positions */}
+              {[
+                { Icon: Book, color: "from-blue-400 to-blue-500", delay: 0 },
+                {
+                  Icon: Star,
+                  color: "from-purple-400 to-purple-500",
+                  delay: 2,
+                },
+                {
+                  Icon: Sparkles,
+                  color: "from-yellow-400 to-yellow-500",
+                  delay: 4,
+                },
+                { Icon: Atom, color: "from-green-400 to-green-500", delay: 6 },
+              ].map(({ Icon, color, delay }, index) => {
+                const angle = (index * Math.PI * 2) / 4; // Evenly space icons
+                const radius = 120; // Distance from center
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+
+                return (
+                  <motion.div
+                    key={index}
+                    className="absolute"
+                    style={{
+                      left: "50%",
+                      top: "50%",
+                      x: x,
+                      y: y,
+                    }}
+                  >
+                    <motion.div
+                      className={`bg-gradient-to-r ${color} p-3 rounded-xl shadow-lg backdrop-blur-sm`}
+                      whileHover={{ scale: 1.2, rotate: 360 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                    >
+                      <Icon className="w-6 h-6 text-white" />
+                    </motion.div>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+
+            {/* Enhanced welcome text */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="text-center mt-12 space-y-3"
+            >
+              <div className="inline-block p-1 px-3 rounded-full bg-yellow-400/10 border border-yellow-400/20">
+                <span className="text-yellow-400 text-sm">Welcome Back</span>
+              </div>
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+                BrainQuest Learning
+              </h3>
+              <p className="text-gray-400 text-sm max-w-[250px] mx-auto">
+                Your journey to knowledge continues here
+              </p>
+            </motion.div>
+          </div>
+        </div>
         {/* Right Panel - Form */}
         <div className="w-full lg:w-1/2 p-8 md:p-12">
           <AnimatePresence mode="wait">
@@ -447,7 +568,6 @@ export default function UserSignIn() {
               <div className="text-6xl mb-3 flex justify-center">
                 {modal.success ? "🎉" : "⚠️"}
               </div>
-
 
               <p className="text-gray-300 text-center mb-6 px-2">
                 {modal.message}

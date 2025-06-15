@@ -345,7 +345,7 @@ export default function Feedback() {
                   setNewReview({ rating: 0, comment: "" });
                 }}
                 className="w-full sm:w-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 lg:py-4 bg-gradient-to-r from-blue-600 to-purple-600 
-                 text-white font-semibold rounded-lg sm:rounded-xl lg:rounded-2xl flex items-center justify-center gap-2 sm:gap-3 text-sm sm:text-base"
+                 text-white font-semibold rounded-lg sm:rounded-xl lg:rounded-2xl flex items-center justify-center gap-2 sm:gap-3 text-sm sm:text-base cursor-pointer"
               >
                 <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                 Write a Review
@@ -377,7 +377,7 @@ export default function Feedback() {
                   whileTap={{ scale: 0.9 }}
                   onClick={prevUserReview}
                   className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 bg-slate-800/80 
-                   hover:bg-slate-700/80 rounded-full text-white shadow-lg"
+                   hover:bg-slate-700/80 rounded-full text-white shadow-lg cursor-pointer"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </motion.button>
@@ -387,7 +387,7 @@ export default function Feedback() {
                   whileTap={{ scale: 0.9 }}
                   onClick={nextUserReview}
                   className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 bg-slate-800/80 
-                   hover:bg-slate-700/80 rounded-full text-white shadow-lg"
+                   hover:bg-slate-700/80 rounded-full text-white shadow-lg cursor-pointer"
                 >
                   <ChevronRight className="w-5 h-5" />
                 </motion.button>
@@ -456,7 +456,7 @@ export default function Feedback() {
                       onClick={() =>
                         handleEditReview(userReviews[currentUserReviewIndex])
                       }
-                      className="p-3 bg-emerald-600/60 hover:bg-emerald-600 rounded-xl backdrop-blur-sm transition-all duration-200 group"
+                      className="p-3 bg-emerald-600/60 hover:bg-emerald-600 rounded-xl backdrop-blur-sm transition-all duration-200 group cursor-pointer"
                     >
                       <Edit3 className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
                     </motion.button>
@@ -468,7 +468,7 @@ export default function Feedback() {
                           userReviews[currentUserReviewIndex]._id
                         )
                       }
-                      className="p-3 bg-red-600/60 hover:bg-red-600 rounded-xl backdrop-blur-sm transition-all duration-200 group"
+                      className="p-3 bg-red-600/60 hover:bg-red-600 rounded-xl backdrop-blur-sm transition-all duration-200 group cursor-pointer"
                     >
                       <Trash2 className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
                     </motion.button>
@@ -530,7 +530,7 @@ export default function Feedback() {
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setFilter(rating)}
-                  className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
+                  className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 cursor-pointer ${
                     filter === rating
                       ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg scale-105"
                       : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 border border-slate-600/50"
@@ -644,7 +644,7 @@ export default function Feedback() {
                           whileHover={{ scale: 1.05, y: -2 }}
                           whileTap={{ scale: 0.95 }}
                           onClick={() => handleLikeReview(review._id)}
-                          className="flex items-center gap-2 text-slate-400 hover:text-red-400 transition-colors duration-200 group"
+                          className="flex items-center gap-2 text-slate-400 hover:text-red-400 transition-colors duration-200 group cursor-pointer"
                         >
                           <div className="p-2 bg-red-500/10 group-hover:bg-red-500/20 rounded-xl transition-colors duration-200">
                             <Heart className="w-4 h-4 group-hover:scale-110 transition-transform" />
@@ -730,7 +730,7 @@ export default function Feedback() {
                           setIsEditing(false);
                           setNewReview({ rating: 0, comment: "" });
                         }}
-                        className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-700/50 transition-all duration-200"
+                        className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-700/50 transition-all duration-200 cursor-pointer"
                       >
                         <X className="w-6 h-6" />
                       </motion.button>
@@ -754,7 +754,7 @@ export default function Feedback() {
                             }
                             onMouseEnter={() => setHoveredRating(i + 1)}
                             onMouseLeave={() => setHoveredRating(0)}
-                            className="focus:outline-none transition-all duration-200"
+                            className="focus:outline-none transition-all duration-200 cursor-pointer"
                           >
                             <Star
                               className={`w-16 h-16 ${

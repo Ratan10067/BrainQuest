@@ -12,6 +12,12 @@ import {
   ArrowLeft,
   CheckCircle,
   Github,
+  Book,
+  Sparkles,
+  Brain,
+  Star,
+  Atom,
+  BookOpen,
 } from "lucide-react";
 import { useGoogleLogin } from "@react-oauth/google";
 import { AuthContext } from "../context/UserContext";
@@ -719,25 +725,188 @@ export default function UserSignUp() {
         transition={{ duration: 0.5 }}
         className="relative w-full max-w-4xl mx-auto bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden flex border border-white/20"
       >
+        {/* Left Panel with adjusted sizes and spacing */}
         <div className="w-1/2 hidden lg:flex items-center justify-center p-12 relative">
+          {/* Background remains the same */}
           <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/10 to-orange-500/10 backdrop-blur-sm" />
-          <motion.div
-            initial={{ scale: 0.8, rotateY: -20 }}
-            animate={{ scale: 1, rotateY: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="relative z-10"
-          >
-            <div className="w-full max-w-md transform transition-transform duration-700 hover:scale-105 bg-gradient-to-br from-yellow-400/20 to-orange-500/20 rounded-3xl p-8 backdrop-blur-sm border border-white/10">
-              <h3 className="text-2xl font-bold text-white mb-4">
-                Welcome to BrainQuest!
-              </h3>
-              <p className="text-gray-300">
-                Join thousands of learners and start your journey today.
-              </p>
-            </div>
-          </motion.div>
-        </div>
 
+          {/* Particles with adjusted size */}
+          <div className="absolute inset-0 overflow-hidden">
+            {[...Array(30)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-1 h-1 bg-yellow-400/30 rounded-full"
+                animate={{
+                  y: [0, Math.random() * 300 - 150], // Reduced range
+                  x: [0, Math.random() * 300 - 150], // Reduced range
+                  scale: [1, Math.random() * 2], // Reduced scale
+                  opacity: [0.3, 0.6, 0.3],
+                }}
+                transition={{
+                  duration: Math.random() * 5 + 3,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  ease: "easeInOut",
+                }}
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Main content container with better spacing */}
+          <div className="relative z-10 space-y-8">
+            {" "}
+            {/* Reduced spacing */}
+            {/* Animated hero element with adjusted size */}
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.7, delay: 0.2 }}
+              className="relative w-48 h-48 mx-auto" // Fixed size container
+            >
+              {/* Rotating circles with adjusted size */}
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-0"
+              >
+                {[...Array(3)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute inset-0 rounded-full border-2 border-yellow-400/20"
+                    style={{
+                      transform: `scale(${1 - i * 0.1}) rotate(${i * 30}deg)`,
+                    }}
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 10 + i * 5,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                  />
+                ))}
+              </motion.div>
+
+              {/* Central icon with reduced size */}
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
+                   bg-gradient-to-br from-yellow-400 to-orange-500 p-6 rounded-full 
+                   shadow-lg shadow-orange-500/30 backdrop-blur-md"
+              >
+                <User className="w-8 h-8 text-white" />{" "}
+                {/* Reduced icon size */}
+              </motion.div>
+
+              {/* Orbiting elements with adjusted radius */}
+              {[
+                { Icon: Brain, color: "from-blue-400 to-blue-500", delay: 0 },
+                {
+                  Icon: Star,
+                  color: "from-purple-400 to-purple-500",
+                  delay: 1.5,
+                },
+                {
+                  Icon: BookOpen,
+                  color: "from-green-400 to-green-500",
+                  delay: 3,
+                },
+              ].map(({ Icon, color, delay }, index) => {
+                const angle = (index * Math.PI * 2) / 3;
+                const radius = 60; // Reduced orbit radius
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+
+                return (
+                  <motion.div
+                    key={index}
+                    className="absolute"
+                    style={{
+                      left: "50%",
+                      top: "50%",
+                    }}
+                    animate={{
+                      x: [x, x],
+                      y: [y, y],
+                      rotate: 360,
+                    }}
+                    transition={{
+                      rotate: {
+                        duration: 8,
+                        delay,
+                        repeat: Infinity,
+                        ease: "linear",
+                      },
+                    }}
+                  >
+                    <motion.div
+                      className={`bg-gradient-to-r ${color} p-2 rounded-lg 
+                         shadow-lg backdrop-blur-sm`} // Reduced padding
+                      whileHover={{ scale: 1.2, rotate: 360 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                    >
+                      <Icon className="w-4 h-4 text-white" />{" "}
+                      {/* Reduced icon size */}
+                    </motion.div>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+            {/* Welcome text with better spacing */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="text-center space-y-3" // Reduced spacing
+            >
+              <div className="inline-block px-3 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm">
+                <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent text-sm font-medium">
+                  Start Your Journey
+                </span>
+              </div>
+              <h2 className="text-2xl font-bold text-white">
+                {" "}
+                {/* Reduced text size */}
+                Join BrainQuest Today
+              </h2>
+              <p className="text-gray-300 text-sm max-w-[250px] mx-auto">
+                {" "}
+                {/* Reduced width */}
+                Unlock your potential with interactive quizzes and join our
+                community
+              </p>
+            </motion.div>
+            {/* Features list with adjusted spacing */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.7 }}
+              className="space-y-2" // Reduced spacing
+            >
+              {[
+                "Interactive Learning Experience",
+                "Track Your Progress",
+                "Join Global Community",
+              ].map((feature, index) => (
+                <motion.div
+                  key={feature}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.8 + index * 0.1 }}
+                  className="flex items-center gap-2 text-gray-300 text-sm" // Added text-sm
+                >
+                  <CheckCircle className="w-4 h-4 text-yellow-400" />{" "}
+                  {/* Reduced icon size */}
+                  <span>{feature}</span>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </div>
         <div className="w-full lg:w-1/2 p-8 md:p-12">
           <AnimatePresence mode="wait">
             {showOtpInput ? (
