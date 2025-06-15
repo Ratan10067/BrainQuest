@@ -1,4 +1,11 @@
-import React, { useState, useContext, useRef, memo, useCallback } from "react";
+import React, {
+  useState,
+  useContext,
+  useRef,
+  memo,
+  useCallback,
+  useEffect,
+} from "react";
 import axios from "axios";
 import { useNavigate, NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -211,12 +218,41 @@ function OtpVerificationForm({
   otpError,
   setModal,
 }) {
+  const [countdown, setCountdown] = useState(30);
+  const [canResend, setCanResend] = useState(false);
   const handleBackToForm = () => {
     setShowOtpInput(false);
     setOtp(["", "", "", "", "", ""]);
     setOtpError("");
   };
+  useEffect(() => {
+    let timer;
+    if (countdown > 0) {
+      timer = setInterval(() => {
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+    } else {
+      setCanResend(true);
+    }
 
+    return () => clearInterval(timer);
+  }, [countdown]);
+  const handleResendOtp = async () => {
+    try {
+      setCanResend(false);
+      setCountdown(30);
+      const response = await axios.post(`${API_BASE_URL}/send-otp`, {
+        email: formData.email,
+        name: formData.name,
+      });
+
+      if (response.status === 200) {
+        setOtpError("");
+      }
+    } catch (error) {
+      setOtpError(error.response?.data?.message || "Failed to resend OTP");
+    }
+  };
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -260,7 +296,23 @@ function OtpVerificationForm({
             />
           ))}
         </div>
-
+        <div className="text-center space-y-2">
+          {countdown > 0 ? (
+            <p className="text-gray-400 text-sm">
+              Resend OTP in{" "}
+              <span className="text-yellow-400">{countdown}s</span>
+            </p>
+          ) : (
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              onClick={handleResendOtp}
+              className="text-yellow-400 hover:text-yellow-300 text-sm transition-colors cursor-pointer"
+            >
+              Resend OTP
+            </motion.button>
+          )}
+        </div>
         {otpError && (
           <motion.p
             initial={{ opacity: 0, y: -10 }}
