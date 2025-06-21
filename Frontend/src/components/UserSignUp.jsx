@@ -3,7 +3,6 @@ import React, {
   useContext,
   useRef,
   memo,
-  useCallback,
   useEffect,
 } from "react";
 import axios from "axios";

@@ -54,7 +54,7 @@ const userSchema = new mongoose.Schema(
     birthday: { type: Date },
     avatar: {
       type: String, // URL or base64-encoded string for the avatar image
-      default: "default-avatar.png", // Default image if user hasn't uploaded one
+      default: "data:image/png;base64,iVBORw0KGgoAAAANSU...", // Default image if user hasn't uploaded one
     },
     quizzesTaken: {
       type: Number,

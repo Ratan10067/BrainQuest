@@ -918,6 +918,7 @@ module.exports.deleteUser = async (req, res, next) => {
     await Result.deleteMany({ userId: userId });
     await Query.deleteMany({ userId: userId });
     await LeaderBoard.deleteMany({ userId: userId });
+    await Feedback.deleteMany({ userId: userId });
     res.status(200).json({
       success: true,
       message: "Account deleted successfully",
@@ -1005,5 +1006,36 @@ module.exports.getPastFeedback = async (req, res, next) => {
       message: "Failed to retrieve feedback",
       error: error.message,
     });
+  }
+};
+
+module.exports.updateAvatar = async (req, res, next) => {
+  try {
+    const { avatarUrl } = req.body;
+    console.log("updateAvatar me yaha aa rha ha", avatarUrl);
+    // const base64Size = avatarUrl.length * (3 / 4) - 2; // Approximate size in bytes
+    // const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+
+    // if (base64Size > MAX_SIZE) {
+    //   return res.status(413).json({
+    //     message: "Image too large",
+    //     details: "Please upload an image smaller than 5MB",
+    //   });
+    // }
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.avatar = avatarUrl;
+    await user.save();
+
+    res.status(200).json({
+      message: "Avatar updated successfully",
+      avatar: user.avatar,
+    });
+  } catch (error) {
+    console.error("Avatar update error:", error);
+    res.status(500).json({ message: "Failed to update avatar" });
   }
 };

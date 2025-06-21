@@ -15,6 +15,7 @@ import {
   Mail,
   Sun,
   Moon,
+  Bell,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AuthContext } from "../context/UserContext";
@@ -38,7 +39,25 @@ export default function Navbar() {
     navigate("/");
     setProfileDropdownOpen(false);
   };
-
+  const [notificationDropdownOpen, setNotificationDropdownOpen] =
+    useState(false);
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      type: "quiz",
+      message: "New quiz available in Mathematics!",
+      time: "2 hours ago",
+      read: false,
+    },
+    {
+      id: 2,
+      type: "achievement",
+      message: "You earned a new badge!",
+      time: "1 day ago",
+      read: false,
+    },
+  ]);
+  const notificationRef = useRef(null);
   const navItems = [
     { path: "/", label: "Home", icon: <Home size={18} /> },
     { path: "/quiz", label: "Quiz", icon: <Brain size={18} /> },
@@ -58,14 +77,25 @@ export default function Navbar() {
       ) {
         setPremiumDropdownOpen(false);
       }
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target)
+      ) {
+        setNotificationDropdownOpen(false);
+      }
     }
-    if (profileDropdownOpen || premiumDropdownOpen) {
+    // Add notificationDropdownOpen to the condition
+    if (
+      profileDropdownOpen ||
+      premiumDropdownOpen ||
+      notificationDropdownOpen
+    ) {
       document.addEventListener("mousedown", handleClickOutside);
     }
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [profileDropdownOpen, premiumDropdownOpen]);
+  }, [profileDropdownOpen, premiumDropdownOpen, notificationDropdownOpen]);
 
   return (
     <nav className="bg-[#1a1f37]/95 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
@@ -180,7 +210,96 @@ export default function Navbar() {
                 </>
               )}
             </div>
+            {/* Add this before the Profile Section */}
+            {isAuthenticated && (
+              <div className="relative" ref={notificationRef}>
+                <button
+                  onClick={() =>
+                    setNotificationDropdownOpen(!notificationDropdownOpen)
+                  }
+                  className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 transition-all"
+                >
+                  <Bell size={20} className="text-gray-300" />
+                  {notifications.some((n) => !n.read) && (
+                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full" />
+                  )}
+                </button>
 
+                <AnimatePresence>
+                  {notificationDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute right-0 mt-2 w-80 py-2 bg-[#2c3250] rounded-xl shadow-xl border border-white/10"
+                    >
+                      <div className="px-4 py-2 border-b border-white/10 flex items-center justify-between">
+                        <h3 className="text-white font-medium">
+                          Notifications
+                        </h3>
+                        <button
+                          onClick={() => navigate("/notifications")}
+                          className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                        >
+                          View All
+                        </button>
+                      </div>
+                      <div className="max-h-[300px] overflow-y-auto">
+                        {notifications.length > 0 ? (
+                          notifications.map((notification) => (
+                            <div
+                              key={notification.id}
+                              className={`px-4 py-3 hover:bg-white/5 transition-colors cursor-pointer ${
+                                !notification.read ? "bg-white/5" : ""
+                              }`}
+                            >
+                              <div className="flex items-start gap-3">
+                                <div
+                                  className={`p-2 rounded-lg ${
+                                    notification.type === "quiz"
+                                      ? "bg-blue-500/20"
+                                      : "bg-yellow-500/20"
+                                  }`}
+                                >
+                                  {notification.type === "quiz" ? (
+                                    <Brain
+                                      size={16}
+                                      className="text-blue-400"
+                                    />
+                                  ) : (
+                                    <Trophy
+                                      size={16}
+                                      className="text-yellow-400"
+                                    />
+                                  )}
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-sm text-white">
+                                    {notification.message}
+                                  </p>
+                                  <p className="text-xs text-gray-400 mt-1">
+                                    {notification.time}
+                                  </p>
+                                </div>
+                                {!notification.read && (
+                                  <div className="w-2 h-2 rounded-full bg-blue-400" />
+                                )}
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="px-4 py-6 text-center">
+                            <p className="text-gray-400 text-sm">
+                              No notifications yet
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
             {/* Profile Section */}
             {isAuthenticated && (
               <div className="relative" ref={dropDownRef}>

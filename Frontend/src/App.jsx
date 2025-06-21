@@ -16,6 +16,7 @@ import Premium from "./components/Premium";
 import NotFoundPage from "./components/NotFoundPage";
 import ResetPassword from "./components/ResetPassword";
 import Feedback from "./components/Feedback";
+import Notification from "./components/Notification";
 export default function App() {
   return (
     <BrowserRouter>
@@ -40,6 +41,7 @@ export default function App() {
           />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="*" element={<NotFoundPage />} />
+          <Route path="/notifications" element={<Notification />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

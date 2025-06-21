@@ -35,7 +35,6 @@ import Settings from "./Settings";
 import { AuthContext } from "../context/UserContext";
 import SessionExpiredModal from "./SessionExpiredModal";
 import ChatBot from "./ChatBot";
-
 export default function UserProfile() {
   const navigate = useNavigate();
   const [editMode, setEditMode] = useState(false);
@@ -149,38 +148,40 @@ export default function UserProfile() {
 
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      try {
-        const formData = new FormData();
-        formData.append("avatar", file);
+    if (!file) return;
 
-        const response = await axios.post(
-          "http://localhost:4000/users/upload-avatar",
-          formData,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+    try {
+      // Create FormData object
+      const formData = new FormData();
+      formData.append("avatar", file);
 
-        if (response.status === 200) {
-          setProfile((p) => ({ ...p, avatar: URL.createObjectURL(file) }));
-          showNotification("success", "Avatar updated successfully!");
+      // Log to verify data
+      console.log("Sending file:", file);
+
+      const response = await axios.post(
+        "http://localhost:4000/users/update-avatar",
+        { avatarUrl: URL.createObjectURL(file) }, // Send as object with avatarUrl property
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
         }
-      } catch (error) {
-        console.error("Error uploading avatar:", error);
-        setError({
-          show: true,
-          message: "Failed to update avatar",
-          details:
-            "There was a problem uploading your image. Please try again.",
-        });
+      );
+
+      if (response.status === 200) {
+        setProfile((prev) => ({ ...prev, avatar: response.data.avatar }));
+        showNotification("success", "Profile picture updated successfully! 🎉");
       }
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+      setError({
+        show: true,
+        message: "Failed to update profile picture",
+        details: error.response?.data?.message || "Please try again later",
+      });
     }
   };
-
   const handleLogOut = async () => {
     try {
       const response = await axios.get(
