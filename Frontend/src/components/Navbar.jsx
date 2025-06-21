@@ -217,7 +217,7 @@ export default function Navbar() {
                   onClick={() =>
                     setNotificationDropdownOpen(!notificationDropdownOpen)
                   }
-                  className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 transition-all"
+                  className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 transition-all cursor-pointer"
                 >
                   <Bell size={20} className="text-gray-300" />
                   {notifications.some((n) => !n.read) && (
@@ -238,8 +238,11 @@ export default function Navbar() {
                           Notifications
                         </h3>
                         <button
-                          onClick={() => navigate("/notifications")}
-                          className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                          onClick={() =>
+                            navigate("/notifications") ||
+                            setNotificationDropdownOpen(false)
+                          }
+                          className="text-sm text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
                         >
                           View All
                         </button>
@@ -442,7 +445,25 @@ export default function Navbar() {
                     </button>
                   </>
                 )}
-
+                {/* Replace the existing mobile notification section with this */}
+                {isAuthenticated && (
+                  <div className="w-full">
+                    <button
+                      onClick={() =>
+                        navigate("/notifications") || setMenuOpen(false)
+                      }
+                      className="w-full flex items-center justify-between px-4 py-3 text-gray-300 hover:text-white hover:bg-white/5 rounded-xl"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <Bell size={18} className="text-gray-300" />
+                        <span>Notifications</span>
+                      </div>
+                      {notifications.some((n) => !n.read) && (
+                        <span className="w-2 h-2 rounded-full bg-red-500" />
+                      )}
+                    </button>
+                  </div>
+                )}
                 {isAuthenticated && (
                   <>
                     <button

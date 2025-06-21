@@ -1,4 +1,5 @@
 const express = require("express");
+const http = require("http");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const mongoose = require("mongoose");
@@ -11,9 +12,12 @@ const { getLeaderboard } = require("./controllers/leaderboard.controller");
 const profileRoutes = require("./routes/profile.routes");
 const contactRoutes = require("./routes/contact.routes");
 const chatbotRoutes = require("./routes/chatbot.routes");
+const { initializeSocket } = require("./socket");
 const path = require("path");
 dotenv.config();
 const app = express();
+const server = http.createServer(app);
+initializeSocket(server);
 const PORT = process.env.PORT || 4000;
 app.set("views", path.join(__dirname, "views")); // Adjust path if necessary
 app.set("view engine", "ejs");
@@ -39,6 +43,6 @@ app.use("/contact", contactRoutes);
 app.get("/leaderboard", getLeaderboard);
 app.use("/profile", profileRoutes);
 app.use("/chatbot", chatbotRoutes);
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is Listening at Port ${PORT}`);
 });
