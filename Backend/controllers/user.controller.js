@@ -8,6 +8,7 @@ const nodemailer = require("nodemailer");
 const Feedback = require("../models/feedback.model");
 const crypto = require("crypto");
 const Query = require("../models/query.model");
+const cloudinary = require("../config/cloudinary");
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -1012,30 +1013,87 @@ module.exports.getPastFeedback = async (req, res, next) => {
 module.exports.updateAvatar = async (req, res, next) => {
   try {
     const { avatarUrl } = req.body;
-    console.log("updateAvatar me yaha aa rha ha", avatarUrl);
-    // const base64Size = avatarUrl.length * (3 / 4) - 2; // Approximate size in bytes
-    // const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+    if (avatarUrl.startsWith("data:image")) {
+      // Upload to Cloudinary with private access mode
+      const uploadResponse = await cloudinary.uploader.upload(avatarUrl, {
+        folder: "avatars",
+        type: "private", // Make the image private
+        access_mode: "authenticated", // Require authentication
+        resource_type: "image",
+        use_filename: true,
+        unique_filename: true,
+        overwrite: true,
+        transformation: [
+          { width: 400, height: 400, crop: "fill" },
+          { quality: "auto" },
+          { fetch_format: "auto" },
+        ],
+      });
 
-    // if (base64Size > MAX_SIZE) {
-    //   return res.status(413).json({
-    //     message: "Image too large",
-    //     details: "Please upload an image smaller than 5MB",
-    //   });
-    // }
-    const user = await User.findById(req.user._id);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      // Generate a signed URL with expiration
+      const signedUrl = cloudinary.url(uploadResponse.public_id, {
+        sign_url: true,
+        type: "private",
+        secure: true,
+        resource_type: "image",
+        transformation: [
+          { width: 400, height: 400, crop: "fill" },
+          { quality: "auto" },
+          { fetch_format: "auto" },
+        ],
+        expires_at: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // URL expires in 24 hours
+      });
+
+      const user = await User.findById(req.user._id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Store both public_id and signed URL
+      user.avatar = signedUrl;
+      user.avatarPublicId = uploadResponse.public_id;
+      await user.save();
+
+      res.status(200).json({
+        message: "Avatar updated successfully",
+        avatar: signedUrl,
+      });
     }
-
-    user.avatar = avatarUrl;
-    await user.save();
-
-    res.status(200).json({
-      message: "Avatar updated successfully",
-      avatar: user.avatar,
-    });
   } catch (error) {
     console.error("Avatar update error:", error);
-    res.status(500).json({ message: "Failed to update avatar" });
+    res.status(500).json({
+      message: "Failed to update avatar",
+      error: error.message,
+    });
+  }
+};
+
+module.exports.refreshAvatarUrl = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user || !user.avatarPublicId) {
+      return res.status(404).json({ message: "No avatar found" });
+    }
+
+    // Generate new signed URL
+    const signedUrl = cloudinary.url(user.avatarPublicId, {
+      sign_url: true,
+      type: "private",
+      secure: true,
+      resource_type: "image",
+      transformation: [
+        { width: 400, height: 400, crop: "fill" },
+        { quality: "auto" },
+        { fetch_format: "auto" },
+      ],
+      expires_at: Math.floor(Date.now() / 1000) + 24 * 60 * 60,
+    });
+
+    user.avatar = signedUrl;
+    await user.save();
+
+    res.json({ avatar: signedUrl });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to refresh avatar URL" });
   }
 };

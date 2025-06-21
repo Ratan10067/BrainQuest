@@ -376,14 +376,14 @@ const ChatBot = () => {
 
   // Chat window dimensions
   const chatWindowClass = isExpanded
-    ? "fixed inset-0 w-full h-full"
+    ? "fixed inset-x-0 bottom-0 top-[82px] w-full" // 72px is typical navbar height
     : "mb-4 w-92 h-140";
 
   return (
     <div
-      className={`fixed ${
+      className={`fixed  ${
         isExpanded
-          ? "inset-0 z-40" // Changed from z-50 to z-40 when expanded
+          ? "inset-x-0 bottom-0 top-[72px] z-40" // Start below navbar
           : "bottom-6 right-6 z-50"
       } ${darkMode ? "dark" : ""}`}
     >
@@ -406,7 +406,7 @@ const ChatBot = () => {
       {/* Chat Window */}
       {isOpen && (
         <div
-          className={`${chatWindowClass} bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden animate-in ${
+          className={`${chatWindowClass} bg-[#1a1f37] rounded-2xl shadow-2xl border border-[#1a1f37] flex flex-col overflow-hidden animate-in ${
             isExpanded ? "rounded-none" : "slide-in-from-bottom-5"
           } duration-300`}
         >
@@ -414,10 +414,10 @@ const ChatBot = () => {
           {!chatMode && !showFriendsList && (
             <div className="flex flex-col items-center justify-center h-full p-6 space-y-6">
               <div className="text-center mb-4">
-                <h3 className="text-xl font-bold text-gray-800 mb-2">
+                <h3 className="text-xl font-bold text-white mb-2">
                   Choose Chat Mode
                 </h3>
-                <p className="text-gray-600 text-sm">
+                <p className="text-white text-sm">
                   Select how you want to communicate
                 </p>
                 <div className="absolute top-4 right-4 flex space-x-2">
@@ -443,7 +443,7 @@ const ChatBot = () => {
 
               <button
                 onClick={() => setChatMode("ai")}
-                className="w-full max-w-xs bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-xl hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-3"
+                className="w-full max-w-xs bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-xl hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-3 cursor-pointer"
               >
                 <Bot size={24} />
                 <span className="font-semibold">Chat with AI Assistant</span>
@@ -454,7 +454,7 @@ const ChatBot = () => {
                   setShowFriendsList(true);
                   setChatMode("friends");
                 }}
-                className="w-full max-w-xs bg-gradient-to-r from-green-600 to-teal-600 text-white p-4 rounded-xl hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-3"
+                className="w-full max-w-xs bg-gradient-to-r from-green-600 to-teal-600 text-white p-4 rounded-xl hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-3 cursor-pointer"
               >
                 <Users size={24} />
                 <span className="font-semibold">Message Friends</span>
@@ -683,31 +683,32 @@ const ChatBot = () => {
               )}
 
               {/* Input */}
-              <div className="p-4 border-t bg-white">
+              <div className="p-4 border-t border-white/10 bg-[#2c3250]">
                 <div className="flex items-center space-x-2">
                   <div className="flex space-x-1">
                     <button
                       onClick={() => imageInputRef.current?.click()}
-                      className="w-8 h-8 text-gray-500 hover:text-blue-600 rounded-full flex items-center justify-center hover:bg-gray-100 transition-all duration-200"
+                      className="w-8 h-8 text-white hover:text-blue-600 rounded-full flex items-center justify-center hover:bg-gray-100 transition-all duration-200"
                       title="Share Image"
                     >
                       <Image size={16} />
                     </button>
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className="w-8 h-8 text-gray-500 hover:text-blue-600 rounded-full flex items-center justify-center hover:bg-gray-100 transition-all duration-200"
+                      className="w-8 h-8 text-white hover:text-blue-600 rounded-full flex items-center justify-center hover:bg-gray-100 transition-all duration-200"
                       title="Share File"
                     >
                       <Paperclip size={16} />
                     </button>
                     <button
                       onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                      className="w-8 h-8 text-gray-500 hover:text-blue-600 rounded-full flex items-center justify-center hover:bg-gray-100 transition-all duration-200"
+                      className="w-8 h-8 text-white hover:text-blue-600 rounded-full flex items-center justify-center hover:bg-gray-100 transition-all duration-200"
                       title="Add Emoji"
                     >
                       <Smile size={16} />
                     </button>
                   </div>
+
                   <textarea
                     ref={inputRef}
                     value={inputText}
@@ -729,7 +730,7 @@ const ChatBot = () => {
                       minHeight: "40px",
                       maxHeight: "120px",
                     }}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm resize-none overflow-auto"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm resize-none overflow-auto text-white bg-[#2c3250] placeholder-gray-400"
                   />
                   <button
                     onClick={handleSendMessage}
@@ -935,15 +936,9 @@ const ChatBot = () => {
       {/* Chat Toggle Button */}
       {!isOpen && (
         <div className="fixed bottom-6 right-6">
-          {" "}
-          {/* Add this wrapper div */}
           <button
             onClick={() => setIsOpen(true)}
-            className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:shadow-xl ${
-              darkMode
-                ? "bg-gradient-to-r from-blue-700 to-purple-700 text-white"
-                : "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
-            }`}
+            className="w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:shadow-xl bg-gradient-to-r from-yellow-400 to-orange-500 text-[#1a1f37] cursor-pointer"
           >
             <MessageCircle size={24} />
           </button>

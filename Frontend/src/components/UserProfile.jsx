@@ -77,7 +77,7 @@ export default function UserProfile() {
     message: "",
     details: "",
   });
-
+  const [isAvatarLoading, setIsAvatarLoading] = useState(false);
   const handleViewSwitch = (view) => {
     setActiveView(view);
     setEditMode(false);
@@ -151,34 +151,49 @@ export default function UserProfile() {
     if (!file) return;
 
     try {
-      // Create FormData object
-      const formData = new FormData();
-      formData.append("avatar", file);
+      setIsAvatarLoading(true);
+      // Convert file to base64
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        try {
+          const base64String = reader.result;
 
-      // Log to verify data
-      console.log("Sending file:", file);
+          const response = await axios.post(
+            "http://localhost:4000/users/update-avatar",
+            { avatarUrl: base64String },
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
 
-      const response = await axios.post(
-        "http://localhost:4000/users/update-avatar",
-        { avatarUrl: URL.createObjectURL(file) }, // Send as object with avatarUrl property
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
+          if (response.status === 200) {
+            setProfile((prev) => ({ ...prev, avatar: response.data.avatar }));
+            showNotification(
+              "success",
+              "Profile picture updated successfully! 🎉"
+            );
+          }
+        } catch (error) {
+          console.error("Error uploading avatar:", error);
+          setError({
+            show: true,
+            message: "Failed to update profile picture",
+            details: error.response?.data?.message || "Please try again later",
+          });
+        } finally {
+          setIsAvatarLoading(false);
         }
-      );
-
-      if (response.status === 200) {
-        setProfile((prev) => ({ ...prev, avatar: response.data.avatar }));
-        showNotification("success", "Profile picture updated successfully! 🎉");
-      }
+      };
+      reader.readAsDataURL(file);
     } catch (error) {
-      console.error("Error uploading avatar:", error);
+      console.error("Error processing file:", error);
       setError({
         show: true,
-        message: "Failed to update profile picture",
-        details: error.response?.data?.message || "Please try again later",
+        message: "Failed to process image",
+        details: "Please try a different image file",
       });
     }
   };
@@ -284,7 +299,23 @@ export default function UserProfile() {
       });
     }
   };
-
+  const handleImageError = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:4000/users/refresh-avatar",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      if (response.data.avatar) {
+        setProfile((prev) => ({ ...prev, avatar: response.data.avatar }));
+      }
+    } catch (error) {
+      console.error("Failed to refresh avatar URL:", error);
+    }
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1a1f37] to-[#2c3250] p-8">
       <div className="flex flex-col md:flex-row gap-8 w-full max-w-7xl mx-auto">
@@ -295,9 +326,20 @@ export default function UserProfile() {
               <img
                 src={profile.avatar}
                 alt="Profile"
+                onError={handleImageError}
                 className="w-32 h-32 rounded-full object-cover ring-4 ring-blue-500/30 shadow-xl transition-transform duration-300 group-hover:scale-105"
               />
-              {editMode && (
+              {isAvatarLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-full">
+                  <div className="relative">
+                    {/* Spinning circle animation */}
+                    <div className="w-10 h-10 border-4 border-white/30 border-t-white/80 rounded-full animate-spin"></div>
+                    {/* Inner pulse animation */}
+                    <div className="absolute inset-0 rounded-full animate-pulse bg-blue-500/20"></div>
+                  </div>
+                </div>
+              )}
+              {editMode && !isAvatarLoading && (
                 <button
                   onClick={handleAvatarClick}
                   className="absolute bottom-2 right-2 bg-blue-500 p-2 rounded-full shadow-lg hover:bg-blue-600 transition-colors duration-300 cursor-pointer"

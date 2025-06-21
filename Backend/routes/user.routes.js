@@ -17,6 +17,7 @@ const {
   submitFeedback,
   getPastFeedback,
   updateAvatar,
+  refreshAvatarUrl
 } = require("../controllers/user.controller");
 const { authUser } = require("../middlewares/auth.middlewares");
 const { get } = require("mongoose");
@@ -55,4 +56,5 @@ router.delete("/delete-account", authUser, deleteUser);
 router.post("/feedback", authUser, submitFeedback);
 router.get("/past-feedback", authUser, getPastFeedback);
 router.post("/update-avatar", authUser, updateAvatar);
+router.get('/refresh-avatar', authUser, refreshAvatarUrl);
 module.exports = router;
