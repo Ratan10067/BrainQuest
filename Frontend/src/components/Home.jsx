@@ -12,6 +12,7 @@ import {
   Sparkles,
   Zap,
 } from "lucide-react";
+import ChatBot from "./ChatBot";
 
 export default function HomePage() {
   const [isVisible, setIsVisible] = useState(false);
@@ -384,6 +385,7 @@ export default function HomePage() {
           animation: float 3s ease-in-out infinite;
         }
       `}</style>
+      <ChatBot />
     </div>
   );
 }
