@@ -32,7 +32,7 @@ const ChatBot = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-
+  const emojiButtonRef = useRef(null);
   // Sample friends data - replace with your actual friends list API
   const [friends] = useState([
     {
@@ -109,6 +109,55 @@ const ChatBot = () => {
     "💯",
     "🤔",
   ];
+
+  // Theme colors based on chat mode and dark mode
+  const getThemeColors = () => {
+    if (darkMode) {
+      return {
+        primary: "from-purple-600 to-blue-600",
+        secondary: "from-purple-500 to-blue-500",
+        background: "#1a1f37",
+        surface: "#2c3250",
+        text: "text-white",
+        textSecondary: "text-white/80",
+        border: "border-white/10",
+        hover: "hover:bg-white/10",
+        messageUser: "bg-gradient-to-r from-purple-600 to-blue-600",
+        messageBot: darkMode
+          ? "bg-[#2c3250] border-white/10"
+          : "bg-white border-gray-200",
+        messageText: darkMode ? "text-white" : "text-gray-800",
+        inputBg: "#2c3250",
+        inputText: "text-white",
+        inputPlaceholder: "placeholder-gray-400",
+        inputBorder: "border-white/20",
+        buttonIcon: "text-white",
+        buttonIconHover: "hover:text-purple-400",
+      };
+    } else {
+      return {
+        primary: "from-blue-600 to-purple-600",
+        secondary: "from-blue-500 to-purple-500",
+        background: "#ffffff",
+        surface: "#f8fafc",
+        text: "text-gray-800",
+        textSecondary: "text-gray-600",
+        border: "border-gray-200",
+        hover: "hover:bg-gray-100",
+        messageUser: "bg-gradient-to-r from-blue-600 to-purple-600",
+        messageBot: "bg-white border-gray-200",
+        messageText: "text-gray-800",
+        inputBg: "bg-white",
+        inputText: "text-gray-800",
+        inputPlaceholder: "placeholder-gray-500",
+        inputBorder: "border-gray-300",
+        buttonIcon: "text-gray-500",
+        buttonIconHover: "hover:text-blue-600",
+      };
+    }
+  };
+
+  const theme = getThemeColors();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -298,7 +347,22 @@ const ChatBot = () => {
   const filteredFriends = friends.filter((friend) =>
     friend.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        showEmojiPicker &&
+        emojiButtonRef.current &&
+        !emojiButtonRef.current.contains(event.target)
+      ) {
+        setShowEmojiPicker(false);
+      }
+    }
 
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showEmojiPicker]);
   const resetChat = () => {
     setChatMode(null);
     setSelectedFriend(null);
@@ -361,11 +425,24 @@ const ChatBot = () => {
         );
       case "file":
         return (
-          <div className="flex items-center space-x-2 p-2 bg-gray-100 rounded-lg">
-            <FileText size={16} className="text-gray-600" />
+          <div
+            className={`flex items-center space-x-2 p-2 ${
+              darkMode ? "bg-white/10" : "bg-gray-100"
+            } rounded-lg`}
+          >
+            <FileText
+              size={16}
+              className={darkMode ? "text-gray-300" : "text-gray-600"}
+            />
             <div className="flex-1">
               <p className="text-sm font-medium">{message.fileName}</p>
-              <p className="text-xs text-gray-500">{message.fileSize}</p>
+              <p
+                className={`text-xs ${
+                  darkMode ? "text-gray-400" : "text-gray-500"
+                }`}
+              >
+                {message.fileSize}
+              </p>
             </div>
           </div>
         );
@@ -374,18 +451,25 @@ const ChatBot = () => {
     }
   };
 
-  // Chat window dimensions
-  const chatWindowClass = isExpanded
-    ? "fixed inset-x-0 bottom-0 top-[82px] w-full" // 72px is typical navbar height
-    : "mb-4 w-92 h-140";
+  // Responsive chat window dimensions
+  const getChatWindowClass = () => {
+    if (isExpanded) {
+      return "fixed bottom-0 left-0 w-full h-[calc(100vh-4rem)] md:h-[calc(100vh-8rem)] md:inset-x-4 md:top-20 max-w-4xl mx-auto z-40";
+    }
+    return "w-full h-[80vh] md:h-[600px] md:w-96 max-w-full";
+  };
 
   return (
     <div
-      className={`fixed  ${
+      className={`fixed ${
         isExpanded
-          ? "inset-x-0 bottom-0 top-[72px] z-40" // Start below navbar
-          : "bottom-6 right-6 z-50"
+          ? "inset-0 z-40"
+          : "bottom-0 right-0 left-0 md:bottom-4 md:right-4 md:left-auto z-50"
       } ${darkMode ? "dark" : ""}`}
+      style={{
+        paddingTop: isExpanded ? "64px" : "0", // Add padding for navbar
+        height: isExpanded ? "100%" : "auto",
+      }}
     >
       {/* Hidden file inputs */}
       <input
@@ -406,46 +490,48 @@ const ChatBot = () => {
       {/* Chat Window */}
       {isOpen && (
         <div
-          className={`${chatWindowClass} bg-[#1a1f37] rounded-2xl shadow-2xl border border-[#1a1f37] flex flex-col overflow-hidden animate-in ${
-            isExpanded ? "rounded-none" : "slide-in-from-bottom-5"
+          className={`${getChatWindowClass()} shadow-2xl flex flex-col overflow-hidden animate-in ${
+            isExpanded
+              ? "rounded-none md:rounded-2xl"
+              : "rounded-2xl slide-in-from-bottom-5"
           } duration-300`}
+          style={{ backgroundColor: theme.background }}
         >
           {/* Mode Selection Screen */}
           {!chatMode && !showFriendsList && (
-            <div className="flex flex-col items-center justify-center h-full p-6 space-y-6">
+            <div className="flex flex-col items-center justify-center h-full p-4 md:p-6 space-y-4 md:space-y-6">
               <div className="text-center mb-4">
-                <h3 className="text-xl font-bold text-white mb-2">
+                <h3
+                  className={`text-lg md:text-xl font-bold ${theme.text} mb-2`}
+                >
                   Choose Chat Mode
                 </h3>
-                <p className="text-white text-sm">
+                <p className={`${theme.textSecondary} text-sm`}>
                   Select how you want to communicate
                 </p>
-                <div className="absolute top-4 right-4 flex space-x-2">
-                  <button
-                    onClick={() => setIsExpanded(!isExpanded)}
-                    className="text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded-full"
-                    title={isExpanded ? "Minimize" : "Expand"}
-                  >
-                    {isExpanded ? (
-                      <Minimize2 size={18} />
-                    ) : (
-                      <Maximize2 size={18} />
-                    )}
-                  </button>
-                  <button
-                    onClick={() => setIsOpen(false)}
-                    className="text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded-full"
-                  >
-                    <X size={18} />
-                  </button>
-                </div>
               </div>
-
+              <div className="absolute top-3 right-3 z-50 flex items-center space-x-2">
+                {!isExpanded ? (
+                  <button
+                    onClick={() => setIsExpanded(true)}
+                    className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                    title="Expand"
+                  >
+                    <Maximize2 size={16} className="text-white" />
+                  </button>
+                ) : null}
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                >
+                  <X size={16} className="text-white" />
+                </button>
+              </div>
               <button
                 onClick={() => setChatMode("ai")}
-                className="w-full max-w-xs bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-xl hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-3 cursor-pointer"
+                className={`w-full max-w-xs bg-gradient-to-r ${theme.primary} text-white p-3 md:p-4 rounded-xl hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-3 cursor-pointer text-sm md:text-base`}
               >
-                <Bot size={24} />
+                <Bot size={20} className="md:w-6 md:h-6" />
                 <span className="font-semibold">Chat with AI Assistant</span>
               </button>
 
@@ -454,9 +540,9 @@ const ChatBot = () => {
                   setShowFriendsList(true);
                   setChatMode("friends");
                 }}
-                className="w-full max-w-xs bg-gradient-to-r from-green-600 to-teal-600 text-white p-4 rounded-xl hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-3 cursor-pointer"
+                className={`w-full max-w-xs bg-gradient-to-r ${theme.primary} text-white p-3 md:p-4 rounded-xl hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-3 cursor-pointer text-sm md:text-base`}
               >
-                <Users size={24} />
+                <Users size={20} className="md:w-6 md:h-6" />
                 <span className="font-semibold">Message Friends</span>
               </button>
             </div>
@@ -465,15 +551,19 @@ const ChatBot = () => {
           {/* Friends List */}
           {showFriendsList && !selectedFriend && (
             <div className="flex flex-col h-full">
-              <div className="bg-gradient-to-r from-green-600 to-teal-600 text-white p-4 flex items-center justify-between">
+              <div
+                className={`bg-gradient-to-r ${theme.primary} text-white p-3 md:p-4 flex items-center justify-between`}
+              >
                 <div className="flex items-center space-x-3">
                   <button
                     onClick={resetChat}
                     className="text-white/80 hover:text-white transition-colors p-1 hover:bg-white/10 rounded-full"
                   >
-                    <ArrowLeft size={18} />
+                    <ArrowLeft size={16} className="md:w-5 md:h-5" />
                   </button>
-                  <h3 className="font-semibold">Select Friend</h3>
+                  <h3 className="font-semibold text-sm md:text-base">
+                    Select Friend
+                  </h3>
                 </div>
                 <div className="flex items-center space-x-2">
                   <button
@@ -482,48 +572,56 @@ const ChatBot = () => {
                     title={isExpanded ? "Minimize" : "Expand"}
                   >
                     {isExpanded ? (
-                      <Minimize2 size={18} />
+                      <Minimize2 size={16} className="md:w-5 md:h-5" />
                     ) : (
-                      <Maximize2 size={18} />
+                      <Maximize2 size={16} className="md:w-5 md:h-5" />
                     )}
                   </button>
                   <button
                     onClick={() => setIsOpen(false)}
                     className="text-white/80 hover:text-white transition-colors p-1 hover:bg-white/10 rounded-full"
                   >
-                    <X size={18} />
+                    <X size={16} className="md:w-5 md:h-5" />
                   </button>
                 </div>
               </div>
 
               {/* Search */}
-              <div className="p-4 border-b bg-white">
+              <div
+                className={`p-3 md:p-4 ${theme.border} border-b`}
+                style={{ backgroundColor: theme.background }}
+              >
                 <div className="relative">
                   <Search
                     className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                    size={16}
+                    size={14}
                   />
                   <input
                     type="text"
                     placeholder="Search friends..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className={`w-full pl-9 pr-4 py-2 text-sm ${theme.inputBorder} ${theme.inputBg} ${theme.inputText} ${theme.inputPlaceholder} border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500`}
                   />
                 </div>
               </div>
 
               {/* Friends List */}
-              <div className="flex-1 overflow-y-auto bg-white">
+              <div
+                className="flex-1 overflow-y-auto"
+                style={{ backgroundColor: theme.background }}
+              >
                 {filteredFriends.length > 0 ? (
                   filteredFriends.map((friend) => (
                     <button
                       key={friend.id}
                       onClick={() => selectFriend(friend)}
-                      className="w-full p-4 hover:bg-gray-50 transition-colors flex items-center space-x-3 border-b border-gray-100 text-left"
+                      className={`w-full p-3 md:p-4 ${theme.hover} transition-colors flex items-center space-x-3 ${theme.border} border-b text-left`}
                     >
                       <div className="relative">
-                        <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center text-white font-semibold">
+                        <div
+                          className={`w-8 h-8 md:w-10 md:h-10 bg-gradient-to-r ${theme.primary} rounded-full flex items-center justify-center text-white font-semibold text-xs md:text-sm`}
+                        >
                           {friend.avatar}
                         </div>
                         {friend.online && (
@@ -531,10 +629,14 @@ const ChatBot = () => {
                         )}
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-gray-800">
+                        <h4
+                          className={`font-semibold text-sm md:text-base ${theme.text}`}
+                        >
                           {friend.name}
                         </h4>
-                        <p className="text-sm text-gray-500">
+                        <p
+                          className={`text-xs md:text-sm ${theme.textSecondary}`}
+                        >
                           {friend.online
                             ? "Online"
                             : `Last seen ${friend.lastSeen}`}
@@ -543,41 +645,47 @@ const ChatBot = () => {
                     </button>
                   ))
                 ) : (
-                  <div className="flex items-center justify-center h-full text-gray-500">
-                    <p>No friends found</p>
+                  <div
+                    className={`flex items-center justify-center h-full ${theme.textSecondary}`}
+                  >
+                    <p className="text-sm">No friends found</p>
                   </div>
                 )}
               </div>
             </div>
           )}
 
-          {/* Original AI Chat Interface */}
+          {/* AI Chat Interface */}
           {chatMode === "ai" && !showFriendsList && (
             <>
               {/* Header */}
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 flex items-center justify-between">
-                <div className="flex items-center space-x-3">
+              <div
+                className={`bg-gradient-to-r ${theme.primary} text-white p-3 md:p-4 flex items-center justify-between`}
+              >
+                <div className="flex items-center space-x-2 md:space-x-3">
                   <button
                     onClick={resetChat}
                     className="text-white/80 hover:text-white transition-colors p-1 hover:bg-white/10 rounded-full"
                   >
-                    <ArrowLeft size={18} />
+                    <ArrowLeft size={16} className="md:w-5 md:h-5" />
                   </button>
-                  <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                    <Bot size={16} />
+                  <div className="w-6 h-6 md:w-8 md:h-8 bg-white/20 rounded-full flex items-center justify-center">
+                    <Bot size={12} className="md:w-4 md:h-4" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-sm">AI Assistant</h3>
+                    <h3 className="font-semibold text-xs md:text-sm">
+                      AI Assistant
+                    </h3>
                     <p className="text-xs text-white/80">Online now</p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1 md:space-x-2">
                   <button
                     onClick={() => setMessages([messages[0]])}
                     className="text-white/80 hover:text-white transition-colors p-1 hover:bg-white/10 rounded-full"
                     title="Clear Chat"
                   >
-                    <RotateCcw size={18} />
+                    <RotateCcw size={16} className="md:w-5 md:h-5" />
                   </button>
                   <button
                     onClick={() => setIsExpanded(!isExpanded)}
@@ -585,22 +693,25 @@ const ChatBot = () => {
                     title={isExpanded ? "Minimize" : "Expand"}
                   >
                     {isExpanded ? (
-                      <Minimize2 size={18} />
+                      <Minimize2 size={16} className="md:w-5 md:h-5" />
                     ) : (
-                      <Maximize2 size={18} />
+                      <Maximize2 size={16} className="md:w-5 md:h-5" />
                     )}
                   </button>
                   <button
                     onClick={() => setIsOpen(false)}
                     className="text-white/80 hover:text-white transition-colors p-1 hover:bg-white/10 rounded-full"
                   >
-                    <X size={18} />
+                    <X size={16} className="md:w-5 md:h-5" />
                   </button>
                 </div>
               </div>
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+              <div
+                className="flex-1 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4"
+                style={{ backgroundColor: theme.surface }}
+              >
                 {messages.map((message) => (
                   <div
                     key={message.id}
@@ -611,15 +722,17 @@ const ChatBot = () => {
                     } items-end space-x-2`}
                   >
                     {message.sender === "bot" && (
-                      <div className="w-6 h-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-                        <Bot size={12} className="text-white" />
+                      <div
+                        className={`w-5 h-5 md:w-6 md:h-6 bg-gradient-to-r ${theme.primary} rounded-full flex items-center justify-center flex-shrink-0`}
+                      >
+                        <Bot size={10} className="md:w-3 md:h-3 text-white" />
                       </div>
                     )}
                     <div
-                      className={`max-w-xs px-3 py-2 rounded-2xl text-sm ${
+                      className={`max-w-[85%] md:max-w-xs px-3 py-2 rounded-2xl text-xs md:text-sm ${
                         message.sender === "user"
-                          ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-br-md"
-                          : "bg-white text-gray-800 rounded-bl-md shadow-sm border"
+                          ? `${theme.messageUser} text-white rounded-br-md`
+                          : `${theme.messageBot} ${theme.messageText} rounded-bl-md shadow-sm border`
                       }`}
                     >
                       {renderMessageContent(message)}
@@ -627,6 +740,8 @@ const ChatBot = () => {
                         className={`text-xs mt-1 ${
                           message.sender === "user"
                             ? "text-white/70"
+                            : darkMode
+                            ? "text-gray-400"
                             : "text-gray-500"
                         }`}
                       >
@@ -634,8 +749,11 @@ const ChatBot = () => {
                       </p>
                     </div>
                     {message.sender === "user" && (
-                      <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
-                        <User size={12} className="text-gray-600" />
+                      <div className="w-5 h-5 md:w-6 md:h-6 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
+                        <User
+                          size={10}
+                          className="md:w-3 md:h-3 text-gray-600"
+                        />
                       </div>
                     )}
                   </div>
@@ -644,10 +762,14 @@ const ChatBot = () => {
                 {/* Typing Indicator */}
                 {isTyping && (
                   <div className="flex justify-start items-end space-x-2">
-                    <div className="w-6 h-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-                      <Bot size={12} className="text-white" />
+                    <div
+                      className={`w-5 h-5 md:w-6 md:h-6 bg-gradient-to-r ${theme.primary} rounded-full flex items-center justify-center flex-shrink-0`}
+                    >
+                      <Bot size={10} className="md:w-3 md:h-3 text-white" />
                     </div>
-                    <div className="bg-white px-3 py-2 rounded-2xl rounded-bl-md shadow-sm border">
+                    <div
+                      className={`${theme.messageBot} px-3 py-2 rounded-2xl rounded-bl-md shadow-sm border`}
+                    >
                       <div className="flex space-x-1">
                         <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                         <div
@@ -667,45 +789,60 @@ const ChatBot = () => {
 
               {/* Emoji Picker */}
               {showEmojiPicker && (
-                <div className="absolute bottom-20 right-4 bg-white border border-gray-200 rounded-lg shadow-lg p-3">
-                  <div className="grid grid-cols-6 gap-2">
+                <div
+                  className="absolute bg-white border border-gray-200 rounded-lg shadow-lg p-2 md:p-3 z-10"
+                  style={{
+                    bottom: "60px", // Position just above the emoji button
+                    left: "72px", // Align with the left side of buttons
+                    width: "fit-content",
+                    maxWidth: "600px",
+                    transform: "translateY(-8px)", // Small offset for visual spacing
+                  }}
+                >
+                  <div className="grid grid-cols-6 gap-1 md:gap-2">
                     {commonEmojis.map((emoji, index) => (
                       <button
                         key={index}
                         onClick={() => addEmoji(emoji)}
-                        className="text-xl hover:bg-gray-100 p-1 rounded transition-colors"
+                        className="text-lg md:text-xl hover:bg-gray-100 p-1 rounded transition-colors"
                       >
                         {emoji}
                       </button>
                     ))}
                   </div>
+                  {/* Add arrow pointing to emoji button */}
+                  <div className="absolute bottom-[-6px] left-6 w-3 h-3 bg-white border-r border-b border-gray-200 transform rotate-45" />
                 </div>
               )}
 
               {/* Input */}
-              <div className="p-4 border-t border-white/10 bg-[#2c3250]">
+              <div
+                className={`p-3 md:p-4 ${theme.border} border-t`}
+                style={{ backgroundColor: theme.surface }}
+              >
                 <div className="flex items-center space-x-2">
                   <div className="flex space-x-1">
                     <button
                       onClick={() => imageInputRef.current?.click()}
-                      className="w-8 h-8 text-white hover:text-blue-600 rounded-full flex items-center justify-center hover:bg-gray-100 transition-all duration-200"
+                      className={`w-7 h-7 md:w-8 md:h-8 ${theme.buttonIcon} ${theme.buttonIconHover} rounded-full flex items-center justify-center ${theme.hover} transition-all duration-200`}
                       title="Share Image"
                     >
-                      <Image size={16} />
+                      <Image size={14} className="md:w-4 md:h-4" />
                     </button>
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className="w-8 h-8 text-white hover:text-blue-600 rounded-full flex items-center justify-center hover:bg-gray-100 transition-all duration-200"
+                      className={`w-7 h-7 md:w-8 md:h-8 ${theme.buttonIcon} ${theme.buttonIconHover} rounded-full flex items-center justify-center ${theme.hover} transition-all duration-200`}
                       title="Share File"
                     >
-                      <Paperclip size={16} />
+                      <Paperclip size={14} className="md:w-4 md:h-4" />
                     </button>
                     <button
+                      ref={emojiButtonRef}
                       onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                      className="w-8 h-8 text-white hover:text-blue-600 rounded-full flex items-center justify-center hover:bg-gray-100 transition-all duration-200"
+                      className={`w-7 h-7 md:w-8 md:h-8 ${theme.buttonIcon} ${theme.buttonIconHover} rounded-full flex items-center justify-center ${theme.hover} transition-all duration-200`}
                       title="Add Emoji"
                     >
-                      <Smile size={16} />
+                      <Smile size={14} className="md:w-4 md:h-4" />
                     </button>
                   </div>
 
@@ -727,17 +864,17 @@ const ChatBot = () => {
                     placeholder="Type your message..."
                     rows="1"
                     style={{
-                      minHeight: "40px",
-                      maxHeight: "120px",
+                      minHeight: "36px",
+                      maxHeight: "100px",
                     }}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm resize-none overflow-auto text-white bg-[#2c3250] placeholder-gray-400"
+                    className={`flex-1 px-3 py-2 text-sm ${theme.inputBorder} ${theme.inputBg} ${theme.inputText} ${theme.inputPlaceholder} border rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none overflow-auto`}
                   />
                   <button
                     onClick={handleSendMessage}
                     disabled={!inputText.trim()}
-                    className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full flex items-center justify-center hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className={`w-7 h-7 md:w-8 md:h-8 bg-gradient-to-r ${theme.primary} text-white rounded-full flex items-center justify-center hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
-                    <Send size={14} />
+                    <Send size={14} className="md:w-4 md:h-4" />
                   </button>
                 </div>
               </div>
@@ -748,8 +885,10 @@ const ChatBot = () => {
           {chatMode === "friends" && selectedFriend && (
             <>
               {/* Header */}
-              <div className="bg-gradient-to-r from-green-600 to-teal-600 text-white p-4 flex items-center justify-between">
-                <div className="flex items-center space-x-3">
+              <div
+                className={`bg-gradient-to-r ${theme.primary} text-white p-3 md:p-4 flex items-center justify-between`}
+              >
+                <div className="flex items-center space-x-2 md:space-x-3">
                   <button
                     onClick={() => {
                       setSelectedFriend(null);
@@ -757,15 +896,15 @@ const ChatBot = () => {
                     }}
                     className="text-white/80 hover:text-white transition-colors p-1 hover:bg-white/10 rounded-full"
                   >
-                    <ArrowLeft size={18} />
+                    <ArrowLeft size={16} className="md:w-5 md:h-5" />
                   </button>
-                  <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                  <div className="w-6 h-6 md:w-8 md:h-8 bg-white/20 rounded-full flex items-center justify-center">
                     <span className="text-xs font-semibold">
                       {selectedFriend.avatar}
                     </span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-sm">
+                    <h3 className="font-semibold text-xs md:text-sm">
                       {selectedFriend.name}
                     </h3>
                     <p className="text-xs text-white/80">
@@ -775,18 +914,18 @@ const ChatBot = () => {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1 md:space-x-2">
                   <button
                     className="text-white/80 hover:text-white transition-colors p-1 hover:bg-white/10 rounded-full"
                     title="Voice Call"
                   >
-                    <Phone size={18} />
+                    <Phone size={16} className="md:w-5 md:h-5" />
                   </button>
                   <button
                     className="text-white/80 hover:text-white transition-colors p-1 hover:bg-white/10 rounded-full"
                     title="Video Call"
                   >
-                    <Video size={18} />
+                    <Video size={16} className="md:w-5 md:h-5" />
                   </button>
                   <button
                     onClick={() => setIsExpanded(!isExpanded)}
@@ -794,22 +933,25 @@ const ChatBot = () => {
                     title={isExpanded ? "Minimize" : "Expand"}
                   >
                     {isExpanded ? (
-                      <Minimize2 size={18} />
+                      <Minimize2 size={16} className="md:w-5 md:h-5" />
                     ) : (
-                      <Maximize2 size={18} />
+                      <Maximize2 size={16} className="md:w-5 md:h-5" />
                     )}
                   </button>
                   <button
                     onClick={() => setIsOpen(false)}
                     className="text-white/80 hover:text-white transition-colors p-1 hover:bg-white/10 rounded-full"
                   >
-                    <X size={18} />
+                    <X size={16} className="md:w-5 md:h-5" />
                   </button>
                 </div>
               </div>
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+              <div
+                className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-2 sm:space-y-4"
+                style={{ backgroundColor: theme.surface }}
+              >
                 {getCurrentMessages().length > 0 ? (
                   getCurrentMessages().map((message) => (
                     <div
@@ -821,17 +963,19 @@ const ChatBot = () => {
                       } items-end space-x-2`}
                     >
                       {message.sender !== "user" && (
-                        <div className="w-6 h-6 bg-gradient-to-r from-green-600 to-teal-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <div
+                          className={`w-5 h-5 md:w-6 md:h-6 bg-gradient-to-r ${theme.primary} rounded-full flex items-center justify-center flex-shrink-0`}
+                        >
                           <span className="text-xs text-white font-semibold">
                             {selectedFriend.avatar.charAt(0)}
                           </span>
                         </div>
                       )}
                       <div
-                        className={`max-w-xs px-3 py-2 rounded-2xl text-sm ${
+                        className={`max-w-[85%] md:max-w-xs px-3 py-2 rounded-2xl text-xs md:text-sm ${
                           message.sender === "user"
-                            ? "bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-br-md"
-                            : "bg-white text-gray-800 rounded-bl-md shadow-sm border"
+                            ? `${theme.messageUser} text-white rounded-br-md`
+                            : `${theme.messageBot} ${theme.messageText} rounded-bl-md shadow-sm border`
                         }`}
                       >
                         {renderMessageContent(message)}
@@ -839,6 +983,8 @@ const ChatBot = () => {
                           className={`text-xs mt-1 ${
                             message.sender === "user"
                               ? "text-white/70"
+                              : darkMode
+                              ? "text-gray-400"
                               : "text-gray-500"
                           }`}
                         >
@@ -846,19 +992,35 @@ const ChatBot = () => {
                         </p>
                       </div>
                       {message.sender === "user" && (
-                        <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
-                          <User size={12} className="text-gray-600" />
+                        <div className="w-5 h-5 md:w-6 md:h-6 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
+                          <User
+                            size={10}
+                            className="md:w-3 md:h-3 text-gray-600"
+                          />
                         </div>
                       )}
                     </div>
                   ))
                 ) : (
-                  <div className="flex flex-col items-center justify-center h-full text-gray-500 space-y-2">
-                    <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
-                      <Users size={24} className="text-gray-400" />
+                  <div
+                    className={`flex flex-col items-center justify-center h-full ${theme.textSecondary} space-y-2`}
+                  >
+                    <div
+                      className={`w-12 h-12 md:w-16 md:h-16 ${
+                        darkMode ? "bg-[#2c3250]" : "bg-gray-200"
+                      } rounded-full flex items-center justify-center`}
+                    >
+                      <Users
+                        size={20}
+                        className={darkMode ? "text-gray-500" : "text-gray-400"}
+                      />
                     </div>
                     <p className="text-sm">No messages yet</p>
-                    <p className="text-xs text-center max-w-xs">
+                    <p
+                      className={`text-xs text-center max-w-xs ${
+                        darkMode ? "text-gray-400" : "text-gray-500"
+                      }`}
+                    >
                       Start a conversation with {selectedFriend.name} by sending
                       a message
                     </p>
@@ -869,45 +1031,59 @@ const ChatBot = () => {
 
               {/* Emoji Picker */}
               {showEmojiPicker && (
-                <div className="absolute bottom-20 right-4 bg-white border border-gray-200 rounded-lg shadow-lg p-3">
-                  <div className="grid grid-cols-6 gap-2">
+                <div
+                  className="absolute bg-white border border-gray-200 rounded-lg shadow-lg p-2 md:p-3 z-10"
+                  style={{
+                    bottom: "60px", // Position just above the emoji button
+                    left: "72px", // Align with the left side of buttons
+                    width: "fit-content",
+                    maxWidth: "300px",
+                    transform: "translateY(-8px)", // Small offset for visual spacing
+                  }}
+                >
+                  <div className="grid grid-cols-6 gap-1 md:gap-2">
                     {commonEmojis.map((emoji, index) => (
                       <button
                         key={index}
                         onClick={() => addEmoji(emoji)}
-                        className="text-xl hover:bg-gray-100 p-1 rounded transition-colors"
+                        className="text-lg md:text-xl hover:bg-gray-100 p-1 rounded transition-colors"
                       >
                         {emoji}
                       </button>
                     ))}
                   </div>
+                  {/* Add arrow pointing to emoji button */}
+                  <div className="absolute bottom-[-6px] left-6 w-3 h-3 bg-white border-r border-b border-gray-200 transform rotate-45" />
                 </div>
               )}
 
               {/* Input */}
-              <div className="p-4 border-t bg-white">
+              <div
+                className={`p-3 md:p-4 ${theme.border} border-t`}
+                style={{ backgroundColor: theme.surface }}
+              >
                 <div className="flex items-center space-x-2">
                   <div className="flex space-x-1">
                     <button
                       onClick={() => imageInputRef.current?.click()}
-                      className="w-8 h-8 text-gray-500 hover:text-green-600 rounded-full flex items-center justify-center hover:bg-gray-100 transition-all duration-200"
+                      className={`w-7 h-7 md:w-8 md:h-8 ${theme.buttonIcon} ${theme.buttonIconHover} rounded-full flex items-center justify-center ${theme.hover} transition-all duration-200`}
                       title="Share Image"
                     >
-                      <Image size={16} />
+                      <Image size={14} className="md:w-4 md:h-4" />
                     </button>
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className="w-8 h-8 text-gray-500 hover:text-green-600 rounded-full flex items-center justify-center hover:bg-gray-100 transition-all duration-200"
+                      className={`w-7 h-7 md:w-8 md:h-8 ${theme.buttonIcon} ${theme.buttonIconHover} rounded-full flex items-center justify-center ${theme.hover} transition-all duration-200`}
                       title="Share File"
                     >
-                      <Paperclip size={16} />
+                      <Paperclip size={14} className="md:w-4 md:h-4" />
                     </button>
                     <button
                       onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                      className="w-8 h-8 text-gray-500 hover:text-green-600 rounded-full flex items-center justify-center hover:bg-gray-100 transition-all duration-200"
+                      className={`w-7 h-7 md:w-8 md:h-8 ${theme.buttonIcon} ${theme.buttonIconHover} rounded-full flex items-center justify-center ${theme.hover} transition-all duration-200`}
                       title="Add Emoji"
                     >
-                      <Smile size={16} />
+                      <Smile size={14} className="md:w-4 md:h-4" />
                     </button>
                   </div>
                   <input
@@ -917,14 +1093,14 @@ const ChatBot = () => {
                     onChange={(e) => setInputText(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder={`Message ${selectedFriend.name}...`}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+                    className={`flex-1 px-3 py-2 text-sm ${theme.inputBorder} ${theme.inputBg} ${theme.inputText} ${theme.inputPlaceholder} border rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent`}
                   />
                   <button
                     onClick={handleSendMessage}
                     disabled={!inputText.trim()}
-                    className="w-8 h-8 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-full flex items-center justify-center hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className={`w-7 h-7 md:w-8 md:h-8 bg-gradient-to-r ${theme.primary} text-white rounded-full flex items-center justify-center hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
-                    <Send size={14} />
+                    <Send size={14} className="md:w-4 md:h-4" />
                   </button>
                 </div>
               </div>
@@ -935,12 +1111,12 @@ const ChatBot = () => {
 
       {/* Chat Toggle Button */}
       {!isOpen && (
-        <div className="fixed bottom-6 right-6">
+        <div className="fixed bottom-4 right-4 md:right-6 z-50">
           <button
             onClick={() => setIsOpen(true)}
-            className="w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:shadow-xl bg-gradient-to-r from-yellow-400 to-orange-500 text-[#1a1f37] cursor-pointer"
+            className="w-12 h-12 md:w-14 md:h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:shadow-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white cursor-pointer"
           >
-            <MessageCircle size={24} />
+            <MessageCircle size={20} className="md:w-6 md:h-6" />
           </button>
         </div>
       )}

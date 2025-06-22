@@ -82,3 +82,14 @@
   font-optical-sizing: auto;
   font-style: normal;
 }
+
+@supports (padding: max(0px)) {
+  .safe-area-inset-bottom {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+}
+
+.fixed {
+  position: fixed;
+  -webkit-transform: translate3d(0, 0, 0);
+}
