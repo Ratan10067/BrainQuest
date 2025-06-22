@@ -278,8 +278,116 @@ module.exports.logout = async (req, res, next) => {
 };
 
 module.exports.getProfile = async (req, res, next) => {
-  console.log(req.user);
-  return res.status(200).json({ user: req.user });
+  try {
+    const userId = req.user._id;
+
+    // Get user details
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Get user's quiz results with proper population
+    const quizResults = await Result.find({ userId })
+      .populate({
+        path: "quizId",
+        model: "quiz", // Changed from 'Quiz' to 'quiz' to match the model name
+        select: "Title subject difficulty", // Select specific fields we need
+      })
+      .sort({ createdAt: -1 });
+
+    // Get leaderboard entries
+    const leaderboardEntries = await LeaderBoard.find({ userId }).sort({
+      score: -1,
+    });
+
+    // Calculate statistics
+    const totalQuizzesTaken = quizResults.length;
+    const averageScore =
+      quizResults.reduce((acc, result) => acc + result.score, 0) /
+        totalQuizzesTaken || 0;
+    const totalScore = quizResults.reduce(
+      (acc, result) => acc + result.score,
+      0
+    );
+    const highestScore = Math.max(
+      ...quizResults.map((result) => result.score),
+      0
+    );
+
+    // Get recent activity with proper population
+    const recentActivity = await Promise.all([
+      Result.find({ userId })
+        .populate({
+          path: "quizId",
+          model: "quiz", // Changed from 'Quiz' to 'quiz'
+          select: "Title subject difficulty",
+        })
+        .sort({ createdAt: -1 })
+        .limit(5),
+      LeaderBoard.find({ userId }).sort({ createdAt: -1 }).limit(5),
+    ]);
+
+    const enhancedProfile = {
+      ...user.toObject(),
+      statistics: {
+        totalQuizzesTaken,
+        averageScore,
+        totalScore,
+        highestScore,
+        totalLeaderboardEntries: leaderboardEntries.length,
+      },
+      quizHistory: quizResults.map((result) => ({
+        quizId: result.quizId?._id,
+        quizName: result.quizId?.Title || "Deleted Quiz", // Changed from 'title' to 'Title'
+        subject: result.quizId?.subject || "Unknown",
+        difficulty: result.quizId?.difficulty || "Unknown",
+        score: result.score,
+        timeTaken: result.timeStats?.timeTaken || 0,
+        completedAt: result.createdAt,
+      })),
+      leaderboardHistory: leaderboardEntries.map((entry) => ({
+        subject: entry.subject,
+        difficulty: entry.difficulty,
+        score: entry.score,
+        rank: entry.rank,
+        completionTime: entry.completionTime,
+        submittedAt: entry.submittedAt,
+      })),
+      recentActivity: {
+        quizzes: recentActivity[0].map((result) => ({
+          type: "quiz",
+          quizName: result.quizId?.Title || "Deleted Quiz", // Changed from 'title' to 'Title'
+          subject: result.quizId?.subject || "Unknown",
+          difficulty: result.quizId?.difficulty || "Unknown",
+          score: result.score,
+          date: result.createdAt,
+        })),
+        leaderboard: recentActivity[1].map((entry) => ({
+          type: "leaderboard",
+          subject: entry.subject,
+          score: entry.score,
+          rank: entry.rank,
+          date: entry.submittedAt,
+        })),
+      },
+    };
+
+    return res.status(200).json({
+      success: true,
+      user: enhancedProfile,
+    });
+  } catch (error) {
+    console.error("Error fetching profile:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching user profile",
+      error: error.message,
+    });
+  }
 };
 
 module.exports.updateProfile = async (req, res, next) => {

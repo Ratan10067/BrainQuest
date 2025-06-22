@@ -108,6 +108,17 @@ const ChatBot = () => {
     "🔥",
     "💯",
     "🤔",
+    "😎",
+    "🥳",
+    "😇",
+    "🤗",
+    "😅",
+    "😜",
+    "🤩",
+    "🥺",
+    "😌",
+    "😏",
+    "😋",
   ];
 
   // Theme colors based on chat mode and dark mode
@@ -450,8 +461,6 @@ const ChatBot = () => {
         return <p>{message.text}</p>;
     }
   };
-
-  // Responsive chat window dimensions
   const getChatWindowClass = () => {
     if (isExpanded) {
       return "fixed bottom-0 left-0 w-full h-[calc(100vh-4rem)] md:h-[calc(100vh-8rem)] md:inset-x-4 md:top-20 max-w-4xl mx-auto z-40";
@@ -487,8 +496,6 @@ const ChatBot = () => {
         onChange={handleImageUpload}
         className="hidden"
       />
-
-      {/* Chat Window */}
       {isOpen && (
         <div
           className={`${getChatWindowClass()} shadow-2xl flex flex-col overflow-hidden animate-in ${
@@ -548,8 +555,6 @@ const ChatBot = () => {
               </button>
             </div>
           )}
-
-          {/* Friends List */}
           {showFriendsList && !selectedFriend && (
             <div className="flex flex-col h-full">
               <div

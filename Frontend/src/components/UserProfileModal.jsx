@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 const UserProfileModal = ({ user, onClose, leaderboardEntry }) => {
-  console.log("Enhanced User Profile Modal Loading...");
+  console.log("Enhanced User Profile Modal Loading...",user);
   if (!user) return null;
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
