@@ -456,22 +456,23 @@ const ChatBot = () => {
     if (isExpanded) {
       return "fixed bottom-0 left-0 w-full h-[calc(100vh-4rem)] md:h-[calc(100vh-8rem)] md:inset-x-4 md:top-20 max-w-4xl mx-auto z-40";
     }
-    return "w-full h-[80vh] md:h-[600px] md:w-96 max-w-full";
+    return "w-full h-[80vh] md:h-[600px] md:w-96 max-w-full z-10";
   };
 
   return (
     <div
       className={`fixed ${
-        isExpanded
-          ? "inset-0 z-40"
-          : "bottom-0 right-0 left-0 md:bottom-4 md:right-4 md:left-auto z-50"
+        isOpen
+          ? isExpanded
+            ? "inset-0 z-40"
+            : "bottom-0 right-0 left-0 md:bottom-4 md:right-4 md:left-auto z-20"
+          : "z-10"
       } ${darkMode ? "dark" : ""}`}
       style={{
-        paddingTop: isExpanded ? "64px" : "0", // Add padding for navbar
+        paddingTop: isExpanded ? "64px" : "0",
         height: isExpanded ? "100%" : "auto",
       }}
     >
-      {/* Hidden file inputs */}
       <input
         ref={fileInputRef}
         type="file"
@@ -510,7 +511,7 @@ const ChatBot = () => {
                   Select how you want to communicate
                 </p>
               </div>
-              <div className="absolute top-3 right-3 z-50 flex items-center space-x-2">
+              <div className="absolute top-3 right-3 z-40 flex items-center space-x-2">
                 {!isExpanded ? (
                   <button
                     onClick={() => setIsExpanded(true)}
@@ -792,11 +793,11 @@ const ChatBot = () => {
                 <div
                   className="absolute bg-white border border-gray-200 rounded-lg shadow-lg p-2 md:p-3 z-10"
                   style={{
-                    bottom: "60px", // Position just above the emoji button
-                    left: "72px", // Align with the left side of buttons
+                    bottom: "60px",
+                    left: "72px",
                     width: "fit-content",
                     maxWidth: "600px",
-                    transform: "translateY(-8px)", // Small offset for visual spacing
+                    transform: "translateY(-8px)",
                   }}
                 >
                   <div className="grid grid-cols-6 gap-1 md:gap-2">
@@ -810,12 +811,9 @@ const ChatBot = () => {
                       </button>
                     ))}
                   </div>
-                  {/* Add arrow pointing to emoji button */}
                   <div className="absolute bottom-[-6px] left-6 w-3 h-3 bg-white border-r border-b border-gray-200 transform rotate-45" />
                 </div>
               )}
-
-              {/* Input */}
               <div
                 className={`p-3 md:p-4 ${theme.border} border-t`}
                 style={{ backgroundColor: theme.surface }}
@@ -1108,10 +1106,9 @@ const ChatBot = () => {
           )}
         </div>
       )}
-
       {/* Chat Toggle Button */}
       {!isOpen && (
-        <div className="fixed bottom-4 right-4 md:right-6 z-50">
+        <div className="fixed bottom-4 right-4 md:right-6 z-40">
           <button
             onClick={() => setIsOpen(true)}
             className="w-12 h-12 md:w-14 md:h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:shadow-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white cursor-pointer"

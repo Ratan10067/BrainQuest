@@ -95,7 +95,7 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#1a1f37] to-[#2c3250] relative overflow-hidden">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-[#1a1f37] to-[#2c3250] relative overflow-hidden z-45">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
