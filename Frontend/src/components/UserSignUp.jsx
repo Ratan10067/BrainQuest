@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useContext,
-  useRef,
-  memo,
-  useEffect,
-} from "react";
+import React, { useState, useContext, useRef, memo, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -42,6 +36,8 @@ const EmailSignupForm = memo(
     onBack,
     handleBackToSocial,
     otpSent,
+    passwordValidation,
+    isPasswordValid,
   }) => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -146,16 +142,75 @@ const EmailSignupForm = memo(
             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         </div>
+        <div className="relative group">
+          <Lock
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 
+                   group-focus-within:text-yellow-400 transition-colors"
+            size={20}
+          />
+          <input
+            name="confirmPassword"
+            type={showPassword ? "text" : "password"}
+            required
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            placeholder="Confirm Password"
+            className="w-full pl-11 pr-12 py-3 bg-white/5 border border-white/10 
+                   rounded-xl text-white placeholder-gray-400 focus:outline-none 
+                   focus:border-yellow-400/50 focus:ring-2 focus:ring-yellow-400/20 
+                   transition-all"
+          />
+        </div>
 
+        {/* Password Requirements */}
+        <div className="space-y-2 text-sm">
+          {[
+            { label: "At least 8 characters", check: "hasLength" },
+            { label: "Contains uppercase letter", check: "hasUppercase" },
+            { label: "Contains lowercase letter", check: "hasLowercase" },
+            { label: "Contains number", check: "hasNumber" },
+            { label: "Contains special character", check: "hasSpecial" },
+          ].map(({ label, check }) => (
+            <div key={check} className="flex items-center space-x-2">
+              <div
+                className={`w-4 h-4 rounded-full flex items-center justify-center 
+                ${
+                  passwordValidation[check] ? "bg-green-500" : "bg-gray-500/50"
+                }`}
+              >
+                {passwordValidation[check] && (
+                  <CheckCircle className="w-3 h-3 text-white" />
+                )}
+              </div>
+              <span
+                className={`${
+                  passwordValidation[check] ? "text-green-400" : "text-gray-400"
+                }`}
+              >
+                {label}
+              </span>
+            </div>
+          ))}
+        </div>
         <motion.button
           type="submit"
-          disabled={loading}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full py-3 rounded-xl bg-gradient-to-r from-yellow-400 
-                 to-orange-500 text-[#1a1f37] font-semibold flex items-center 
-                 justify-center space-x-2 hover:shadow-lg hover:shadow-yellow-500/25 
-                 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          disabled={
+            loading ||
+            !isPasswordValid ||
+            formData.password !== formData.confirmPassword ||
+            formData.name === "" ||
+            formData.email === ""
+          }
+          whileHover={{ scale: loading || !isPasswordValid ? 1 : 1.02 }}
+          whileTap={{ scale: loading || !isPasswordValid ? 1 : 0.98 }}
+          className={`w-full py-3 rounded-xl bg-gradient-to-r 
+    ${
+      loading || !isPasswordValid || formData.name === "" || formData.email === ""
+        ? "from-gray-400 to-gray-500 cursor-not-allowed opacity-50"
+        : "from-yellow-400 to-orange-500 cursor-pointer hover:shadow-lg hover:shadow-yellow-500/25"
+    } 
+    text-[#1a1f37] font-semibold flex items-center justify-center space-x-2 
+    transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {loading ? (
             <>
@@ -163,7 +218,9 @@ const EmailSignupForm = memo(
               <span>Creating Account...</span>
             </>
           ) : (
-            <span>Create Account</span>
+            <>
+              <span>Create Account</span>
+            </>
           )}
         </motion.button>
       </form>
@@ -503,6 +560,7 @@ export default function UserSignUp() {
     name: "",
     email: "",
     password: "",
+    confirmPassword: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -515,7 +573,13 @@ export default function UserSignUp() {
     google: false,
     github: false,
   });
-
+  const [passwordValidation, setPasswordValidation] = useState({
+    hasLength: false,
+    hasUppercase: false,
+    hasLowercase: false,
+    hasNumber: false,
+    hasSpecial: false,
+  });
   const [modal, setModal] = useState({
     open: false,
     success: false,
@@ -529,7 +593,19 @@ export default function UserSignUp() {
     flow: "auth-code", // Changed to auth-code for better security
     scope: "email profile",
   });
-
+  const checkPasswordStrength = (password, confirmPassword) => {
+    setPasswordValidation({
+      hasLength: password.length >= 8,
+      hasUppercase: /[A-Z]/.test(password),
+      hasLowercase: /[a-z]/.test(password),
+      hasNumber: /[0-9]/.test(password),
+      hasSpecial: /[!@#$%^&*]/.test(password),
+      passwordsMatch: password === confirmPassword && password !== "",
+    });
+  };
+  const isPasswordValid = Object.values(passwordValidation).every(
+    (value) => value
+  );
   // Google OAuth Success Handler
   async function handleGoogleSuccess(codeResponse) {
     setSocialLoading((prev) => ({ ...prev, google: true }));
@@ -589,7 +665,16 @@ export default function UserSignUp() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((f) => ({ ...f, [name]: value }));
+    setFormData((prev) => {
+      const newData = { ...prev, [name]: value };
+      if (name === "password" || name === "confirmPassword") {
+        checkPasswordStrength(
+          name === "password" ? value : newData.password,
+          name === "confirmPassword" ? value : newData.confirmPassword
+        );
+      }
+      return newData;
+    });
   };
 
   const handleBackToSocial = () => {
@@ -645,7 +730,27 @@ export default function UserSignUp() {
     e.preventDefault();
     setLoading(true);
     setOtpError("");
+    const isPasswordValid = Object.values(passwordValidation).every(
+      (value) => value
+    );
 
+    if (!isPasswordValid) {
+      setModal({
+        open: true,
+        success: false,
+        message: "Please ensure all password requirements are met.",
+      });
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setModal({
+        open: true,
+        success: false,
+        message: "Passwords do not match.",
+      });
+      return;
+    }
     try {
       const response = await axios.post(`${API_BASE_URL}/send-otp`, {
         email: formData.email,
@@ -988,6 +1093,8 @@ export default function UserSignUp() {
                 onBack={() => setShowEmailForm(false)}
                 handleBackToSocial={handleBackToSocial}
                 otpSent={otpSent}
+                passwordValidation={passwordValidation}
+                isPasswordValid={isPasswordValid}
               />
             ) : (
               <SocialLoginOptions

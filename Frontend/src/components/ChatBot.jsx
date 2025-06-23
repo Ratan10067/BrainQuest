@@ -298,6 +298,16 @@ const ChatBot = () => {
         setIsTyping(false);
       }
     } catch (error) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          text: "Sorry, I couldn't process your request. Please try again later. Maybe due to you are not login or may be server is down. Sorry for the inconvenience.",
+          sender: "bot",
+          timestamp: new Date(),
+          type: "text",
+        },
+      ]);
       console.error("Error sending message:", error);
       setIsTyping(false);
       return;
