@@ -302,7 +302,7 @@ const ChatBot = () => {
         ...prev,
         {
           id: Date.now() + 1,
-          text: "Sorry, I couldn't process your request. Please try again later. Maybe due to you are not login or may be server is down. Sorry for the inconvenience.",
+          text: "Sorry, we couldn't process your request. Please try again later. This may be due to you not being logged in, or the server may be down. We apologize for the inconvenience.",
           sender: "bot",
           timestamp: new Date(),
           type: "text",
